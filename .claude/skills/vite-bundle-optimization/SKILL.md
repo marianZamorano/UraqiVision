@@ -69,3 +69,16 @@ const Explorador = lazy(() => import("./pages/Explorador")); // aquí dentro viv
 - [ ] Vistas WebP pedidas por fecha; estación < 40 MB.
 - [ ] Portada < 3 s medida con Lighthouse.
 - [ ] Ninguna dependencia nueva sin consultar ni secretos en `VITE_*`.
+
+## Referencias del documento maestro (§31)
+
+<!-- referencias:inicio (generado por ai/sync.mjs desde ai/referencias/catalogo.json; no editar a mano) -->
+
+Enlaces de §31 que aplican aquí. Cítalos (APA 7) donde implementes lo que respaldan y consulta la fuente antes de
+usar una afirmación concreta: el contenido de cada enlace no se resume aquí. Detalle: skill `referencias-documento`
+y `npm run referencias:revisar`.
+
+- **Cesium GS (2026). CesiumJS [Software]** — <https://github.com/CesiumGS/cesium>
+  Citada en: §18. Aplica a: RF-02, RF-25, RF-26, RF-27, RF-28, RF-29, RF-30, RF-32, RF-24, RNF-11. Usa la documentación vigente (MCP context7) al implementar el globo; muestra su atribución y licencia en el globo y en Acerca de (RF-24, RNF-11).
+
+<!-- referencias:fin -->

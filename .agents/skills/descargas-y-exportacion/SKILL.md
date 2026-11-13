@@ -55,3 +55,16 @@ cifras con rango, fuentes y límites. Solo si el equipo lo pide.
 - [ ] CSV con rango, fuente, licencia y sin ceros falsos; idéntico a `hectares.csv`.
 - [ ] `change.tif`, `scars.geojson` y `manifest.json` descargables tal cual, con licencia.
 - [ ] Plus (RF-23, RF-31) solo si el equipo lo pidió.
+
+## Referencias del documento maestro (§31)
+
+<!-- referencias:inicio (generado por ai/sync.mjs desde ai/referencias/catalogo.json; no editar a mano) -->
+
+Enlaces de §31 que aplican aquí. Cítalos (APA 7) donde implementes lo que respaldan y consulta la fuente antes de
+usar una afirmación concreta: el contenido de cada enlace no se resume aquí. Detalle: skill `referencias-documento`
+y `npm run referencias:revisar`.
+
+- **GDAL/OGR contributors (2026). COG: Cloud Optimized GeoTIFF generator** — <https://gdal.org/drivers/raster/cog.html>
+  Citada en: §22. Aplica a: RNF-09, RF-22, PS-02, MC-01. Opciones del driver COG al escribir change.tif y los COG por fecha sin pérdida; cítala donde se escriben y en la prueba de integridad (PS-02).
+
+<!-- referencias:fin -->
