@@ -1,0 +1,7 @@
+{
+  "gates": [
+    { "id": "no-failures", "metric": "failedTests", "op": "==", "value": 0 },
+    { "id": "coverage-lines", "metric": "coverageLines", "op": ">=", "value": 80 },
+    { "id": "p95", "metric": "p95Ms", "op": "<=", "value": 500, "required": false }
+  ]
+}

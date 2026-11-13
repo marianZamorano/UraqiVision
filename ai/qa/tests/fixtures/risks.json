@@ -1,0 +1,5 @@
+[
+  { "id": "R1", "area": "Autenticación", "likelihood": 4, "impact": 5 },
+  { "id": "R2", "area": "Listado", "likelihood": 2, "impact": 2 },
+  { "id": "R3", "area": "Pagos", "likelihood": 3, "impact": 4, "factors": { "complexity": 5, "changeFrequency": 5 } }
+]

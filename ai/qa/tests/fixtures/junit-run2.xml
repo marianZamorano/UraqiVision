@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="items" tests="2" failures="2">
+    <testcase classname="items.api" name="lista paginada" time="0.900">
+      <failure message="timeout">Timeout 800ms exceeded</failure>
+    </testcase>
+    <testcase classname="items.api" name="rechaza page negativa" time="0.045">
+      <failure message="expected 400, received 500">AssertionError</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

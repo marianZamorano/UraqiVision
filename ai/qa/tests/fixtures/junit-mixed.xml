@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="items" tests="4" failures="1" errors="1" skipped="1" time="0.95">
+    <testcase classname="items.api" name="lista paginada" time="0.120"/>
+    <testcase classname="items.api" name="rechaza page negativa" time="0.050">
+      <failure message="expected 400, received 500">AssertionError: expected 400, received 500
+    at items.spec.ts:42</failure>
+    </testcase>
+    <testcase classname="items.api" name="timeout de base de datos" time="0.700">
+      <error message="ECONNREFUSED 127.0.0.1:5432"><![CDATA[Error: connect ECONNREFUSED 127.0.0.1:5432]]></error>
+    </testcase>
+    <testcase classname="items.api" name="pendiente" time="0"><skipped/></testcase>
+  </testsuite>
+</testsuites>

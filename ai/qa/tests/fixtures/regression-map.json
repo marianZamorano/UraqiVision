@@ -1,0 +1,8 @@
+{
+  "areas": [
+    { "name": "auth", "risk": "high", "paths": ["src/auth/**"], "suites": ["test/auth/**"], "tags": ["@auth"] },
+    { "name": "items", "risk": "medium", "paths": ["src/items/**", "src/shared/*.ts"], "suites": ["test/items/**"], "tags": ["@items"] }
+  ],
+  "alwaysRun": ["@smoke"],
+  "fullRegressionOn": ["package.json", "**/*.lock", "migrations/**"]
+}

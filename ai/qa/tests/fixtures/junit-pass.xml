@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="items" tests="2" failures="0">
+    <testcase classname="items.api" name="lista paginada" time="0.100"/>
+    <testcase classname="items.api" name="rechaza page negativa" time="0.040"/>
+  </testsuite>
+</testsuites>
