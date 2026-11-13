@@ -100,9 +100,6 @@ export function extraerCierres(texto) {
   return [...numeros].sort((a, b) => a - b);
 }
 
-/** Rama de trabajo que se puede borrar tras fusionar (nunca dev, qa ni main). */
-export const ramaBorrable = (rama) => RE_RAMA.test(rama) && !['dev', 'qa', 'main'].includes(rama);
-
 /** Pares base ← origen permitidos para crear una PR. */
 export function prPermitida(base, head) {
   if (!base) return { ok: false, motivo: 'Indica el destino con --base: sin él, gh apunta a main (la rama por defecto).' };

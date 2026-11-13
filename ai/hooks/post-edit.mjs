@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { normalize } from './lib/guard.mjs';
+import { clasificar } from './lib/entorno.mjs';
 import { platform, readStdinJson, failOpen } from './lib/io.mjs';
 
 function flatKeys(obj, prefix = '', out = new Set()) {
@@ -64,6 +65,12 @@ try {
   const cwd = event.cwd || process.cwd();
   const files = normalize(event.tool_name, event.tool_input).filter((e) => e.kind === 'write' && e.path).map((e) => e.path);
   const msgs = files.flatMap((f) => checkFile(f, cwd));
+  // Plantilla de entorno editada: pausa para que la persona comunique el cambio de estructura al equipo.
+  for (const f of files) {
+    if (String(clasificar(path.basename(f), ['*'])).startsWith('plantilla') || /^\.env(\.[\w-]+)?\.example$/.test(path.basename(f))) {
+      msgs.push(`⏸ PAUSA: editaste ${path.basename(f)} (estructura del .env). Detente y dile a la persona que debe comunicar este cambio a su equipo antes de continuar. Luego ejecuta \`npm run env:sync\` para alinear su .env (no leas el .env) y \`npm run env:compartir\` si debe compartir valores nuevos.`);
+    }
+  }
   if (msgs.length) {
     const reason = `[uraqi-guard:post-edit] Revisa antes de seguir:\n- ${msgs.join('\n- ')}`;
     const out = platform() === 'gemini'

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Tras un pull o merge: si cambió .env.example, agrega al .env local las claves nuevas (vacías) y avisa.
+exec node "$(git rev-parse --show-toplevel)/ai/hooks/git-post-merge.mjs"
