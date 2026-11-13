@@ -1,0 +1,31 @@
+# Al crear un issue de trabajo: rama tipo/N-titulo desde dev, PR en borrador hacia dev con "Closes #N",
+# etiqueta "estado: en progreso" y comentario con los pasos (ai/scripts/issue-a-pr.mjs).
+# Los eventos de issues corren con el workflow de la rama por defecto (main).
+# Requiere en Settings → Actions → General: "Allow GitHub Actions to create and approve pull requests".
+name: Issue a PR
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  crear-rama-y-pr:
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Crear rama y PR borrador
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: node ai/scripts/issue-a-pr.mjs --issue "$ISSUE_NUMBER"
