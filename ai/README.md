@@ -161,6 +161,9 @@ a la persona y solo entonces aplican con `--aplicar --si`. Un solo commit grande
 - **Aprobaciones** (`.github/workflows/aprobaciones.yml`, reglas en `ai/hooks/lib/aprobaciones.mjs`): hacia
   `dev` el autor puede fusionar su propia PR tras confirmar; hacia `qa` y `main` deben aprobar todos los
   colaboradores excepto el autor, sobre el último commit. Al abrir la PR pide revisión a quienes faltan.
+- **Estado de issues** (`.github/workflows/estado-issues.yml`, reglas en `ai/hooks/lib/estado-issues.mjs`):
+  PR abierta a `dev` → `estado: en revisión`; fusionada en `dev`/`qa`/`main` → `en dev`/`en preproducción`/
+  `en producción` (y se cierra en `main`). Revisar o sincronizar a mano: `npm run issues:estado -- --pr N --simular`.
 - **Revisar desde el asistente o la terminal** (`ai/scripts/prs.mjs`): `npm run pr:pendientes`,
   `npm run pr:estado -- N`, `npm run pr:aprobar -- N`, `npm run pr:fusionar -- N` (merge commit). Aprobar y
   fusionar siempre piden confirmación; Claude y opencode además piden permiso antes de ejecutarlos.
