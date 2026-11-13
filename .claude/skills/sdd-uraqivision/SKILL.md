@@ -23,7 +23,7 @@ $ARGUMENTS
   `specs/NNN-*/spec.md`, `plan.md`, `tasks.md` y tareas marcadas `[X]`) y di qué fase sigue. No modifica nada.
 - `fase N`: ejecuta solo esa fase y se detiene.
 - `ruta rápida`: el recorrido mínimo para el hackathon (abajo).
-- `feature <nombre>`: arranca las fases 2 a 6 para una feature de la tabla de features.
+- `feature <nombre>`: arranca las fases 2 a 6 de un área con los prompts de su SDD (`sdd/m-<área>.md`), uno a uno con la skill `sdd-prompts`.
 
 ## Reglas para todas las fases
 
@@ -35,19 +35,22 @@ $ARGUMENTS
 5. Las specs no nombran librerías; el plan sí (el stack ya está fijado en §18).
 6. Hechos, hipótesis y recomendaciones separados. Nunca se declara que una prueba pasó sin ejecutarla.
 
-## Features recomendadas (una spec cada una)
+## SDD por área (fuente de los prompts)
 
-Descomposición propuesta a partir de §19 y del plan del hackathon (§25). Es una propuesta: confírmala con
-el equipo en la fase 2. En **este repositorio (frontend)** van las specs de la web; las del pipeline, la
-publicación de estaciones e Insight van en `UraqiVisionBack`.
+La descomposición en specs y **todos los prompts listos, en orden**, están en **`sdd/`**: un SDD por área de §19
+(más proyecto e integración), con la misma estructura (`sdd/00-estructura.md`) y el orden global en
+`sdd/README.md`. Esta skill explica las fases; para ejecutar un prompt usa la skill `sdd-prompts`
+(`npm run sdd:siguiente -- --yo`). En **este repositorio (frontend)** van las specs de la web; las del pipeline, la
+publicación e Insight tienen su propio SDD en `UraqiVisionBack`.
 
-| Spec | Repositorio | Módulos | Requisitos principales | Primera meta |
-|---|---|---|---|---|
-| `001-mapa-analisis` | este (frontend) | M-MAPA | RF-05–RF-08, RF-10, RF-35, RF-36, RF-38 | Mapa 2D con deslizador y el primer par real |
-| `002-globo-atlas` | este (frontend) | M-GLOBO, M-ATLAS | RF-01–RF-03, RF-25–RF-30, RF-32 | Globo con departamentos y vuelo de cámara |
-| `003-interfaz-bilingue` | este (frontend) | M-INTERFAZ | RF-19–RF-24, RF-31, RF-33, RF-34, RF-37, RNF-03, RNF-04, RNF-12 | Cambio de idioma y estados de la vista |
-| pipeline y publicación | `UraqiVisionBack` | M-INGESTA, M-CIENCIA, M-VALIDACIÓN, M-PUBLICACIÓN | MC-01–MC-07, CQ, VC, RF-22, RF-26, RF-27 | Archivos publicados de San Ignacio (sáb 13:00) |
-| insight | `UraqiVisionBack` | M-INSIGHT | RF-16–RF-18, RN-09, RN-10, RN-14 | `POST /api/insight` con plantillas de respaldo |
+| Spec | SDD | Módulo (§19) | Requisitos principales |
+|---|---|---|---|
+| `001-base-web` | `sdd/01-proyecto.md` | — (§25: Joaco) | Base de §17, §18 y §20.1; RNF transversales |
+| `002-mapa-analisis` | `sdd/m-mapa.md` | M-MAPA | RF-05–RF-08, RF-10, RF-35, RF-36, RF-38 |
+| `003-portada-atlas` | `sdd/m-atlas.md` | M-ATLAS | RF-01, RF-03, RF-04 |
+| `004-interfaz-bilingue` | `sdd/m-interfaz.md` | M-INTERFAZ | RF-15, RF-19–RF-24, RF-31, RF-33, RF-34, RF-37 |
+| `005-globo` | `sdd/m-globo.md` | M-GLOBO | RF-02, RF-25–RF-30, RF-32 |
+| `006-integracion` | `sdd/90-integracion.md` | — (equipo) | RF-16–RF-18 en la web, RF-29, RF-36, PS-09 |
 
 La web y el backend se coordinan por dos contratos del documento maestro: los archivos publicados de cada
 estación (§17.3) y `POST /api/insight` (§21.1). Un cambio de contrato se acuerda entre ambos repositorios.
@@ -71,31 +74,24 @@ En la fase 8 usa `revisor-interfaz` (pantallas), `uiux-design-auditor` y `react-
 
 ## Prompts listos
 
-**Fase 1, constitución:**
+Los prompts de cada fase, ya redactados a partir del documento maestro y en orden, están en los SDD de `sdd/`
+(sección «8. Secuencia de prompts» de cada área). No los copies desde aquí: así hay una sola fuente y su historial
+(`sdd/historial/`) registra quién los ejecutó, cuándo, con qué cambios y con qué resultado.
 
-```text
-/speckit-constitution Crea la constitución del frontend de UraqiVision a partir de docs/UraqiVisionDocumentoMaestrov1.0.pdf (usa la copia .txt para leerlo), que es la fuente de verdad y prevalece sobre la constitución. Este repositorio es solo la web; el pipeline y la función Insight viven en UraqiVisionBack. Principios: I. Documento maestro primero: nada fuera del alcance de §8 sin consultar; las DP de §29 no se implementan hasta resolverse. II. Mostrar con honestidad: RN-04 a RN-07 y RN-13 son obligatorias (sin datos simulados como resultados, causas como hipótesis, hectáreas con rango, fechas en hora de Bolivia, ausencia de dato nunca como cero). III. Arquitectura estática primero (§17): la web solo lee los archivos publicados por el backend (§17.3) y llama a Insight por su contrato (§21.1); no recalcula resultados; cambiar el stack de §18 o un contrato requiere acordarlo con el backend y enmendar el documento. IV. Bilingüe y accesible (RNF-03, RNF-04, RNF-12): 100 % es/en, WCAG 2.2 AA, movimiento reducido. V. Rendimiento (RNF-01, RNF-02, RNF-05): portada en menos de 3 s, CesiumJS diferido, usable en celular. VI. Seguridad y costo (RNF-06, RNF-10): ninguna clave en el navegador ni en el repo; todo en planes gratuitos. VII. Trazabilidad: cada spec, tarea, prueba y commit cita sus identificadores (RF, RNF, RN, PS). Restricciones: TypeScript estricto, Vitest y Playwright, licencia MIT para código y CC BY 4.0 para textos. Flujo: una tarea a la vez con su prueba, commits sin Co-Authored-By de IA.
-```
-
-**Fase 2, ejemplo para la primera feature:**
-
-```text
-/speckit-specify Feature 001-mapa-analisis del frontend de UraqiVision. Mapa 2D de la estación San Ignacio de Velasco con MapLibre que lee los archivos publicados de §17.3 (producidos por UraqiVisionBack): mapa de cambio con leyenda, unidades, opacidad y zonas sin dato (RF-05), deslizador antes/después operable con mouse, tacto y teclado (RF-06), línea de tiempo con fechas excluidas y su motivo (RF-07), vistas HH, HV y HV/HH con canales inexistentes deshabilitados (RF-08), focos FIRMS (RF-10), control de capas (RF-35) y línea de tiempo sincronizada (RF-36). Conserva los identificadores del documento en cada requisito. Fuera de alcance: lo de §8.2 y el procesamiento de datos, que es del backend.
-```
-
-**Fase 5, tareas:**
-
-```text
-/speckit-tasks Ordena por historia de usuario. Cada tarea lleva su responsable según §19 del documento maestro, el identificador que resuelve y su prueba (PS-xx de §23.3). Prueba antes que implementación. Marca con [P] las paralelizables.
-```
+- `npm run sdd:estado`: progreso por área, conflictos y siguiente prompt.
+- `npm run sdd:siguiente -- --yo`: tu siguiente prompt, listo para copiar.
+- Al pegarlo (empieza con `[SDD P-…]`), el asistente confirma contigo antes de ejecutarlo y, al terminar, lo
+  registra y te entrega el siguiente (skill `sdd-prompts`).
 
 ## Ruta rápida (hackathon)
 
-El sábado 14 a las 9:00 empieza el hackathon y la primera meta es un antes/después real a las 13:00
-(§25). Con poco tiempo:
+El sábado 14 a las 9:00 empieza el hackathon y la primera meta es un antes/después real a las 13:00 (§25). El orden
+de `sdd/README.md` ya sigue esa ruta:
 
-1. **Antes del sábado** (si las reglas lo permiten, DP-02): fase 1 (constitución) y fase 2 de
-   `001-mapa-analisis` (y, en `UraqiVisionBack`, la del pipeline, para que el mapa tenga datos reales).
-2. **Sábado temprano**: fases 4–6 de la spec del mapa en un mismo turno, aceptando las opciones recomendadas.
-3. Las demás features entran con `feature <nombre>` a medida que su responsable las empieza.
-4. Fase 8 para cada feature antes de integrarla. `speckit-converge` el domingo por la tarde.
+1. **Antes del sábado** (si las reglas lo permiten, DP-02): constitución y proyecto web base (`sdd/01-proyecto.md`)
+   y la especificación de cada área (P-*-01). En `UraqiVisionBack`, lo mismo para el pipeline, para que el mapa
+   tenga datos reales.
+2. **Sábado temprano**: aclarar, planificar, tareas y análisis de M-MAPA, M-ATLAS y M-INTERFAZ, y la implementación
+   del mapa con el primer par real.
+3. Cada área sigue su secuencia con su responsable; las dependencias marcan cuándo puede empezar cada prompt.
+4. Verificación de cada área antes de integrarla; recorrido completo y entrega el domingo (`sdd/90-integracion.md`).
