@@ -43,7 +43,8 @@ presentes como resultado.
 - **Preguntas sugeridas (RF-17)**: de 3 a 5 por estación, en ambos idiomas, respondibles **solo** con el
   contenido de la estación, el método y el glosario (RN-09); cada una con su respuesta de plantilla para el
   respaldo de Insight (RF-18).
-- Los textos van en `station.json` con forma `{ es, en }` (skill `publicacion-estacion`).
+- Los textos de la estación van en `station.json` con forma `{ es, en }` (§17.3). Ese archivo lo publica el
+  backend (`UraqiVisionBack`): coordina ahí los textos de la estación; las fichas del atlas viven en la web.
 
 ## Calendario de la superficie (RF-04, Plus)
 
