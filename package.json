@@ -14,7 +14,7 @@
     "commits:dividir": "node ai/scripts/dividir-commits.mjs --aplicar",
     "ai:sync": "node ai/sync.mjs",
     "ai:check": "node ai/sync.mjs --check",
-    "test:guardas": "node --test ai/hooks/test/guard.test.mjs ai/hooks/test/commit-groups.test.mjs ai/hooks/test/aprobaciones.test.mjs ai/hooks/test/estado-issues.test.mjs",
+    "test:guardas": "node --test ai/hooks/test/guard.test.mjs ai/hooks/test/commit-groups.test.mjs ai/hooks/test/aprobaciones.test.mjs ai/hooks/test/estado-issues.test.mjs ai/hooks/test/buenas-practicas-pr.test.mjs",
     "hooks:activar": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
