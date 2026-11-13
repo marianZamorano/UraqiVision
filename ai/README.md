@@ -66,6 +66,7 @@ las de API, contratos, integración con base de datos y carga.
 |---|---|---|
 | `documento-maestro` | Encontrar requisitos por identificador, comprobar el alcance, clasificar hechos e hipótesis | Todos |
 | `sdd-uraqivision` | Flujo de Spec Kit adaptado al documento y al hackathon, con prompts listos | Todos |
+| `microauditoria` | Últimas decisiones y cambios con evidencia, comprobaciones rápidas y contrato con el otro repositorio (igual en backend y frontend) | Todos |
 | `globo-y-mapa` | CesiumJS sin ion, carga diferida, respaldo 2D, estado compartido, capas | M-GLOBO, M-MAPA |
 | `interfaz-bilingue-accesible` | es/en, WCAG 2.2 AA, estados de la vista, cifras y fechas | M-INTERFAZ, M-ATLAS |
 | `rigor-y-fuentes` | Citas, APA 7, hechos frente a hipótesis, nada inventado | M-ATLAS, contenidos |
