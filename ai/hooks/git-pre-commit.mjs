@@ -7,8 +7,10 @@
 // sensibles; no puede haber archivos .env* no permitidos; .env y .env.example deben tener la misma estructura; y si
 // el commit cambia la estructura de una plantilla, hay una PAUSA obligatoria para comunicarlo al equipo (el .env se
 // copia a Descargas). Tras comunicarlo: URAQI_ENV_COMUNICADO=1 git commit …
+// Ayuda al día: si el commit toca una fuente de las herramientas, ai/README.md y la configuración generada deben
+// estar regenerados (npm run ai:sync) y agregados al commit.
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { findSecrets, isSecretPath, PROTECTED_BRANCHES } from './lib/guard.mjs';
 import { currentBranch } from './lib/git.mjs';
 import { clasificar, compararClaves, sensiblesConValor, mensajePausa, parseClaves } from './lib/entorno.mjs';
@@ -72,4 +74,21 @@ for (const line of git('diff', '--cached', '-U0', '--no-color', '--diff-filter=A
 if (problems.length) {
   process.stderr.write(`[uraqi-guard:pre-commit] Commit bloqueado (RNF-06):\n- ${problems.join('\n- ')}\nQuita el secreto, rótalo si llegó a compartirse y vuelve a intentar.\n`);
   process.exit(1);
+}
+
+// Ayuda (ai/README.md) y configuración generada al día: si el commit toca una fuente, ai/sync.mjs --check debe pasar
+// y lo regenerado debe ir en el commit. ai/README.md lo genera ai/sync.mjs desde ai/docs/README.plantilla.md.
+const FUENTES = /^(\.agents\/skills\/|ai\/|\.githooks\/|\.github\/workflows\/|\.specify\/|specs\/|package\.json$|\.claude\/|\.gemini\/|\.codex\/|\.opencode\/|\.mcp\.json$|opencode\.json$)/;
+const GENERADOS = ['ai/README.md', '.claude', '.gemini', '.codex', '.opencode', '.mcp.json', 'opencode.json'];
+if (git('diff', '--cached', '--name-only').split('\n').some((f) => FUENTES.test(f))) {
+  const root = git('rev-parse', '--show-toplevel').trim();
+  const r = spawnSync(process.execPath, [path.join(root, 'ai', 'sync.mjs'), '--check'], { cwd: root, encoding: 'utf8' });
+  const sinAgregar = git('diff', '--name-only', '--', ...GENERADOS).split('\n').filter(Boolean);
+  if (r.status !== 0 || sinAgregar.length) {
+    const detalle = r.status !== 0
+      ? `${r.stdout ?? ''}${r.stderr ?? ''}`.split('\n').filter((l) => /desactualizado|sobra|no se puede generar|^- /.test(l)).slice(0, 12)
+      : sinAgregar.map((f) => `regenerado pero sin agregar al commit: ${f}`);
+    process.stderr.write(`[uraqi-guard:ayuda-desactualizada] Commit bloqueado: ai/README.md (la ayuda) o la configuración generada no están al día con las fuentes de este commit.\n- ${detalle.join('\n- ')}\nEjecuta \`npm run ai:sync\`, revisa el resultado y agrégalo (git add ai/README.md .claude .gemini .codex .opencode .mcp.json opencode.json).\n`);
+    process.exit(1);
+  }
 }
