@@ -28,6 +28,12 @@ test('entorno: los asistentes no escriben .env a mano; .env.example sí, sin sec
   assert.equal(evaluateTool('Write', { file_path: '.env.example', content: 'INSIGHT_API_KEY=\nPORT=5173' }).decision, null);
 });
 
+test('lectura de secretos: sin falsos positivos con opciones --head ni menciones en texto', () => {
+  assert.equal(evaluateTool('Bash', { command: 'gh pr create --base dev --head feat/14-x --title "gestión del .env (#15)"' }, undefined, { branch: 'feat/14-x' }).decision, null);
+  assert.ok(denied(evaluateTool('Bash', { command: 'head -n 5 .env' })));
+  assert.ok(denied(evaluateTool('PowerShell', { command: 'Get-Content .env | Select -First 2' })));
+});
+
 test('ramas: borrar está prohibido para los asistentes', () => {
   for (const command of ['git branch -d feat/1-x', 'git branch -D feat/1-x', 'git branch --delete x', 'git push origin --delete feat/1-x', 'git push origin -d feat/1-x', 'git push origin :feat/1-x', 'gh api repos/o/r/git/refs/heads/feat/1-x -X DELETE']) {
     assert.ok(denied(evaluateTool('Bash', { command }, undefined, { branch: 'feat/2-y' })), command);
