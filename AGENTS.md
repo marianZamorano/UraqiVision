@@ -1,7 +1,14 @@
-# UraqiVision — instrucciones para asistentes de IA
+# UraqiVision (frontend) — instrucciones para asistentes de IA
 
 Lo leen Claude Code (vía `CLAUDE.md`), Gemini CLI (vía `.gemini/settings.json`), Codex CLI y opencode.
 Lanza siempre el agente **desde la raíz del repositorio**.
+
+**Este repositorio es solo el frontend**: la web (globo, mapa de análisis, atlas, interfaz, descargas,
+idiomas y accesibilidad). El **backend** —el pipeline en Python (ingesta, ciencia, validación, publicación de
+estaciones) y la función Insight— vive en el repositorio privado
+[`UraqiVisionBack`](https://github.com/marianZamorano/UraqiVisionBack). Aquí la web **consume** lo que el
+backend produce: los archivos publicados de cada estación (§17.3) y el contrato `POST /api/insight` (§21.1).
+Si una tarea es del backend, dilo y no la implementes aquí.
 
 ## 1. Fuente de verdad
 
@@ -35,25 +42,23 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
    herramientas (RNF-06). La clave del proveedor de IA vive solo en el servidor.
 8. Declara en la entrega dónde y cómo se usó IA.
 
-## 4. Reglas de datos que el código debe respetar (§16)
+## 4. Reglas de datos que la web debe respetar al mostrar (§16)
 
-- RN-01: solo se comparan escenas de la misma órbita y la misma grilla.
-- RN-02: sin productos BETA; una sola madurez y un solo CRID por serie (PROVISIONAL y VALIDATED, tramos aparte).
 - RN-04: nunca se muestran datos simulados o de ejemplo como si fueran resultados.
 - RN-05: las causas del cambio son hipótesis con fuente, nunca certezas. Las clases de parche son cuatro
   (compatible con quema, compatible con pérdida previa de estructura, evidencia ambigua, datos insuficientes).
 - RN-06: las hectáreas van con su rango de sensibilidad.
 - RN-07: fechas de adquisición en UTC, mostradas en hora de Bolivia.
 - RN-13: la ausencia de dato **nunca** se muestra como cero; se muestra «no reportada» con su motivo.
-- Promedios en potencia lineal; dB solo después (§12). Los COG de análisis son float32 sin pérdida (RNF-09).
+- La web no recalcula nada que ya venga en los archivos publicados; las cifras coinciden con ellos (RF-09, RF-37).
+- Las reglas del pipeline (RN-01, RN-02, lineal antes que dB, COG sin pérdida) son del backend (`UraqiVisionBack`).
 
 ## 5. Stack y módulos (§18 y §19)
 
-- Pipeline: Python (asf_search, earthaccess, openSEPPO/GDAL ≥ 3.13, h5py, NumPy, xarray, rioxarray, SciPy,
-  GeoPandas, rasterio, pandas, Matplotlib), pruebas con pytest.
 - Web: React + TypeScript + Vite, CesiumJS (sin token de Cesium ion), MapLibre GL JS, Recharts,
   react-i18next (`es.json` y `en.json`), pruebas con Vitest y Playwright.
-- Insight: función serverless con adaptador de proveedor (Claude, configurable por variables de entorno).
+- Backend (en `UraqiVisionBack`): pipeline en Python e Insight (función serverless con adaptador de proveedor).
+  La web solo conoce el contrato de Insight y los archivos publicados.
 - Hospedaje: GitHub Pages o Vercel (**pendiente, DP-06**: no lo decidas tú).
 - **Entornos por rama** (decisión del equipo, 12 nov 2026):
 
@@ -64,8 +69,9 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
   | `dev` | Integración | Sin despliegue obligatorio |
 
   No existe una rama `master`. Cómo se configuran los dos despliegues depende de DP-06.
-- Módulos y responsables: M-INGESTA (Alex), M-CIENCIA (Tabata), M-VALIDACIÓN (Tabata), M-PUBLICACIÓN (Mimi),
-  M-INSIGHT (Mimi), M-GLOBO (Joaco), M-MAPA (Joaco), M-ATLAS (Angie y Marian), M-INTERFAZ (Angie y Marian).
+- Módulos de este repositorio: M-GLOBO (Joaco), M-MAPA (Joaco), M-ATLAS (Angie y Marian), M-INTERFAZ (Angie y
+  Marian). En `UraqiVisionBack`: M-INGESTA (Alex), M-CIENCIA (Tabata), M-VALIDACIÓN (Tabata), M-PUBLICACIÓN
+  (Mimi) y M-INSIGHT (Mimi).
 
 ## 6. Forma de trabajar
 
@@ -138,24 +144,22 @@ Todo se define una sola vez y se genera para cada plataforma con `node ai/sync.m
 **Coordinador**: la skill `vibecodear` actúa como Engineering Manager: diagnostica, elige roles y reparte el
 trabajo entre las skills y subagentes de cada rol (tabla en `.agents/skills/vibecodear/references/roles.md`).
 
-Skills por rol (44; detalle en `ai/README.md`):
+Skills por rol (37; detalle en `ai/README.md`). Las de ingesta, ciencia, validación, publicación e Insight
+están en `UraqiVisionBack`.
 
 | Rol | Skills |
 |---|---|
 | Proyecto y SDD | `documento-maestro`, `sdd-uraqivision`, `flujo-issues-y-pr`, `entrega-hackathon`, `rigor-y-fuentes`, `vibecodear` |
-| Ingesta | `ingesta-nisar-asf`, `python-geoespacial` |
-| Ciencia y validación | `ciencia-radar-nisar`, `python-geoespacial`, `validacion-optica-firms`, `notebook-reproducible` |
-| Publicación | `publicacion-estacion`, `descargas-y-exportacion` |
 | Contenidos | `fichas-atlas`, `metodo-y-creditos`, `rigor-y-fuentes` |
-| Frontend | `globo-y-mapa`, `react-component-architecture`, `react-components-and-state`, `frontend-data-fetching`, `typed-api-integration`, `vite-bundle-optimization`, `frontend-testing` |
-| Insight | `insight-lector-radar` |
+| Frontend | `globo-y-mapa`, `react-component-architecture`, `react-components-and-state`, `frontend-data-fetching`, `typed-api-integration`, `vite-bundle-optimization`, `frontend-testing`, `descargas-y-exportacion` |
 | UX | `interfaz-bilingue-accesible`, `design-system-tokens`, `responsive-visual-testing` |
 | QA | `qa-project-discovery`, `qa-test-strategy`, `qa-test-design`, `qa-automation`, `qa-regression-analysis`, `qa-quality-gates`, `qa-test-reporting`, `qa-defect-analysis`, `qa-security-testing`, `test-driven-development`, `systematic-debugging`, `verification-before-completion` |
 | DevSecOps | `devops-secrets-management`, `devops-dependency-security`, `devops-git-workflow`, `devops-release-readiness`, `devops-free-tier-audit`, `devops-supervised-execution` |
 
-Subagentes (16). De solo lectura: `guardian-alcance`, `revisor-cientifico`, `auditor-publicacion`,
-`revisor-interfaz`, `revisor-insight`, `revisor-qa`, `security-qa-engineer`, `test-evidence-analyst`,
-`devsecops-engineer`, `free-tier-architect` (con web), `release-readiness-reviewer`, `uiux-design-auditor`.
+Subagentes (13). De solo lectura: `guardian-alcance`, `revisor-interfaz`, `revisor-qa`,
+`security-qa-engineer`, `test-evidence-analyst`, `devsecops-engineer`, `free-tier-architect` (con web),
+`release-readiness-reviewer`, `uiux-design-auditor`. (Los revisores científico, de publicación y de Insight
+están en `UraqiVisionBack`.)
 Pueden escribir con aprobación: `qa-architect`, `automation-qa-engineer`, `react-performance-auditor`,
 `react-ui-reviewer`.
 
