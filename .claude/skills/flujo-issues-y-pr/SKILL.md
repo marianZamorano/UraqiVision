@@ -99,14 +99,14 @@ descripción de la PR o en sus commits. No hay que moverlos a mano:
 | Evento | Estado del issue |
 |---|---|
 | Se abre una PR hacia `dev` | etiqueta `estado: en revisión` |
-| Se fusiona en `dev` | `estado: en dev` y comentario con la PR |
-| Se fusiona en `qa` | `estado: en preproducción` y comentario |
-| Se fusiona en `main` | `estado: en producción`, comentario y **se cierra** |
+| Se fusiona en `dev` | `estado: en dev`, comentario con la PR y **se cierra** |
+| Se fusiona en `qa` | `estado: en preproducción` y comentario (aunque esté cerrado) |
+| Se fusiona en `main` | `estado: en producción` y comentario (aunque esté cerrado) |
 | La PR se cierra sin fusionar | se quita `estado: en revisión` |
 
-- GitHub solo cierra issues con `Closes #N` al fusionar en `main` (la rama por defecto); por eso un issue sigue
-  abierto mientras está en `dev` o en preproducción. No lo cierres a mano: se cierra al llegar a producción.
-- Un issue cerrado a mano no se modifica, salvo para marcarlo en producción.
+- GitHub solo cierra issues con `Closes #N` al fusionar en `main` (la rama por defecto); por eso el cierre al
+  entrar a `dev` lo hace este workflow. La etiqueta de estado sigue el recorrido hasta producción con el issue
+  ya cerrado: mira la etiqueta para saber dónde está.
 - Para revisar o sincronizar una PR: `npm run issues:estado -- --pr N --simular` (sin `--simular` aplica los cambios).
 
 ## Trazabilidad completa (sin excepciones)
