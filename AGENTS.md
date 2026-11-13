@@ -101,8 +101,8 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
     persona. Los hooks avisan solos de las PR que esperan su aprobación: cuando aparezca el aviso, díselo
     y ofrécele revisarlas.
   - **Estado de los issues automático**: al abrir la PR a `dev` el issue pasa a `estado: en revisión`; al
-    fusionar en `dev`, `qa` o `main` pasa a `en dev`, `en preproducción` o `en producción` (y se cierra en
-    `main`). No cierres issues a mano: se cierran al llegar a producción.
+    fusionar en `dev` se **cierra** con `estado: en dev`, y la etiqueta sigue a `en preproducción` y
+    `en producción` al llegar a `qa` y `main`. No cambies estados a mano.
   - Crear issues, ramas remotas o PR y hacer push requiere la aprobación de la persona.
 - No leas ni muestres `.env`, `.netrc` (credenciales de Earthdata) ni claves privadas.
 
