@@ -31,8 +31,11 @@ el commit, el push o la PR se rechazan con el motivo.
    documento maestro y su criterio de aceptación.
    - Desde Spec Kit: `/speckit-taskstoissues` convierte las tareas de `tasks.md` en issues.
    - A mano: `gh issue create --template tarea.yml` (pide confirmación: crea algo en GitHub).
-2. **Rama desde dev**: `git switch dev && git pull`, luego `git switch -c feat/<N>-descripcion-corta`.
-   El número de la rama es el del issue: así cada commit recibe `Refs #N` automáticamente.
+2. **Rama y PR automáticas**: al crear el issue, el workflow `Issue a PR` crea la rama `tipo/N-titulo` desde
+   `dev` (`feat` para tareas, `fix` para defectos) con un commit vacío que cita el issue, abre una **PR en
+   borrador** hacia `dev` con `Closes #N` y comenta en el issue cómo empezar. **Usa esa rama**, no crees otra:
+   `git fetch origin && git switch tipo/N-titulo`. El número de la rama es el del issue: así cada commit recibe
+   `Refs #N` automáticamente. (Si la automatización no corrió, créala a mano: `git switch -c feat/<N>-descripcion` desde `dev`.)
 3. **Commits** en formato Conventional Commits (lo valida commitlint):
 
    ```
@@ -98,16 +101,25 @@ descripción de la PR o en sus commits. No hay que moverlos a mano:
 
 | Evento | Estado del issue |
 |---|---|
-| Se abre una PR hacia `dev` | etiqueta `estado: en revisión` |
-| Se fusiona en `dev` | `estado: en dev`, comentario con la PR y **se cierra** |
-| Se fusiona en `qa` | `estado: en preproducción` y comentario (aunque esté cerrado) |
-| Se fusiona en `main` | `estado: en producción` y comentario (aunque esté cerrado) |
-| La PR se cierra sin fusionar | se quita `estado: en revisión` |
+| Se crea el issue (PR en borrador automática) | `estado: en progreso` |
+| La PR se marca como lista para revisión | `estado: en revisión` |
+| La PR se fusiona en `dev` (**aceptada**) | `estado: en dev`, comentario con la PR y **se cierra** |
+| La PR se cierra sin fusionar | se quitan `en progreso` / `en revisión` (el issue queda abierto) |
+| Se abre una PR hacia `qa` o `main` | se crea su **issue de promoción** con los issues que lleva |
+| Se fusiona en `qa` **con aprobación completa** | `estado: en preproducción` y se cierra el issue de promoción |
+| Se fusiona en `main` **con aprobación completa** | `estado: en producción` y se cierra el issue de promoción |
+| Se fusiona en `qa` o `main` **sin** aprobación completa | **no cambia ningún estado**; aviso y etiqueta `aprobación incompleta` |
 
-- GitHub solo cierra issues con `Closes #N` al fusionar en `main` (la rama por defecto); por eso el cierre al
-  entrar a `dev` lo hace este workflow. La etiqueta de estado sigue el recorrido hasta producción con el issue
-  ya cerrado: mira la etiqueta para saber dónde está.
-- Para revisar o sincronizar una PR: `npm run issues:estado -- --pr N --simular` (sin `--simular` aplica los cambios).
+- **PR aceptada = issue cerrado, sí o sí.** Solo sigue abierto el issue cuya PR no se aprobó.
+- GitHub solo cierra issues con `Closes #N` al fusionar en `main` (la rama por defecto); el cierre al entrar a
+  `dev` lo hace este workflow. La etiqueta sigue el recorrido hasta producción con el issue ya cerrado.
+- **Protección** (workflow `Protección de issues`): se revierte poner o quitar etiquetas `estado:` a mano,
+  cerrar un issue de promoción sin aprobación completa, cerrar un issue con PR en curso (si el trabajo se
+  descarta, cierra la PR) y reabrir un issue cuya PR ya fue aceptada (para un problema nuevo, abre otro issue).
+- Los workflows que reaccionan a eventos de issues (`Issue a PR`, `Protección de issues`) corren desde la rama
+  por defecto: funcionan cuando están en `main`.
+- Revisar qué haría con una PR: `npm run issues:estado -- --pr N --simular`. Para aplicarlo sin que la
+  protección lo revierta, hazlo con la automatización: `gh workflow run estado-issues.yml --ref dev -f pr=N`.
 
 ## Trazabilidad completa (sin excepciones)
 
