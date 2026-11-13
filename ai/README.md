@@ -286,7 +286,7 @@ Reglas que bloquean (o avisan) antes de que el asistente actúe. Los mensajes ll
 
 | Regla | Qué bloquea o avisa | Dónde |
 |---|---|---|
-| `ayuda-desactualizada` | Commit bloqueado: ai/README.md (la ayuda) o la configuración generada no están al día con las fuentes de este commit. | `ai/hooks/git-pre-commit.mjs` |
+| `ayuda-desactualizada` | Commit bloqueado: ai/README.md (la ayuda) o la configuración generada no están al día con las fuentes. | `ai/hooks/git-pre-commit.mjs` |
 | `borrar-rama` | Borrar ramas está prohibido: son parte de la trazabilidad entre issues, commits y PR. Solo una persona puede decidirlo, si la rama crea confusión o su código ya no sirve | `ai/hooks/lib/guard.mjs` |
 | `commit-en-main` | No se commitea directamente en … | `ai/hooks/git-pre-commit.mjs` |
 | `commit-grande` | Este commit mezcla varios temas. | `ai/hooks/git-commit-msg.mjs` |
@@ -329,7 +329,7 @@ Se activan con `npm run hooks:activar` y corren en tu máquina en cada commit, p
 | `post-checkout` | 1) Toda rama nueva se sube: si la rama actual no tiene upstream, hace `git push -u origin <rama>` (o solo enlaza el upstream si la rama ya existe en origin). No actúa en dev, qa, main ni con HEAD desacoplado. 2) Variables de entorno: si .env.example cambió entre los dos commits, agrega al .env local las claves nuevas vacías y avisa qué valores pedir al equipo (ver ai/scripts/entorno.mjs). Nunca bloquea: si no hay red, avisa para subir la rama después. URAQI_SIN_PUSH=1 desactiva el push. | `ai/hooks/git-post-checkout.mjs` |
 | `post-merge` | si cambió .env.example, agrega al .env local las claves nuevas vacías y avisa qué valores pedir al equipo. Nunca bloquea ni muestra valores. | `ai/hooks/git-post-merge.mjs` |
 | `pre-commit` | impide versionar archivos con secretos o líneas con claves. También impide commitear directamente en dev, qa o main: el trabajo va en una rama tipo/N-descripcion y llega a esas ramas por PR. Variables de entorno: solo se versionan las plantillas permitidas (.env.example y las declaradas), sin valores sensibles; no puede haber archivos .env* no permitidos; .env y .env.example deben tener la misma estructura; y si el commit cambia la estructura de una plantilla, hay una PAUSA obligatoria para comunicarlo al equipo (el .env se copia a Descargas). Tras comunicarlo: URAQI_ENV_COMUNICADO=1 git commit … Ayuda al día: si el commit toca una fuente de las herramientas, ai/README.md y la configuración generada deben estar regenerados (npm run ai:sync) y agregados al commit. | `ai/hooks/git-pre-commit.mjs` |
-| `pre-push` | nada llega a dev, qa ni main sin PR y todo commit que se sube cita su issue. | `ai/hooks/git-pre-push.mjs` |
+| `pre-push` | nada llega a dev, qa ni main sin PR, todo commit que se sube cita su issue y no quedan archivos generados por ai/sync.mjs (incluida la ayuda ai/README.md) sin commitear. | `ai/hooks/git-pre-push.mjs` |
 | `prepare-commit-msg` | en ramas tipo/N-descripcion (feat/12-deslizador), agrega "Refs #N" al mensaje si todavía no cita ningún issue. Así cada commit queda enlazado a su issue sin escribirlo a mano. | `ai/hooks/git-prepare-commit-msg.mjs` |
 
 ## Automatización en GitHub
@@ -375,7 +375,9 @@ desde la rama por defecto (`main`): hasta que los workflows lleguen a `main` por
 - **Validada**: el sync falla si la plantilla cita un `npm run`, un `node ai/…` o una ruta que no existen, o si
   un script de `package.json` no tiene su descripción en `uraqi.scripts`.
 - **Hook pre-commit**: si el commit toca una fuente y la ayuda o los generados quedaron viejos, lo bloquea
-  (`[uraqi-guard:ayuda-desactualizada]`) y pide `npm run ai:sync`.
+  (`[uraqi-guard:ayuda-desactualizada]`) y pide `npm run ai:sync`. Si ya están regenerados pero sin agregar,
+  avisa (así se pueden dividir los commits por tema).
+- **Hook pre-push**: bloquea el push mientras queden archivos generados sin commitear.
 - **Hook de los asistentes tras editar** (`ai/hooks/post-edit.mjs`): avisa al asistente si edita este README a
   mano, porque el siguiente sync lo pisa.
 - **CI**: el workflow Buenas prácticas de PR ejecuta `node ai/sync.mjs --check` en cada PR; las pruebas de
