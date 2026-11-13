@@ -1,0 +1,41 @@
+name: Defecto
+description: Algo no funciona como dice el documento maestro o la spec.
+title: "[Defecto] "
+labels: ["defecto"]
+body:
+  - type: input
+    id: identificadores
+    attributes:
+      label: Requisito afectado
+      description: RF, RNF, MC, RN, CQ, VC o PS que no se cumple.
+      placeholder: RF-34
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Resultado esperado y resultado obtenido
+    validations:
+      required: true
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Evidencia
+      description: Salida de pruebas, captura o log. No pegues claves, tokens ni el contenido de .env o .netrc.
+  - type: dropdown
+    id: severidad
+    attributes:
+      label: Severidad
+      options:
+        - Bloquea la demo o la entrega
+        - Alta
+        - Media
+        - Baja
+    validations:
+      required: true

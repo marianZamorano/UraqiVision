@@ -1,0 +1,93 @@
+# Trazabilidad commit ↔ issue ↔ PR en TODA PR hacia dev, qa o main (sin excepciones). Falla si:
+# 1. algún commit de la PR no cita su issue (#N, GH-N o la URL del issue);
+# 2. algún issue citado por los commits no aparece en el título o la descripción de la PR
+#    (así cada issue enlaza todas las PR por las que pasó: → dev, dev → qa, qa → main);
+# 3. una PR de trabajo hacia dev no cierra al menos un issue (Closes/Fixes/Resolves #N);
+#    las PR de promoción dev → qa y qa → main listan sus issues con "Refs #N";
+# 4. algún commit no cumple Conventional Commits (commitlint.config.mjs).
+# Es el control que no depende de que cada persona tenga activados los hooks locales (.githooks).
+name: Trazabilidad
+
+on:
+  pull_request:
+    branches: [dev, qa, main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  trazabilidad:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Commits con issue e issues referenciados en la PR
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          fallos=0
+          pr_text="$(printf '%s\n%s\n' "$PR_TITLE" "$PR_BODY")"
+
+          # Promociones permitidas: dev → qa y qa → main. Cualquier otra rama solo entra a dev.
+          if [ "$BASE_REF" = "qa" ] && [ "$HEAD_REF" != "dev" ]; then
+            echo "::error::A qa solo se llega por PR desde dev (llegó desde $HEAD_REF)."; fallos=1
+          fi
+          if [ "$BASE_REF" = "main" ] && [ "$HEAD_REF" != "qa" ]; then
+            echo "::error::A main solo se llega por PR desde qa (llegó desde $HEAD_REF)."; fallos=1
+          fi
+
+          # 1. Cada commit cita su issue; se juntan los issues citados.
+          issues=""
+          for sha in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
+            msg="$(git log -1 --format=%B "$sha")"
+            titulo="$(printf '%s' "$msg" | head -n1)"
+            if printf '%s' "$titulo" | grep -qE '^(Revert "|fixup! |squash! |amend! )'; then continue; fi
+            refs="$(printf '%s' "$msg" | grep -oiE '(^|[[:space:](,:])#[0-9]+\b|\bGH-[0-9]+\b|/issues/[0-9]+\b' | grep -oE '[0-9]+' | sort -u)"
+            if [ -z "$refs" ]; then
+              echo "::error::El commit ${sha:0:7} no cita ningún issue: $titulo"; fallos=1
+            else
+              echo "OK  ${sha:0:7} $titulo  →  $(printf '#%s ' $refs)"
+              issues="$issues $refs"
+            fi
+          done
+          issues="$(printf '%s\n' $issues | sort -un)"
+
+          # 2. Cada issue citado por los commits aparece en la PR.
+          for n in $issues; do
+            if ! printf '%s' "$pr_text" | grep -qE "#$n\b"; then
+              echo "::error::El issue #$n aparece en los commits pero no en la descripción de la PR (agrega Closes #$n o Refs #$n)."; fallos=1
+            fi
+          done
+
+          # 3. Una PR de trabajo hacia dev cierra al menos un issue; toda PR referencia al menos uno.
+          if [ "$BASE_REF" = "dev" ]; then
+            if ! printf '%s' "$pr_text" | grep -qiE '\b(close[sd]?|fix(e[sd])?|resolve[sd]?)\b[[:space:]:]*#[0-9]+'; then
+              echo "::error::Una PR hacia dev debe cerrar al menos un issue (por ejemplo: Closes #12)."; fallos=1
+            fi
+          elif ! printf '%s' "$pr_text" | grep -qE '#[0-9]+'; then
+            echo "::error::La PR de promoción debe listar los issues que lleva (Refs #N)."; fallos=1
+          fi
+
+          if [ -n "$issues" ]; then echo "Issues trazados en esta PR: $(printf '#%s ' $issues)"; fi
+          exit $fallos
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Formato de commits (commitlint)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          npm ci --no-fund --no-audit
+          npx commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose

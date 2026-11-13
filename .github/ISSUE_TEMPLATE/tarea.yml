@@ -1,0 +1,54 @@
+name: Tarea
+description: Trabajo planificado (una tarea de Spec Kit, un requisito o parte de él).
+title: "[Tarea] "
+labels: ["tarea"]
+body:
+  - type: input
+    id: identificadores
+    attributes:
+      label: Identificadores del documento maestro
+      description: RF, RNF, MC, RN, CQ, VC o PS que resuelve (docs/UraqiVisionDocumentoMaestrov1.0.pdf).
+      placeholder: RF-06, PS-04
+    validations:
+      required: true
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: Módulo (§19)
+      options:
+        - M-INGESTA
+        - M-CIENCIA
+        - M-VALIDACIÓN
+        - M-PUBLICACIÓN
+        - M-INSIGHT
+        - M-GLOBO
+        - M-MAPA
+        - M-ATLAS
+        - M-INTERFAZ
+        - Herramientas del repositorio
+    validations:
+      required: true
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Qué hay que hacer
+      description: Si viene de Spec Kit, enlaza la spec y el id de la tarea (T0NN).
+    validations:
+      required: true
+  - type: textarea
+    id: criterio
+    attributes:
+      label: Criterio de aceptación
+      description: Cómo se sabe que está listo (prueba, comando o comprobación).
+    validations:
+      required: true
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: Prioridad (§13)
+      options:
+        - MVP
+        - Plus
+        - Futuro
+    validations:
+      required: true

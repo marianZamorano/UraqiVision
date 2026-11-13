@@ -1,0 +1,35 @@
+# Aprobaciones de PR (reglas en ai/hooks/lib/aprobaciones.mjs):
+# - Hacia dev: el autor puede fusionar su propia PR tras confirmar; no se exige la aprobación de otros.
+# - Hacia qa y main: deben aprobar TODOS los colaboradores excepto el autor, sobre el último commit.
+# Al abrir una PR hacia qa o main pide revisión automáticamente a quienes faltan (GitHub les notifica).
+# El check falla mientras falten aprobaciones o haya cambios solicitados; se reevalúa con cada revisión.
+name: Aprobaciones
+
+on:
+  pull_request:
+    branches: [dev, qa, main]
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  aprobaciones:
+    if: contains(fromJSON('["dev","qa","main"]'), github.event.pull_request.base.ref)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Revisar aprobaciones
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node ai/scripts/prs.mjs ci --pr "$PR_NUMBER"
