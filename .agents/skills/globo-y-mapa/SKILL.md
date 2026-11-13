@@ -14,7 +14,8 @@ documentación vigente (MCP `context7` o la documentación oficial). No escribas
   (RF-27), vuelo de cámara (RF-25), controles (RF-28).
 - **El mapa 2D mide y compara**: mapa de cambio (RF-05), deslizador (RF-06), línea de tiempo (RF-07),
   polarizaciones (RF-08), focos (RF-10), control de capas (RF-35).
-- Los dos **leen los mismos archivos publicados** (skill `publicacion-estacion`). Nada se calcula en el
+- Los dos **leen los mismos archivos publicados** (§17.3; los produce el backend en `UraqiVisionBack`; tipos
+  en la skill `typed-api-integration`). Nada se calcula en el
   navegador que ya venga calculado en esos archivos.
 
 ## Reglas del globo

@@ -1,7 +1,9 @@
 # Herramientas de IA de UraqiVision
 
 Skills, subagentes, hooks y servidores MCP para **Claude Code, Gemini CLI, Codex CLI y opencode**, definidos
-una sola vez y generados para cada plataforma. Las reglas del proyecto están en [`AGENTS.md`](../AGENTS.md);
+una sola vez y generados para cada plataforma. Este repositorio es el **frontend**: las skills y subagentes del
+pipeline, la publicación de estaciones e Insight están en
+[`UraqiVisionBack`](https://github.com/marianZamorano/UraqiVisionBack). Las reglas del proyecto están en [`AGENTS.md`](../AGENTS.md);
 la fuente de verdad es [`docs/UraqiVisionDocumentoMaestrov1.0.pdf`](../docs/UraqiVisionDocumentoMaestrov1.0.pdf).
 
 ## Qué se edita y qué se genera
@@ -64,17 +66,10 @@ las de API, contratos, integración con base de datos y carga.
 |---|---|---|
 | `documento-maestro` | Encontrar requisitos por identificador, comprobar el alcance, clasificar hechos e hipótesis | Todos |
 | `sdd-uraqivision` | Flujo de Spec Kit adaptado al documento y al hackathon, con prompts listos | Todos |
-| `ciencia-radar-nisar` | MC-01–MC-09, CQ, VC, unidades lineal/dB, sin dato ≠ 0 | M-INGESTA, M-CIENCIA, M-VALIDACIÓN |
-| `publicacion-estacion` | Contrato de la carpeta publicada (§17.3), COG sin pérdida, peso | M-PUBLICACIÓN |
 | `globo-y-mapa` | CesiumJS sin ion, carga diferida, respaldo 2D, estado compartido, capas | M-GLOBO, M-MAPA |
-| `insight-lector-radar` | Contrato, adaptador, plantillas, límites y seguridad de la clave | M-INSIGHT |
 | `interfaz-bilingue-accesible` | es/en, WCAG 2.2 AA, estados de la vista, cifras y fechas | M-INTERFAZ, M-ATLAS |
 | `rigor-y-fuentes` | Citas, APA 7, hechos frente a hipótesis, nada inventado | M-ATLAS, contenidos |
 | `entrega-hackathon` | Estado frente al plan (§25), demo de 7 láminas, checklist de entrega | Todo el equipo |
-| `ingesta-nisar-asf` | Buscar GCOV con asf_search/earthaccess, recortar con GDAL ≥ 3.13, manifiesto y huellas (RF-26) | M-INGESTA |
-| `python-geoespacial` | COG float32 sin pérdida, NaN en lugar de 0, lineal → dB, pytest con rásters sintéticos | M-CIENCIA, M-PUBLICACIÓN |
-| `validacion-optica-firms` | dNBR de Sentinel-2, focos FIRMS, precisión, exhaustividad y Dice (VC-01 a VC-05) | M-VALIDACIÓN |
-| `notebook-reproducible` | Regenerar resultados desde el manifiesto, revisión visual y figuras de control (RNF-08) | M-CIENCIA |
 | `metodo-y-creditos` | Página de método, Fuente y calidad, Acerca de, licencias y citas (RF-15, RF-24, RF-37) | M-INTERFAZ |
 | `fichas-atlas` | Las 9 fichas, Tunari, relato local, hipótesis y preguntas sugeridas (RF-03, RF-12, RF-13, RF-17) | M-ATLAS |
 | `descargas-y-exportacion` | PNG y CSV con créditos, descarga de COG/GeoJSON/manifiesto, ficha imprimible (RF-21, RF-22, RF-31) | M-INTERFAZ, M-PUBLICACIÓN |
@@ -105,10 +100,7 @@ defecto); `web: true` les da búsqueda web.
 | Subagente | Cuándo usarlo |
 |---|---|
 | `guardian-alcance` | Antes de aprobar un plan, tareas o una rama: alcance, DP pendientes, trazabilidad |
-| `revisor-cientifico` | Al terminar una parte del pipeline o antes de publicar cifras |
-| `auditor-publicacion` | Antes de publicar o desplegar una estación |
 | `revisor-interfaz` | Al terminar un componente o pantalla (puede usar Playwright en localhost) |
-| `revisor-insight` | Al terminar o cambiar Insight, antes de desplegarlo |
 | `revisor-qa` | Antes de marcar una tarea como hecha o integrar una rama |
 
 Cómo invocarlos: en Claude Code, «usa el subagente revisor-qa» o `@agent-revisor-qa`; en opencode,
