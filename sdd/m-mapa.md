@@ -75,6 +75,21 @@ Fuera del área: el procesamiento (es del backend), RF-39 y RF-40 (Futuro) y lo 
 - MCP: `context7` (MapLibre GL JS), `playwright` (contra localhost).
 - Hooks: post-edit (paridad es/en), pre-commit, código vivo en la promoción.
 
+**Referencias del documento maestro (§31)**
+
+<!-- referencias:inicio (generado por ai/sync.mjs desde ai/referencias/catalogo.json; no editar a mano) -->
+
+Enlaces de §31 que aplican aquí. Cítalos (APA 7) donde implementes lo que respaldan y consulta la fuente antes de
+usar una afirmación concreta: el contenido de cada enlace no se resume aquí. Detalle: skill `referencias-documento`
+y `npm run referencias:revisar`.
+
+- **MapBiomas Bolivia (s. f.). Capas** — <https://bolivia.mapbiomas.org/en/capas/>
+  Citada en: §10.3, §17. Aplica a: RF-14, RF-35, RF-03. Fuente de límites, áreas protegidas y territorios: cada capa que la use muestra fuente y año (RF-14, RF-35) y aparece en Acerca de.
+- **NISAR (2025). NASA-ISRO SAR (NISAR) mission science users' handbook (2.ª ed.)** — <https://doi.org/10.48577/jpl.UD4HV3>
+  Citada en: no la cita el cuerpo del documento (relación propuesta por el equipo). Aplica a: RN-11, RF-08, RF-15, RF-19, RF-24, RF-16. Fundamentos de la misión y del radar (§9): respalda el texto de qué resalta cada polarización (RF-08), el glosario (RF-19), la página de método y las citas de datos (RN-11, RF-24) y las explicaciones de Insight; el documento no la cita en el cuerpo.
+
+<!-- referencias:fin -->
+
 ## 7. Riesgos y pendientes
 
 - §24: hueco permanente de datos NISAR (27 jul – 10 ago) → mostrarlo en la línea de tiempo; escenas VALIDATED con

@@ -70,6 +70,19 @@ huella de las escenas y el resumen del cambio. Historias: CU-01, CU-03. Fuera de
 - MCP: `context7` (CesiumJS), `playwright` (contra localhost).
 - Hooks: pre-commit, código vivo en la promoción.
 
+**Referencias del documento maestro (§31)**
+
+<!-- referencias:inicio (generado por ai/sync.mjs desde ai/referencias/catalogo.json; no editar a mano) -->
+
+Enlaces de §31 que aplican aquí. Cítalos (APA 7) donde implementes lo que respaldan y consulta la fuente antes de
+usar una afirmación concreta: el contenido de cada enlace no se resume aquí. Detalle: skill `referencias-documento`
+y `npm run referencias:revisar`.
+
+- **Cesium GS (2026). CesiumJS [Software]** — <https://github.com/CesiumGS/cesium>
+  Citada en: §18. Aplica a: RF-02, RF-25, RF-26, RF-27, RF-28, RF-29, RF-30, RF-32, RF-24, RNF-11. Usa la documentación vigente (MCP context7) al implementar el globo; muestra su atribución y licencia en el globo y en Acerca de (RF-24, RNF-11).
+
+<!-- referencias:fin -->
+
 ## 7. Riesgos y pendientes
 
 - §24: el globo 3D es lento en celulares de gama media → carga diferida, menos detalle en el celular y respaldo en
