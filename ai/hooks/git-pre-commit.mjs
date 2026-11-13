@@ -1,8 +1,17 @@
 #!/usr/bin/env node
 // Hook de git pre-commit (PS-06, RNF-06): impide versionar archivos con secretos o líneas con claves.
 // Se activa con: git config core.hooksPath .githooks
+// También impide commitear directamente en dev, qa o main: el trabajo va en una rama tipo/N-descripcion y
+// llega a esas ramas por PR.
 import { execFileSync } from 'node:child_process';
-import { findSecrets, isSecretPath } from './lib/guard.mjs';
+import { findSecrets, isSecretPath, PROTECTED_BRANCHES } from './lib/guard.mjs';
+import { currentBranch } from './lib/git.mjs';
+
+const branch = currentBranch();
+if (PROTECTED_BRANCHES.includes(branch)) {
+  process.stderr.write(`[uraqi-guard:commit-en-main] No se commitea directamente en ${branch}.\nCrea una rama para el issue desde dev: git switch -c feat/<N>-descripcion (los cambios sin confirmar se mueven con ella).\n`);
+  process.exit(1);
+}
 
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 const problems = [];

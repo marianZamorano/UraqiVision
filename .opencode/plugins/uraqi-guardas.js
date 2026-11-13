@@ -2,10 +2,11 @@
 // Plugin de opencode: aplica las guardas compartidas de ai/hooks/lib/guard.mjs antes de cada herramienta.
 // Lanzar un error bloquea la herramienta. Las aprobaciones ("ask") las resuelve "permission" de opencode.json.
 import { evaluateTool, evaluatePrompt } from '../../ai/hooks/lib/guard.mjs';
+import { currentBranch } from '../../ai/hooks/lib/git.mjs';
 
 export const UraqiGuardas = async ({ directory }) => ({
   'tool.execute.before': async (input, output) => {
-    const result = evaluateTool(input.tool, output.args ?? {}, directory);
+    const result = evaluateTool(input.tool, output.args ?? {}, directory, { branch: currentBranch(directory) });
     if (result.decision === 'deny') throw new Error(result.reason);
   },
   'chat.message': async (_input, output) => {

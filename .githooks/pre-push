@@ -1,0 +1,3 @@
+#!/bin/sh
+# Bloquea el push a main (solo por PR) y los commits sin issue.
+exec node "$(git rev-parse --show-toplevel)/ai/hooks/git-pre-push.mjs" "$@"

@@ -63,6 +63,29 @@ test('apply_patch de Codex: se revisan los archivos y las líneas añadidas', ()
   assert.equal(evaluateTool('apply_patch', { command: ok }).decision, null);
 });
 
+test('flujo: nada llega a dev, qa ni main sin PR', () => {
+  const enRama = { branch: 'feat/12-deslizador' };
+  for (const command of ['git push origin main', 'git push origin HEAD:qa', 'git push origin dev', 'git push origin :main', 'git push -u origin refs/heads/main']) {
+    assert.ok(denied(evaluateTool('Bash', { command }, undefined, enRama)), command);
+  }
+  for (const branch of ['main', 'qa', 'dev']) {
+    assert.ok(denied(evaluateTool('Bash', { command: 'git push' }, undefined, { branch })), `push desde ${branch}`);
+    assert.ok(denied(evaluateTool('Bash', { command: 'git push origin HEAD' }, undefined, { branch })), `HEAD desde ${branch}`);
+    assert.ok(denied(evaluateTool('Bash', { command: 'git merge feat/12-deslizador' }, undefined, { branch })), `merge en ${branch}`);
+  }
+  assert.ok(denied(evaluateTool('run_shell_command', { command: 'git status && git push origin main' }, undefined, enRama)));
+});
+
+test('flujo: lo permitido en ramas de trabajo pasa', () => {
+  const enRama = { branch: 'feat/12-deslizador' };
+  for (const command of ['git push -u origin feat/12-deslizador', 'git push', 'git merge dev', 'git push origin main-fix-docs']) {
+    assert.equal(evaluateTool('Bash', { command }, undefined, enRama).decision, null, command);
+  }
+  assert.equal(evaluateTool('Bash', { command: 'git merge --abort' }, undefined, { branch: 'dev' }).decision, null);
+  assert.equal(evaluateTool('Bash', { command: 'git push origin feat/12-deslizador' }, undefined, { branch: 'dev' }).decision, null);
+  assert.equal(evaluateTool('Bash', { command: 'git pull' }, undefined, { branch: 'main' }).decision, null);
+});
+
 test('mensajes del usuario con secretos no se envían', () => {
   assert.ok(denied(evaluatePrompt(`usa esta clave ${FAKE_ANTHROPIC}`)));
   assert.equal(evaluatePrompt('¿qué es la polarización HV?').decision, null);
