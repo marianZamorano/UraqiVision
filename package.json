@@ -9,11 +9,12 @@
     "pr:estado": "node ai/scripts/prs.mjs estado",
     "pr:aprobar": "node ai/scripts/prs.mjs aprobar",
     "pr:fusionar": "node ai/scripts/prs.mjs fusionar",
+    "issues:estado": "node ai/scripts/estado-issues.mjs",
     "commits:plan": "node ai/scripts/dividir-commits.mjs",
     "commits:dividir": "node ai/scripts/dividir-commits.mjs --aplicar",
     "ai:sync": "node ai/sync.mjs",
     "ai:check": "node ai/sync.mjs --check",
-    "test:guardas": "node --test ai/hooks/test/guard.test.mjs ai/hooks/test/commit-groups.test.mjs ai/hooks/test/aprobaciones.test.mjs",
+    "test:guardas": "node --test ai/hooks/test/guard.test.mjs ai/hooks/test/commit-groups.test.mjs ai/hooks/test/aprobaciones.test.mjs ai/hooks/test/estado-issues.test.mjs",
     "hooks:activar": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
