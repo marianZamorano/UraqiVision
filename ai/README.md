@@ -162,8 +162,15 @@ a la persona y solo entonces aplican con `--aplicar --si`. Un solo commit grande
   `dev` el autor puede fusionar su propia PR tras confirmar; hacia `qa` y `main` deben aprobar todos los
   colaboradores excepto el autor, sobre el último commit. Al abrir la PR pide revisión a quienes faltan.
 - **Estado de issues** (`.github/workflows/estado-issues.yml`, reglas en `ai/hooks/lib/estado-issues.mjs`):
-  PR abierta a `dev` → `estado: en revisión`; fusionada en `dev` → `en dev` y se cierra; fusionada en
-  `qa`/`main` → `en preproducción`/`en producción` (aunque ya esté cerrado). Revisar o sincronizar a mano: `npm run issues:estado -- --pr N --simular`.
+  PR en borrador → `en progreso`; lista → `en revisión`; aceptada en `dev` → `en dev` y se cierra; fusionada
+  en `qa`/`main` con aprobación completa → `en preproducción`/`en producción` y se cierra su issue de promoción
+  (creado al abrir la PR). Sin aprobación completa no cambia ningún estado. Simular: `npm run issues:estado -- --pr N --simular`.
+- **Issue a PR** (`.github/workflows/issue-a-pr.yml`, `ai/scripts/issue-a-pr.mjs`): al crear un issue de trabajo
+  crea la rama `tipo/N-titulo` desde `dev` y una PR en borrador hacia `dev` con `Closes #N`.
+- **Protección de issues** (`.github/workflows/proteger-issues.yml`, `ai/scripts/proteger-issues.mjs`): revierte
+  etiquetas `estado:` manuales, cierres sin aprobación o con PR en curso y reaperturas de issues aceptados.
+- Los workflows de eventos de issues corren desde `main`, y `Issue a PR` requiere activar en Settings → Actions →
+  General «Allow GitHub Actions to create and approve pull requests».
 - **Revisar desde el asistente o la terminal** (`ai/scripts/prs.mjs`): `npm run pr:pendientes`,
   `npm run pr:estado -- N`, `npm run pr:aprobar -- N`, `npm run pr:fusionar -- N` (merge commit). Aprobar y
   fusionar siempre piden confirmación; Claude y opencode además piden permiso antes de ejecutarlos.

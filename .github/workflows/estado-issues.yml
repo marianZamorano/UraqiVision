@@ -1,19 +1,26 @@
 # Estado de los issues según sus PR (reglas en ai/hooks/lib/estado-issues.mjs):
-#   PR abierta hacia dev → "estado: en revisión"; fusionada en dev → "estado: en dev" y se cierra;
-#   fusionada en qa → "estado: en preproducción"; fusionada en main → "estado: en producción"
-#   (estas dos, aunque el issue ya esté cerrado); PR cerrada sin fusionar → se quita "estado: en revisión".
-# GitHub solo cierra issues con "Closes #N" al fusionar en main; esto cierra al entrar a dev.
+#   PR hacia dev: borrador → "en progreso"; lista → "en revisión"; fusionada (aceptada) → "en dev" y se cierra;
+#   cerrada sin fusionar → se quitan "en progreso"/"en revisión".
+#   PR hacia qa o main: al abrirla se crea su issue de promoción; al fusionarla, SOLO con la aprobación completa
+#   (todos los colaboradores excepto el autor, sobre el último commit), los issues pasan a "en preproducción" o
+#   "en producción" y se cierra el issue de promoción. Sin aprobación completa no cambia ningún estado.
+# Para aplicar a mano una PR ya fusionada: gh workflow run estado-issues.yml --ref dev -f pr=<N>
 name: Estado de issues
 
 on:
   pull_request:
     branches: [dev, qa, main]
-    types: [opened, reopened, closed]
+    types: [opened, reopened, ready_for_review, converted_to_draft, closed]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Número de la PR a sincronizar
+        required: true
 
 permissions:
   contents: read
   issues: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   estado:
@@ -29,5 +36,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_EVENT_ACTION: ${{ github.event.action }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
         run: node ai/scripts/estado-issues.mjs --pr "$PR_NUMBER"
