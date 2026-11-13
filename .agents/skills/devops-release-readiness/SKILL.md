@@ -1,7 +1,7 @@
 ---
 name: devops-release-readiness
-description: Decide con evidencia si un cambio está listo para desplegarse — Git limpio, build/lint/typecheck/tests en verde, configuración y secretos auditados, variables por entorno, dependencias, plan de rollback y verificación posterior — y emite un veredicto NOT_READY / CONFIG_PREPARED / BUILD_VERIFIED. Úsala antes de cada despliegue preview o producción.
-argument-hint: "[ruta-app] [preview|production]"
+description: Decide con evidencia si un cambio está listo para desplegarse — Git limpio, build/lint/typecheck/tests en verde, configuración y secretos auditados, variables por entorno, dependencias, plan de rollback y verificación posterior — y emite un veredicto NOT_READY / CONFIG_PREPARED / BUILD_VERIFIED. Úsala antes de la PR dev → qa (preproducción) y de la PR qa → main (producción).
+argument-hint: "[ruta-app] [preproduccion|produccion]"
 disable-model-invocation: true
 allowed-tools: Read, Grep, Glob, Bash(node ai/devops/scripts/*), Bash(git status *), Bash(git log *), Bash(git diff *)
 ---
@@ -12,8 +12,13 @@ allowed-tools: Read, Grep, Glob, Bash(node ai/devops/scripts/*), Bash(git status
 Un único informe de go/no-go que separa hechos verificados de supuestos, antes de tocar cualquier entorno.
 
 ## Cuándo usarla
-- Antes de `devops-vercel-deployment preview|production`.
-- Antes de fusionar a la rama de producción.
+
+Entornos de UraqiVision (AGENTS.md §5): `qa` despliega **preproducción** y `main` despliega **producción**,
+cada una con su propio despliegue. No existe una rama `master`.
+
+- Antes de la PR `dev → qa` (preproducción).
+- Antes de la PR `qa → main` (producción), con evidencia de que la misma versión ya pasó por preproducción.
+- El proveedor de hospedaje está pendiente (DP-06): sin esa decisión, el nivel máximo es `CONFIG_PREPARED`.
 
 ## Entradas
 - Ruta de la app; entorno objetivo.
@@ -24,11 +29,11 @@ Un único informe de go/no-go que separa hechos verificados de supuestos, antes 
 
 ## Herramientas
 - `node ai/devops/scripts/deploy-readiness.mjs --root . --app-dir <app> --with-build --out reports/devops/readiness-<fecha>.md`
-- `validate-build.mjs`, `dependency-audit.mjs --production`, `env-check.mjs`.
+- `node ai/devops/scripts/dependency-audit.mjs --production` y `node ai/devops/scripts/env-check.mjs`.
 
 ## Procedimiento
 1. Git: commit identificable, sin cambios sin confirmar, rama correcta, al día con el remoto.
-2. `deploy-readiness.mjs --with-build` (ejecuta los scripts del proyecto: install solo si se pide con `validate-build --install`).
+2. `deploy-readiness.mjs --with-build` (ejecuta los scripts del proyecto; no instala dependencias: si faltan, pide permiso para instalarlas).
 3. Dependencias de producción sin critical/high no aceptados.
 4. Variables requeridas presentes en el entorno objetivo (nombres; nunca valores).
 5. Migraciones: ¿hay cambios de esquema? → plan separado con aprobación y backup.

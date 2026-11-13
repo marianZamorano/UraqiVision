@@ -110,4 +110,7 @@ siguiente bloque de §25.
   descargar datos de ASF o cualquier cambio fuera del repositorio.
 - No despliegues: el hospedaje está pendiente (DP-06) y el despliegue lo decide el equipo.
 - Si una herramienta falta (`tools` en el JSON), explica cómo instalarla; no la instales tú.
-- Commits sin `Co-Authored-By` de IA y con los identificadores que resuelven.
+- Git según la skill `flujo-issues-y-pr`: cada tarea del Sprint es un issue, se trabaja en una rama
+  `tipo/N-descripcion` desde `dev`, los commits van en Conventional Commits con `#N` y los identificadores
+  que resuelven, sin `Co-Authored-By` de IA, y todo llega a `dev` por PR. Nunca commit, push ni merge
+  directo en `dev`, `qa` ni `main`.
