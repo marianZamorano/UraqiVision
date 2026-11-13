@@ -142,6 +142,12 @@ exigen coherencia con el documento maestro (identificadores y secciones que exis
 señaladas); al fusionarse en `dev`, el workflow Herramientas de IA avisa a los demás colaboradores con una mención.
 `npm run ai:verificar` comprueba que todo funciona y está activo; `npm run ai:cambios`, qué cambia en tu rama.
 
+**Código vivo en las promociones**: al pedir de forma explícita una PR hacia `qa` o `main`, el revisor de código
+vivo (skill `codigo-vivo`, subagente `revisor-codigo-vivo`, guarda `[uraqi-guard:codigo-no-vivo]` y workflow
+Código vivo) detiene la promoción si hay código roto, muerto o desconectado y da un plan de solución. También
+revisa el CI/CD por rama: cuando se implemente, `dev`, `qa` y `main` deben verificar conflictos, código vivo,
+pruebas, build y que el proyecto vuelva a levantar (`npm run codigo:revisar`, `npm run codigo:levantar`).
+
 | Tipo | Dónde se define | Claude Code | Gemini CLI | Codex CLI | opencode |
 |---|---|---|---|---|---|
 | Skills | `.agents/skills/` | `.claude/skills/` (copia) · `/nombre` | `.agents/skills/` | `.agents/skills/` · `$nombre` | `.agents/skills/` |
@@ -162,10 +168,10 @@ están en `UraqiVisionBack`.
 | Contenidos | `fichas-atlas`, `metodo-y-creditos`, `rigor-y-fuentes` |
 | Frontend | `globo-y-mapa`, `react-component-architecture`, `react-components-and-state`, `frontend-data-fetching`, `typed-api-integration`, `vite-bundle-optimization`, `frontend-testing`, `descargas-y-exportacion` |
 | UX | `interfaz-bilingue-accesible`, `design-system-tokens`, `responsive-visual-testing` |
-| QA | `qa-project-discovery`, `qa-test-strategy`, `qa-test-design`, `qa-automation`, `qa-regression-analysis`, `qa-quality-gates`, `qa-test-reporting`, `qa-defect-analysis`, `qa-security-testing`, `test-driven-development`, `systematic-debugging`, `verification-before-completion` |
+| QA | `qa-project-discovery`, `qa-test-strategy`, `qa-test-design`, `qa-automation`, `qa-regression-analysis`, `qa-quality-gates`, `qa-test-reporting`, `qa-defect-analysis`, `qa-security-testing`, `codigo-vivo`, `test-driven-development`, `systematic-debugging`, `verification-before-completion` |
 | DevSecOps | `devops-secrets-management`, `devops-dependency-security`, `devops-git-workflow`, `devops-release-readiness`, `devops-free-tier-audit`, `devops-supervised-execution` |
 
-Subagentes. De solo lectura: `guardian-alcance`, `revisor-interfaz`, `revisor-qa`,
+Subagentes. De solo lectura: `guardian-alcance`, `revisor-interfaz`, `revisor-qa`, `revisor-codigo-vivo`,
 `security-qa-engineer`, `test-evidence-analyst`, `devsecops-engineer`, `free-tier-architect` (con web),
 `release-readiness-reviewer`, `uiux-design-auditor`. (Los revisores científico, de publicación y de Insight
 están en `UraqiVisionBack`.)
