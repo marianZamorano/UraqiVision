@@ -1,0 +1,3 @@
+#!/bin/sh
+# Agrega "Refs #N" al mensaje en ramas tipo/N-descripcion (trazabilidad commit → issue).
+exec node "$(git rev-parse --show-toplevel)/ai/hooks/git-prepare-commit-msg.mjs" "$@"

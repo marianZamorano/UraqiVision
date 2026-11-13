@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-// Hook de inicio de sesión: recuerda al agente la fuente de verdad y las reglas clave. Nunca bloquea.
+// Hook de inicio de sesión: recuerda al agente la fuente de verdad y las reglas clave, y avisa de las PR que
+// esperan la aprobación de la persona (consulta GitHub con gh; si no hay red o sesión, lo omite). Nunca bloquea.
 // Uso: node ai/hooks/session-context.mjs --platform=<claude|codex|gemini>
 import { platform } from './lib/io.mjs';
+import { avisoPRs } from './lib/prs-resumen.mjs';
 
 export const CONTEXT = `[UraqiVision] Contexto del proyecto
 - Fuente de verdad: docs/UraqiVisionDocumentoMaestrov1.0.pdf (busca en la copia .txt por identificador: RF-xx, RNF-xx, MC-xx, RN-xx, CQ-xx, VC-xx, PS-xx, DP-xx). Lo que no está en el documento no está decidido.
@@ -9,15 +11,19 @@ export const CONTEXT = `[UraqiVision] Contexto del proyecto
 - No inventes datos, cifras, fuentes, DOI ni endpoints. Separa hechos, propuestas, hipótesis y pendientes.
 - Ciencia: promedios en lineal y dB después; misma órbita y grilla (RN-01); sin dato nunca es cero (RN-13); causas como hipótesis (RN-05); hectáreas con rango (RN-06).
 - Textos de interfaz en español e inglés (RNF-03). Ninguna clave en el código ni en el repo (RNF-06).
-- Cita los identificadores en código, tareas y commits. Commits sin Co-Authored-By de IA.
+- Git (skill flujo-issues-y-pr): nunca commit, push ni merge directo en main, qa ni dev. Trabaja en una rama tipo/N-descripcion desde dev y abre una PR a dev con "Closes #N"; luego se promueve dev → qa (preproducción) → main (producción) por PR. Toda PR, en las tres ramas, lista todos los issues de sus commits.
+- Aprobación de PR: hacia dev el autor puede fusionar su propia PR tras confirmar; hacia qa y main deben aprobar TODOS los colaboradores excepto el autor, sobre el último commit. Aprobar y fusionar solo con npm run pr:aprobar / pr:fusionar y con la confirmación de la persona.
+- Commits en Conventional Commits con su issue: tipo(alcance): descripción en minúscula (RF-xx) #N. Sin Co-Authored-By de IA. commitlint y los hooks rechazan lo que no cumpla. Con muchos cambios, propone dividirlos por tema (node ai/scripts/dividir-commits.mjs) y PREGUNTA a la persona antes de dividir o de hacer un solo commit grande.
 - Skills: documento-maestro, sdd-uraqivision y las de cada módulo. Subagentes revisores de solo lectura.
 - Las guardas [uraqi-guard:<regla>] bloquean secretos, .env/.netrc y comandos destructivos.`;
 
 try {
+  const aviso = await avisoPRs({ modo: 'inicio' });
+  const texto = aviso ? `${CONTEXT}\n\n${aviso}` : CONTEXT;
   if (platform() === 'claude') {
-    process.stdout.write(`${CONTEXT}\n`);
+    process.stdout.write(`${texto}\n`);
   } else {
-    process.stdout.write(`${JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: CONTEXT } })}\n`);
+    process.stdout.write(`${JSON.stringify({ hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: texto } })}\n`);
   }
 } catch {
   // SessionStart nunca bloquea.

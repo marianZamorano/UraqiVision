@@ -22,7 +22,10 @@ Adaptado del agente homónimo de chapterCoreIEEE (ecosistema DevOps).
 3. Comprueba lo propio de UraqiVision: estaciones publicadas con `quality.json` completo (CQ-06), vistas de
    menos de 40 MB por estación (RNF-02), ninguna clave en el bundle (PS-06), textos en ambos idiomas (PS-03).
 4. Comprueba que existe un plan de rollback y una prueba de humo del recorrido (PS-09).
-5. El hospedaje está pendiente (DP-06): si no está decidido, el nivel máximo es `CONFIG_PREPARED`.
+5. Entornos: la PR `dev → qa` despliega **preproducción** y la PR `qa → main` despliega **producción**
+   (AGENTS.md §5). Antes de la PR a `main`, exige evidencia de que la versión pasó por preproducción
+   (`qa`). No existe una rama `master`.
+6. El hospedaje está pendiente (DP-06): si no está decidido, el nivel máximo es `CONFIG_PREPARED`.
 
 ## Salida
 Veredicto, bloqueos con corrección propuesta, lista de comprobaciones con comando y resultado.

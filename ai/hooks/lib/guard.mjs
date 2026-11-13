@@ -70,12 +70,59 @@ export const SHELL_DENY = [
   { id: 'secret-file-read', re: new RegExp(String.raw`\b(?:cat|type|more|less|head|tail|Get-Content|gc|bat|xxd|strings|base64|cp|copy|scp|Copy-Item)\b[^;&|\n]*${SECRET_FILE_IN_CMD}`, 'i'), why: 'Lee o copia un archivo con secretos (.env, .netrc, claves)' },
   { id: 'env-exfiltration', re: /\b(?:env|printenv|Get-ChildItem\s+env:|gci\s+env:)\b[^;&\n]*\|\s*[^;&\n]*\b(?:curl|wget|nc|iwr|Invoke-WebRequest|irm|Invoke-RestMethod)\b/i, why: 'Envía variables de entorno a la red' },
   { id: 'publish-package', re: /\b(?:npm|yarn|pnpm)\s+publish\b|\btwine\s+upload\b|\bgh\s+release\s+create\b/i, why: 'Publicación de paquetes o releases (fuera del alcance de un agente)' },
+  { id: 'pr-merge-directo', re: /\bgh\s+pr\s+merge\b|\bgh\s+api\b[^\n]*\/pulls\/\d+\/merge\b/i, why: 'Fusionar una PR solo con `npm run pr:fusionar -- <N>`: comprueba las aprobaciones (todos los colaboradores en qa y main) y pide confirmación' },
+  { id: 'pr-aprobar-directo', re: /\bgh\s+pr\s+review\b[^;&|\n]*(?:--approve|\s-a\b)|\bgh\s+api\b[^\n]*\/pulls\/\d+\/reviews\b[^\n]*(?:-X\s*(?:POST|PUT)|--method\s+(?:POST|PUT)|\s-[fF]\s)/i, why: 'Aprobar una PR solo con `npm run pr:aprobar -- <N>`, que muestra el resumen y pide confirmación' },
   { id: 'disable-guards', re: /--dangerously-skip-permissions|disableAllHooks|bypassPermissions|core\.hooksPath\s+(?:\/dev\/null|""|'')/i, why: 'Intento de desactivar los permisos o las guardas' },
 ];
 
-export function evaluateShell(command) {
+// ------------------------------------------------------------------ Flujo issue → rama → PR
+
+// Ramas que solo reciben cambios por PR: tipo/N-… → dev → qa (preproducción) → main (producción).
+// No existe una rama master.
+export const PROTECTED_BRANCHES = ['main', 'qa', 'dev'];
+
+/** Divide un comando compuesto (;, &&, ||, |) en segmentos. */
+const segments = (cmd) => cmd.split(/;|&&|\|\||\|/).map((s) => s.trim()).filter(Boolean);
+const tokens = (seg) => seg.match(/"[^"]*"|'[^']*'|\S+/g)?.map((t) => t.replace(/^["']|["']$/g, '')) ?? [];
+
+/**
+ * Hace cumplir el flujo de trabajo: nada llega a dev, qa ni main sin PR.
+ * - push a una rama protegida (explícito: `origin dev`, `HEAD:qa`, `:main`) siempre se bloquea;
+ * - estando en una rama protegida, `git push` sin una rama distinta de destino se bloquea;
+ * - estando en una rama protegida, `git merge` (que no sea --abort) se bloquea.
+ * Los merges se hacen en GitHub al aprobar la PR (`gh pr merge` pide confirmación).
+ */
+export function evaluateGitFlow(command, { branch } = {}) {
+  const onProtected = PROTECTED_BRANCHES.includes(branch);
+  for (const seg of segments(command)) {
+    const t = tokens(seg);
+    const gi = t.findIndex((x) => x === 'git');
+    if (gi < 0) continue;
+    const sub = t.slice(gi + 1).find((x) => !x.startsWith('-'));
+    const args = t.slice(t.indexOf(sub, gi + 1) + 1);
+    if (sub === 'push') {
+      const positional = args.filter((x) => !x.startsWith('-'));
+      const refspecs = positional.slice(1); // el primero es el remoto
+      const targets = refspecs.map((r) => r.replace(/^\+/, '').split(':').pop().replace(/^refs\/heads\//, ''));
+      if (targets.some((x) => PROTECTED_BRANCHES.includes(x))) {
+        return deny('push-to-protected', 'Push directo a dev, qa o main: crea una rama (tipo/N-descripcion) desde dev, haz push de la rama y abre una PR hacia dev que cierre el issue (skill flujo-issues-y-pr).');
+      }
+      if (onProtected && (refspecs.length === 0 || targets.includes('HEAD') || refspecs.includes('HEAD'))) {
+        return deny('push-from-protected', `Estás en ${branch} y este push la subiría directamente: crea una rama con \`git switch -c tipo/N-descripcion\` y haz push de esa rama.`);
+      }
+    }
+    if (sub === 'merge' && onProtected && !args.includes('--abort')) {
+      return deny('merge-into-protected', `Merge local en ${branch}: los merges a dev, qa y main se hacen en GitHub al aprobar la PR (skill flujo-issues-y-pr).`);
+    }
+  }
+  return NONE;
+}
+
+export function evaluateShell(command, ctx = {}) {
   const cmd = Array.isArray(command) ? command.join(' ') : String(command ?? '');
   if (!cmd.trim()) return NONE;
+  const flow = evaluateGitFlow(cmd, ctx);
+  if (flow.decision) return flow;
   const secrets = findSecrets(cmd);
   if (secrets.length) return deny('secret-in-command', `El comando contiene un posible secreto (${secrets.join(', ')}). Usa variables de entorno; nunca pongas secretos en comandos.`);
   for (const r of SHELL_DENY) {
@@ -164,10 +211,11 @@ export function normalize(toolName, input = {}) {
   }
 }
 
-export function evaluateTool(toolName, input, cwd = process.cwd()) {
+/** ctx.branch: rama actual del repositorio (la calcula el hook con lib/git.mjs). */
+export function evaluateTool(toolName, input, cwd = process.cwd(), ctx = {}) {
   for (const e of normalize(toolName, input)) {
     let r = NONE;
-    if (e.kind === 'shell') r = evaluateShell(e.command);
+    if (e.kind === 'shell') r = evaluateShell(e.command, ctx);
     else if (e.kind === 'write') r = evaluateWrite(e.path, e.content, cwd);
     else if (e.kind === 'read') r = evaluateRead(e.path);
     if (r.decision) return r;

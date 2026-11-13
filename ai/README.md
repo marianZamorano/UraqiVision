@@ -128,8 +128,47 @@ Una sola lógica (`ai/hooks/lib/guard.mjs`) para las cuatro plataformas. **Bloqu
 **Avisan sin bloquear** tras cada edición: JSON o GeoJSON inválido y claves distintas entre `es.json` y
 `en.json` (RNF-03). Al iniciar la sesión inyectan un resumen de las reglas clave.
 
-Los permisos nativos piden confirmación para `git push` y `vercel` (Claude y opencode).
-Git: `pre-commit` bloquea secretos y `commit-msg` avisa si falta un identificador o hay un `Co-Authored-By` de IA.
+**Flujo de git** (skill `flujo-issues-y-pr`): las guardas de los asistentes bloquean push o merge directo a
+`dev`, `qa` y `main` (también `git push` sin destino estando en ellas). Los permisos nativos piden confirmación
+para `git push` y `vercel` (Claude y opencode).
+
+## Hooks de git (`.githooks/`, activar con `npm run hooks:activar`)
+
+| Hook | Qué hace |
+|---|---|
+| `pre-commit` | Bloquea commits en `dev`, `qa` o `main` y archivos o líneas con secretos (RNF-06) |
+| `prepare-commit-msg` | En ramas `tipo/N-descripcion` agrega `Refs #N` al mensaje |
+| `commit-msg` | Bloquea commits sin issue (`#N`) y valida Conventional Commits con commitlint (`commitlint.config.mjs`); detecta commits que mezclan temas (3+ grupos, o 2 grupos con 8+ archivos), muestra la división propuesta y **pregunta** (en terminal `[s/N]`; sin terminal se detiene hasta que la persona decida); avisa si falta un identificador o hay `Co-Authored-By` de IA |
+| `pre-push` | Bloquea el push a `dev`, `qa` o `main` y los commits sin issue; avisa si la rama no sigue `tipo/N-descripcion` |
+
+Requisitos: `npm install` en la raíz (instala commitlint 21.2.4) y `npm run hooks:activar`.
+
+**Dividir commits grandes** (`ai/scripts/dividir-commits.mjs`, reglas en `ai/hooks/lib/commit-groups.mjs`):
+`npm run commits:plan` muestra la propuesta sin cambiar nada; `npm run commits:dividir` la muestra y pregunta
+(aplicar / editar mensajes / cancelar) antes de crear un commit por tema. Los agentes usan `--json`, preguntan
+a la persona y solo entonces aplican con `--aplicar --si`. Un solo commit grande se aprueba con
+`URAQI_UN_COMMIT=1` o con la línea `Commit-grande: aprobado` en el mensaje (útil desde el IDE).
+
+## GitHub
+
+- **Ramas y entornos**: `main` = producción (despliegue propio), `qa` = preproducción (despliegue propio y
+  separado), `dev` = integración. No existe `master`. Toda rama entra por PR a `dev`, luego PR `dev → qa` y
+  PR `qa → main`. El proveedor de los despliegues depende de DP-06.
+- Workflow `.github/workflows/trazabilidad.yml`, en **toda** PR a `dev`, `qa` o `main`, sin excepciones:
+  cada commit cita su issue; cada issue citado aparece en la descripción de la PR; las PR a `dev` cierran al
+  menos un issue; a `qa` solo se llega desde `dev` y a `main` solo desde `qa`; formato con commitlint.
+- `node ai/scripts/issues-de-promocion.mjs dev qa` (o `qa main`) genera la lista `Refs #N` de una promoción.
+- **Aprobaciones** (`.github/workflows/aprobaciones.yml`, reglas en `ai/hooks/lib/aprobaciones.mjs`): hacia
+  `dev` el autor puede fusionar su propia PR tras confirmar; hacia `qa` y `main` deben aprobar todos los
+  colaboradores excepto el autor, sobre el último commit. Al abrir la PR pide revisión a quienes faltan.
+- **Revisar desde el asistente o la terminal** (`ai/scripts/prs.mjs`): `npm run pr:pendientes`,
+  `npm run pr:estado -- N`, `npm run pr:aprobar -- N`, `npm run pr:fusionar -- N` (merge commit). Aprobar y
+  fusionar siempre piden confirmación; Claude y opencode además piden permiso antes de ejecutarlos.
+- **Aviso automático**: el hook de inicio de sesión y, cada 10 minutos, el de cada mensaje consultan GitHub
+  (con `gh`) y avisan al asistente de PR nuevas por aprobar o propias listas para fusionar. Caché en
+  `.git/uraqi-prs.json`; sin red o sin `gh` no hacen nada.
+- Plantillas de issue (`tarea`, `defecto`) con identificadores del documento, módulo y prioridad, y plantilla de PR
+  con `Closes #`, verificación y checklist.
 
 ## Servidores MCP
 

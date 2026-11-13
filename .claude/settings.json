@@ -25,7 +25,15 @@
       "Bash(vercel *)",
       "PowerShell(vercel *)",
       "Bash(gh release *)",
-      "Bash(gh pr merge *)"
+      "Bash(gh pr merge *)",
+      "Bash(npm run pr:aprobar*)",
+      "PowerShell(npm run pr:aprobar*)",
+      "Bash(npm run pr:fusionar*)",
+      "PowerShell(npm run pr:fusionar*)",
+      "Bash(node ai/scripts/prs.mjs aprobar*)",
+      "PowerShell(node ai/scripts/prs.mjs aprobar*)",
+      "Bash(node ai/scripts/prs.mjs fusionar*)",
+      "PowerShell(node ai/scripts/prs.mjs fusionar*)"
     ]
   },
   "hooks": {
@@ -35,7 +43,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/ai/hooks/session-context.mjs\" --platform=claude",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }
@@ -46,7 +54,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/ai/hooks/prompt-guard.mjs\" --platform=claude",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }

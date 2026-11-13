@@ -12,7 +12,8 @@ allowed-tools: Read, Grep, Glob, WebFetch, Bash(node ai/devops/scripts/free-tier
 Responder con evidencia: **¿se puede operar gratis?, ¿hasta cuándo? y ¿qué podría generar un cargo?** Nunca habilita servicios ni introduce métodos de pago.
 
 ## Cuándo usarla
-- Al diseñar el despliegue (junto a `devops-vercel-deployment analyze`).
+- Al diseñar el despliegue: evidencia para DP-06 (GitHub Pages o Vercel), considerando que `qa`
+  (preproducción) y `main` (producción) necesitan cada una su propio despliegue.
 - Al añadir un servicio externo (BD, almacenamiento, colas, email).
 - Mensualmente o cuando el dashboard de un proveedor avise de consumo.
 

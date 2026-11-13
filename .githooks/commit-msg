@@ -1,3 +1,28 @@
 #!/bin/sh
-# Avisos sobre el mensaje del commit (identificadores y coautoría de IA). Nunca bloquea.
-exec node "$(git rev-parse --show-toplevel)/ai/hooks/git-commit-msg.mjs" "$1"
+# 1) Trazabilidad: el commit debe citar su issue (#N); avisos de identificadores y coautoría de IA.
+# 2) Commits grandes: si mezcla varios temas, muestra la división propuesta y PREGUNTA (código 3 del script).
+#    Con terminal se responde aquí; sin terminal (agentes, IDE) el commit se detiene para preguntar a la persona.
+# 3) Formato: Conventional Commits validado con commitlint (commitlint.config.mjs).
+ROOT="$(git rev-parse --show-toplevel)"
+node "$ROOT/ai/hooks/git-commit-msg.mjs" "$1"
+rc=$?
+if [ "$rc" -eq 3 ]; then
+  if (exec </dev/tty) 2>/dev/null; then
+    printf '¿Mantener todo en un solo commit? [s/N] ' >/dev/tty
+    read -r resp </dev/tty
+    case "$resp" in
+      s|S|si|SI|sí|Sí) ;;
+      *) echo "Commit cancelado. Para dividirlo: npm run commits:dividir" >&2; exit 1 ;;
+    esac
+  else
+    exit 1
+  fi
+elif [ "$rc" -ne 0 ]; then
+  exit "$rc"
+fi
+CLI="$ROOT/node_modules/@commitlint/cli/cli.js"
+if [ ! -f "$CLI" ]; then
+  echo "[uraqi-guard:commitlint] Falta commitlint: ejecuta 'npm install' en la raíz del repositorio." >&2
+  exit 1
+fi
+exec node "$CLI" --edit "$1"
