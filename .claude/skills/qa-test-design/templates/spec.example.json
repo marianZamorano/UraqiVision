@@ -1,0 +1,16 @@
+{
+  "feature": "Alta de recurso",
+  "fields": [
+    { "name": "name", "type": "string", "minLength": 3, "maxLength": 80, "required": true },
+    { "name": "contactEmail", "type": "email", "required": true },
+    { "name": "capacity", "type": "integer", "min": 1, "max": 500, "required": false },
+    { "name": "status", "type": "enum", "values": ["ACTIVE", "INACTIVE"] },
+    { "name": "startDate", "type": "date" }
+  ],
+  "rules": [
+    { "conditions": { "authenticated": false }, "outcome": "401" },
+    { "conditions": { "authenticated": true, "role": "viewer" }, "outcome": "403" },
+    { "conditions": { "authenticated": true, "role": "admin" }, "outcome": "201" }
+  ],
+  "pairwise": true
+}

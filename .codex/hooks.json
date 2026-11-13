@@ -1,0 +1,51 @@
+{
+  "description": "Generado por ai/sync.mjs — no editar a mano; edita la fuente (ai/ o .agents/skills/) y ejecuta `node ai/sync.mjs`.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ai/hooks/session-context.mjs --platform=codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ai/hooks/prompt-guard.mjs --platform=codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|apply_patch)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ai/hooks/pre-tool.mjs --platform=codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ai/hooks/post-edit.mjs --platform=codex",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

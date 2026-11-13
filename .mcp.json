@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "node",
+      "args": [
+        "ai/mcp/launch.mjs",
+        "playwright"
+      ]
+    },
+    "context7": {
+      "command": "node",
+      "args": [
+        "ai/mcp/launch.mjs",
+        "context7"
+      ]
+    },
+    "qa-evidence": {
+      "command": "node",
+      "args": [
+        "ai/qa/mcp-servers/qa-evidence/server.mjs"
+      ]
+    },
+    "devops-readiness": {
+      "command": "node",
+      "args": [
+        "ai/devops/mcp-servers/devops-readiness/server.mjs"
+      ]
+    }
+  }
+}

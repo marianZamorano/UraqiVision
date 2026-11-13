@@ -1,0 +1,91 @@
+{
+  "context": {
+    "fileName": [
+      "AGENTS.md"
+    ]
+  },
+  "mcpServers": {
+    "playwright": {
+      "command": "node",
+      "args": [
+        "ai/mcp/launch.mjs",
+        "playwright"
+      ],
+      "description": "Navegador automatizado para PS-07, PS-08 y PS-09. Solo contra localhost salvo aprobación explícita."
+    },
+    "context7": {
+      "command": "node",
+      "args": [
+        "ai/mcp/launch.mjs",
+        "context7"
+      ],
+      "description": "Documentación vigente de librerías (CesiumJS, MapLibre GL JS, react-i18next, rasterio, xarray...) para no inventar APIs. Solo lectura. CONTEXT7_API_KEY es opcional (sube el límite de uso)."
+    },
+    "qa-evidence": {
+      "command": "node",
+      "args": [
+        "ai/qa/mcp-servers/qa-evidence/server.mjs"
+      ],
+      "description": "Servidor propio de solo lectura (de chapterCoreIEEE): analiza resultados de pruebas JUnit, cobertura, esquemas JSON, contratos y quality gates dentro del repositorio. No ejecuta pruebas ni escribe archivos."
+    },
+    "devops-readiness": {
+      "command": "node",
+      "args": [
+        "ai/devops/mcp-servers/devops-readiness/server.mjs"
+      ],
+      "description": "Servidor propio de solo lectura (de chapterCoreIEEE): detecta el stack, revisa secretos por nombre, variables de entorno, planes gratuitos, preparación del despliegue y la política de aprobación de los agentes. No despliega ni modifica nada."
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "uraqi-contexto",
+            "command": "node ai/hooks/session-context.mjs --platform=gemini",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "uraqi-prompt",
+            "command": "node ai/hooks/prompt-guard.mjs --platform=gemini",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command|write_file|replace|read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "uraqi-guardas",
+            "command": "node ai/hooks/pre-tool.mjs --platform=gemini",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "uraqi-post-edit",
+            "command": "node ai/hooks/post-edit.mjs --platform=gemini",
+            "timeout": 15000
+          }
+        ]
+      }
+    ]
+  }
+}
