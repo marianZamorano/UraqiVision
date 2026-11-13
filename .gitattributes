@@ -1,0 +1,7 @@
+# Finales de línea LF en todas las plataformas (los hooks de git en sh fallan con CRLF).
+* text=auto eol=lf
+*.pdf binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.tif binary
