@@ -1,11 +1,11 @@
 // Estado de los issues según el avance de sus PR. Funciones puras (sin red); lo aplica ai/scripts/estado-issues.mjs.
 //
-// GitHub solo cierra issues con "Closes #N" al fusionar en la rama por defecto (main). Este flujo actualiza el
-// estado también en dev (integración) y qa (preproducción):
-//   PR abierta hacia dev      → estado: en revisión
-//   fusionada en dev          → estado: en dev
-//   fusionada en qa           → estado: en preproducción
-//   fusionada en main         → estado: en producción, y el issue se cierra
+// GitHub solo cierra issues con "Closes #N" al fusionar en la rama por defecto (main). Aquí el issue se cierra
+// al fusionar en dev (decisión del equipo, 13 nov 2026) y las etiquetas siguen el recorrido aunque esté cerrado:
+//   PR abierta hacia dev      → estado: en revisión            (solo issues abiertos)
+//   fusionada en dev          → estado: en dev, y el issue se cierra
+//   fusionada en qa           → estado: en preproducción       (aunque el issue esté cerrado)
+//   fusionada en main         → estado: en producción          (aunque el issue esté cerrado; lo cierra si seguía abierto)
 //   PR cerrada sin fusionar   → se quita estado: en revisión
 
 export const ETIQUETAS = Object.freeze({
@@ -31,11 +31,11 @@ export function transicion({ accion, fusionada, base, pr }) {
   }
   const destino = ETIQUETAS[base];
   const texto = {
-    dev: `Integrado en \`dev\` con la PR #${pr}.`,
+    dev: `Integrado en \`dev\` con la PR #${pr}. Se cierra el issue; la etiqueta de estado seguirá su paso a preproducción y producción.`,
     qa: `En preproducción: llegó a \`qa\` con la PR #${pr}.`,
-    main: `En producción: llegó a \`main\` con la PR #${pr}. Se cierra el issue.`,
+    main: `En producción: llegó a \`main\` con la PR #${pr}.`,
   }[base];
-  return { etiqueta: destino.nombre, quitar: NOMBRES.filter((n) => n !== destino.nombre), cerrar: base === 'main', comentario: texto };
+  return { etiqueta: destino.nombre, quitar: NOMBRES.filter((n) => n !== destino.nombre), cerrar: base === 'dev' || base === 'main', comentario: texto };
 }
 
 const REF = /(?:^|[\s(,:])#(\d+)\b|\bGH-(\d+)\b|\/issues\/(\d+)\b/gi;
@@ -47,12 +47,29 @@ export function extraerIssues(textos) {
   return [...numeros].sort((a, b) => a - b);
 }
 
+/**
+ * Issues que la PR declara en su título o descripción: solo los que van tras una palabra clave
+ * (Closes, Fixes, Resolves, Refs), para no confundir menciones en texto libre ("detecta el issue #1").
+ * Acepta listas: "Refs #3, #5 y #7".
+ */
+export function extraerIssuesDePR(texto) {
+  const numeros = new Set();
+  const re = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?|refs?)\b[\s:]*((?:#\d+(?:[\s,]+(?:y\s+|and\s+)?)?)+)/gi;
+  for (const m of String(texto ?? '').matchAll(re)) for (const n of m[1].matchAll(/#(\d+)/g)) numeros.add(Number(n[1]));
+  return [...numeros].sort((a, b) => a - b);
+}
+
 /** Commits que cuentan para la trazabilidad: sin los de merge (p. ej. "Merge pull request #2 from …"). */
 export function commitsDeTrabajo(commits) {
   return commits.filter((c) => (c.parents?.length ?? 1) < 2 && !/^Merge (pull request|branch) /.test(c.commit?.message ?? ''));
 }
 
-/** ¿Se modifica este issue? Un issue cerrado solo se toca para marcarlo en producción. */
+/**
+ * ¿Se modifica este issue? Las fusiones (dev, qa, main) actualizan también issues cerrados, para que la etiqueta
+ * siga el recorrido hasta producción. Marcar o desmarcar "en revisión" solo aplica a issues abiertos.
+ */
 export function debeActualizar(issueAbierto, t) {
-  return Boolean(t) && (issueAbierto || t.etiqueta === ETIQUETAS.main.nombre);
+  if (!t) return false;
+  const esFusion = [ETIQUETAS.dev.nombre, ETIQUETAS.qa.nombre, ETIQUETAS.main.nombre].includes(t.etiqueta);
+  return esFusion || issueAbierto;
 }
