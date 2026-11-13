@@ -1,0 +1,3 @@
+#!/bin/sh
+# Escaneo de secretos antes de cada commit (RNF-06, PS-06). Activar con: git config core.hooksPath .githooks
+exec node "$(git rev-parse --show-toplevel)/ai/hooks/git-pre-commit.mjs"
