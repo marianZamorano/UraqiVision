@@ -100,6 +100,9 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
     `npm run pr:aprobar -- N` y `npm run pr:fusionar -- N` (merge commit), siempre con la confirmación de la
     persona. Los hooks avisan solos de las PR que esperan su aprobación: cuando aparezca el aviso, díselo
     y ofrécele revisarlas.
+  - **Buenas prácticas de PR automáticas**: título en Conventional Commits (o `Promoción dev → qa: …`),
+    rama `tipo/N` que cierra su issue, descripción completa, sin conflictos ni secretos, archivos generados
+    al día y pruebas en verde; `gh pr create` siempre con `--base` y el par correcto. Solo merge commit.
   - **Issue → rama y PR automáticas**: al crear un issue, la automatización crea la rama `tipo/N-titulo`
     desde `dev` y una PR en borrador con `Closes #N`; trabaja en esa rama.
   - **Estado de los issues automático**: `en progreso` (PR en borrador) → `en revisión` (PR lista) →
