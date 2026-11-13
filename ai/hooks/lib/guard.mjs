@@ -3,6 +3,7 @@
 // Solo endurecen: nunca aprueban nada. Las aprobaciones ("ask") las dan los permisos nativos de cada
 // plataforma (.claude/settings.json, opencode.json, aprobaciones de Codex y Gemini).
 import path from 'node:path';
+import { prPermitida } from './buenas-practicas-pr.mjs';
 
 const NONE = Object.freeze({ decision: null, rule: null, reason: null });
 const deny = (rule, reason) => ({ decision: 'deny', rule, reason: `[uraqi-guard:${rule}] ${reason}` });
@@ -96,6 +97,22 @@ export function evaluateGitFlow(command, { branch } = {}) {
   const onProtected = PROTECTED_BRANCHES.includes(branch);
   for (const seg of segments(command)) {
     const t = tokens(seg);
+    // gh pr create: solo con destino explícito y el par origen → destino permitido (tipo/N → dev, dev → qa, qa → main).
+    const gh = t.findIndex((x) => x === 'gh');
+    if (gh >= 0 && t[gh + 1] === 'pr' && t[gh + 2] === 'create') {
+      const opcion = (...nombres) => {
+        for (let i = gh + 3; i < t.length; i += 1) {
+          for (const n of nombres) {
+            if (t[i] === n) return t[i + 1];
+            if (t[i].startsWith(`${n}=`)) return t[i].slice(n.length + 1);
+          }
+        }
+        return undefined;
+      };
+      const r = prPermitida(opcion('--base', '-B'), opcion('--head', '-H') ?? branch);
+      if (!r.ok) return deny('pr-destino', `${r.motivo} Flujo: tipo/N → dev, dev → qa, qa → main (skill flujo-issues-y-pr).`);
+      continue;
+    }
     const gi = t.findIndex((x) => x === 'git');
     if (gi < 0) continue;
     const sub = t.slice(gi + 1).find((x) => !x.startsWith('-'));
@@ -111,7 +128,7 @@ export function evaluateGitFlow(command, { branch } = {}) {
         return deny('push-from-protected', `Estás en ${branch} y este push la subiría directamente: crea una rama con \`git switch -c tipo/N-descripcion\` y haz push de esa rama.`);
       }
     }
-    if (sub === 'merge' && onProtected && !args.includes('--abort')) {
+    if (sub === 'merge' && onProtected && !args.includes('--abort') && t[gi] === 'git') {
       return deny('merge-into-protected', `Merge local en ${branch}: los merges a dev, qa y main se hacen en GitHub al aprobar la PR (skill flujo-issues-y-pr).`);
     }
   }

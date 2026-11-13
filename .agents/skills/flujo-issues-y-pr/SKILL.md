@@ -94,6 +94,28 @@ el commit, el push o la PR se rechazan con el motivo.
    `node ai/scripts/issues-de-promocion.mjs dev qa` (o `qa main`) y pégala en la descripción. Antes de
    la PR a `main`, el subagente `release-readiness-reviewer` da su veredicto.
 
+## Buenas prácticas de PR (automáticas)
+
+El workflow `Buenas prácticas de PR` (reglas en `ai/hooks/lib/buenas-practicas-pr.mjs`) revisa cada PR hacia
+`dev`, `qa` o `main` y deja un comentario de resumen que se actualiza solo:
+
+| Revisa | Regla | ¿Bloquea? |
+|---|---|---|
+| Título | Trabajo: Conventional Commits (`feat(mapa): …`). Promoción: `Promoción dev → qa: …` o `Promoción qa → main: …` | Sí |
+| Rama | Hacia `dev`: `tipo/N-descripcion` en minúsculas, y la PR cierra ese issue #N | Sí |
+| Descripción | Secciones «Issues», «Qué cambia» y «Cómo se verificó» completas, sin `(completar)` | Sí, salvo en borrador |
+| Referencias | Cada `Closes`/`Refs #N` es un issue que existe, no una PR | Sí |
+| Conflictos | Sin conflictos con la rama destino; aviso si está desactualizada | Sí / aviso |
+| Secretos | Ninguna línea agregada con claves | Sí |
+| Calidad | `node ai/sync.mjs --check` y `npm run test:guardas` en verde | Sí |
+| Tamaño | Aviso si una PR de trabajo supera 800 líneas o 40 archivos (sin generados) | Aviso |
+
+También pone etiquetas `tipo: …` y `tamaño: XS…XL`, asigna la PR a su autor y, al fusionar, **borra la rama de
+trabajo** (nunca `dev`, `qa` ni `main`). En GitHub solo se permite fusionar con **merge commit**.
+
+Guarda local: `gh pr create` exige `--base` (sin él, gh apunta a `main`) y solo acepta `tipo/N → dev`,
+`dev → qa` y `qa → main`.
+
 ## Estado automático de los issues
 
 El workflow `Estado de issues` (reglas en `ai/hooks/lib/estado-issues.mjs`) actualiza cada issue citado en la
