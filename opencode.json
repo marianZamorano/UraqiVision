@@ -43,7 +43,11 @@
       "git push -f*": "deny",
       "git reset --hard*": "deny",
       "npm publish*": "deny",
-      "vercel*": "ask"
+      "vercel*": "ask",
+      "npm run pr:aprobar*": "ask",
+      "npm run pr:fusionar*": "ask",
+      "node ai/scripts/prs.mjs aprobar*": "ask",
+      "node ai/scripts/prs.mjs fusionar*": "ask"
     }
   }
 }

@@ -44,7 +44,7 @@
             "type": "command",
             "name": "uraqi-contexto",
             "command": "node ai/hooks/session-context.mjs --platform=gemini",
-            "timeout": 10000
+            "timeout": 30000
           }
         ]
       }
@@ -56,7 +56,7 @@
             "type": "command",
             "name": "uraqi-prompt",
             "command": "node ai/hooks/prompt-guard.mjs --platform=gemini",
-            "timeout": 10000
+            "timeout": 30000
           }
         ]
       }

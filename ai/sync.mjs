@@ -239,11 +239,17 @@ emit(path.join('.claude', 'settings.json'), json({
       'Bash(git push *)', 'PowerShell(git push *)',
       'Bash(vercel *)', 'PowerShell(vercel *)',
       'Bash(gh release *)', 'Bash(gh pr merge *)',
+      // Aprobar y fusionar PR: Claude pide permiso a la persona antes de ejecutarlos.
+      'Bash(npm run pr:aprobar*)', 'PowerShell(npm run pr:aprobar*)',
+      'Bash(npm run pr:fusionar*)', 'PowerShell(npm run pr:fusionar*)',
+      'Bash(node ai/scripts/prs.mjs aprobar*)', 'PowerShell(node ai/scripts/prs.mjs aprobar*)',
+      'Bash(node ai/scripts/prs.mjs fusionar*)', 'PowerShell(node ai/scripts/prs.mjs fusionar*)',
     ],
   },
   hooks: {
-    SessionStart: [{ hooks: [{ type: 'command', command: claudeHook('session-context.mjs'), timeout: 10 }] }],
-    UserPromptSubmit: [{ hooks: [{ type: 'command', command: claudeHook('prompt-guard.mjs'), timeout: 10 }] }],
+    // Inicio y mensajes consultan GitHub para avisar de PR pendientes: margen de tiempo para la red.
+    SessionStart: [{ hooks: [{ type: 'command', command: claudeHook('session-context.mjs'), timeout: 30 }] }],
+    UserPromptSubmit: [{ hooks: [{ type: 'command', command: claudeHook('prompt-guard.mjs'), timeout: 30 }] }],
     PreToolUse: [{
       matcher: 'Bash|PowerShell|Write|Edit|MultiEdit|NotebookEdit|Read',
       hooks: [{ type: 'command', command: claudeHook('pre-tool.mjs'), timeout: 10 }],
@@ -258,8 +264,8 @@ emit(path.join('.claude', 'settings.json'), json({
 emit(path.join('.codex', 'hooks.json'), json({
   description: GEN,
   hooks: {
-    SessionStart: [{ hooks: [{ type: 'command', command: hook('session-context.mjs', 'codex'), timeout: 10 }] }],
-    UserPromptSubmit: [{ hooks: [{ type: 'command', command: hook('prompt-guard.mjs', 'codex'), timeout: 10 }] }],
+    SessionStart: [{ hooks: [{ type: 'command', command: hook('session-context.mjs', 'codex'), timeout: 30 }] }],
+    UserPromptSubmit: [{ hooks: [{ type: 'command', command: hook('prompt-guard.mjs', 'codex'), timeout: 30 }] }],
     PreToolUse: [{ matcher: '^(Bash|apply_patch)$', hooks: [{ type: 'command', command: hook('pre-tool.mjs', 'codex'), timeout: 10 }] }],
     PostToolUse: [{ matcher: '^apply_patch$', hooks: [{ type: 'command', command: hook('post-edit.mjs', 'codex'), timeout: 15 }] }],
   },
@@ -273,8 +279,8 @@ emit(path.join('.gemini', 'settings.json'), json({
     description: mcp[n].description,
   }])),
   hooks: {
-    SessionStart: [{ hooks: [{ type: 'command', name: 'uraqi-contexto', command: hook('session-context.mjs', 'gemini'), timeout: 10000 }] }],
-    BeforeAgent: [{ hooks: [{ type: 'command', name: 'uraqi-prompt', command: hook('prompt-guard.mjs', 'gemini'), timeout: 10000 }] }],
+    SessionStart: [{ hooks: [{ type: 'command', name: 'uraqi-contexto', command: hook('session-context.mjs', 'gemini'), timeout: 30000 }] }],
+    BeforeAgent: [{ hooks: [{ type: 'command', name: 'uraqi-prompt', command: hook('prompt-guard.mjs', 'gemini'), timeout: 30000 }] }],
     BeforeTool: [{
       matcher: 'run_shell_command|write_file|replace|read_file',
       hooks: [{ type: 'command', name: 'uraqi-guardas', command: hook('pre-tool.mjs', 'gemini'), timeout: 10000 }],
@@ -297,6 +303,10 @@ emit('opencode.json', json({
       'git reset --hard*': 'deny',
       'npm publish*': 'deny',
       'vercel*': 'ask',
+      'npm run pr:aprobar*': 'ask',
+      'npm run pr:fusionar*': 'ask',
+      'node ai/scripts/prs.mjs aprobar*': 'ask',
+      'node ai/scripts/prs.mjs fusionar*': 'ask',
     },
   },
 }));
@@ -305,10 +315,11 @@ emit(path.join('.opencode', 'plugins', 'uraqi-guardas.js'), `// ${GEN}
 // Plugin de opencode: aplica las guardas compartidas de ai/hooks/lib/guard.mjs antes de cada herramienta.
 // Lanzar un error bloquea la herramienta. Las aprobaciones ("ask") las resuelve "permission" de opencode.json.
 import { evaluateTool, evaluatePrompt } from '../../ai/hooks/lib/guard.mjs';
+import { currentBranch } from '../../ai/hooks/lib/git.mjs';
 
 export const UraqiGuardas = async ({ directory }) => ({
   'tool.execute.before': async (input, output) => {
-    const result = evaluateTool(input.tool, output.args ?? {}, directory);
+    const result = evaluateTool(input.tool, output.args ?? {}, directory, { branch: currentBranch(directory) });
     if (result.decision === 'deny') throw new Error(result.reason);
   },
   'chat.message': async (_input, output) => {
