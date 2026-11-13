@@ -221,7 +221,9 @@ desde la rama por defecto (`main`): hasta que los workflows lleguen a `main` por
 - **Validada**: el sync falla si la plantilla cita un `npm run`, un `node ai/…` o una ruta que no existen, o si
   un script de `package.json` no tiene su descripción en `uraqi.scripts`.
 - **Hook pre-commit**: si el commit toca una fuente y la ayuda o los generados quedaron viejos, lo bloquea
-  (`[uraqi-guard:ayuda-desactualizada]`) y pide `npm run ai:sync`.
+  (`[uraqi-guard:ayuda-desactualizada]`) y pide `npm run ai:sync`. Si ya están regenerados pero sin agregar,
+  avisa (así se pueden dividir los commits por tema).
+- **Hook pre-push**: bloquea el push mientras queden archivos generados sin commitear.
 - **Hook de los asistentes tras editar** (`ai/hooks/post-edit.mjs`): avisa al asistente si edita este README a
   mano, porque el siguiente sync lo pisa.
 - **CI**: el workflow Buenas prácticas de PR ejecuta `node ai/sync.mjs --check` en cada PR; las pruebas de
