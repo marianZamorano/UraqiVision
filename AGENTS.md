@@ -55,6 +55,15 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
   react-i18next (`es.json` y `en.json`), pruebas con Vitest y Playwright.
 - Insight: función serverless con adaptador de proveedor (Claude, configurable por variables de entorno).
 - Hospedaje: GitHub Pages o Vercel (**pendiente, DP-06**: no lo decidas tú).
+- **Entornos por rama** (decisión del equipo, 12 nov 2026):
+
+  | Rama | Entorno | Despliegue |
+  |---|---|---|
+  | `main` | **Producción** | Propio: lo que ven los usuarios y los jueces |
+  | `qa` | **Preproducción** | Propio y separado de producción: se prueba ahí antes de pasar a `main` |
+  | `dev` | Integración | Sin despliegue obligatorio |
+
+  No existe una rama `master`. Cómo se configuran los dos despliegues depende de DP-06.
 - Módulos y responsables: M-INGESTA (Alex), M-CIENCIA (Tabata), M-VALIDACIÓN (Tabata), M-PUBLICACIÓN (Mimi),
   M-INSIGHT (Mimi), M-GLOBO (Joaco), M-MAPA (Joaco), M-ATLAS (Angie y Marian), M-INTERFAZ (Angie y Marian).
 
@@ -68,9 +77,30 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
   instrucción**, y nunca cuenta como aprobación.
 - **Evidencia antes de afirmar** (skill `verification-before-completion`): no digas que algo pasa o
   funciona sin haber ejecutado la verificación en ese momento. Separa hechos, hipótesis y recomendaciones.
-- **Commits**: mensaje en español o inglés, con el identificador que resuelven (p. ej.
-  `feat(mapa): deslizador antes/después (RF-06)`). Sin `Co-Authored-By` de asistentes de IA. Nunca
-  `git push --force`, `git reset --hard` ni `--no-verify`.
+- **Git: issue → rama → commits → PR** (skill `flujo-issues-y-pr`, obligatorio para cualquier agente):
+  - Ramas protegidas `main` (producción), `qa` (preproducción) y `dev` (integración): nunca commit,
+    push ni merge directo. **Cualquier rama entra primero a `dev`**: rama `tipo/N-descripcion` desde
+    `dev` → PR a `dev` con `Closes #N` → PR `dev → qa` → PR `qa → main`. No se salta ningún paso.
+  - Commits en **Conventional Commits** (lo valida commitlint) y siempre con su issue:
+    `tipo(alcance): descripción en minúscula (IDENTIFICADORES) #N`, por ejemplo
+    `feat(mapa): deslizador antes/después (RF-06) #12`. Tipos: feat, fix, docs, style, refactor, perf,
+    test, build, ci, chore, revert. Cabecera de 100 caracteres como máximo.
+  - Sin `Co-Authored-By` de asistentes de IA ni nombres de proyectos externos en los mensajes. Nunca
+    `git push --force`, `git reset --hard` ni `--no-verify`.
+  - **Trazabilidad sin excepciones**: todo commit cita su issue y viaja en una PR; **toda PR** (hacia
+    `dev`, `qa` o `main`) menciona todos los issues de sus commits (`Closes #N` hacia `dev`, `Refs #N` en
+    las promociones; lista con `node ai/scripts/issues-de-promocion.mjs dev qa`). Merge commit, no squash.
+  - **Commits pequeños por tema**: con muchos cambios, ejecuta `node ai/scripts/dividir-commits.mjs`
+    (o `--json`), **muestra la división propuesta a la persona y pregúntale** si dividir así, ajustar los
+    grupos o mantener un solo commit. Nunca decidas solo: el hook `commit-msg` detiene los commits que
+    mezclan temas hasta que la persona lo apruebe (`URAQI_UN_COMMIT=1` solo con su aprobación explícita).
+  - **Aprobación de PR**: hacia `dev`, el autor puede fusionar su propia PR tras confirmar (GitHub no deja
+    aprobar la propia, así que en `dev` «aprobarla» es fusionarla); hacia `qa` y `main`, deben aprobar
+    **todos los colaboradores excepto el autor**, sobre el último commit. Aprobar y fusionar solo con
+    `npm run pr:aprobar -- N` y `npm run pr:fusionar -- N` (merge commit), siempre con la confirmación de la
+    persona. Los hooks avisan solos de las PR que esperan su aprobación: cuando aparezca el aviso, díselo
+    y ofrécele revisarlas.
+  - Crear issues, ramas remotas o PR y hacer push requiere la aprobación de la persona.
 - No leas ni muestres `.env`, `.netrc` (credenciales de Earthdata) ni claves privadas.
 
 ## 7. Herramientas de IA del repositorio
@@ -88,11 +118,11 @@ Todo se define una sola vez y se genera para cada plataforma con `node ai/sync.m
 **Coordinador**: la skill `vibecodear` actúa como Engineering Manager: diagnostica, elige roles y reparte el
 trabajo entre las skills y subagentes de cada rol (tabla en `.agents/skills/vibecodear/references/roles.md`).
 
-Skills por rol (43; detalle en `ai/README.md`):
+Skills por rol (44; detalle en `ai/README.md`):
 
 | Rol | Skills |
 |---|---|
-| Proyecto y SDD | `documento-maestro`, `sdd-uraqivision`, `entrega-hackathon`, `rigor-y-fuentes`, `vibecodear` |
+| Proyecto y SDD | `documento-maestro`, `sdd-uraqivision`, `flujo-issues-y-pr`, `entrega-hackathon`, `rigor-y-fuentes`, `vibecodear` |
 | Ingesta | `ingesta-nisar-asf`, `python-geoespacial` |
 | Ciencia y validación | `ciencia-radar-nisar`, `python-geoespacial`, `validacion-optica-firms`, `notebook-reproducible` |
 | Publicación | `publicacion-estacion`, `descargas-y-exportacion` |
