@@ -4,7 +4,7 @@
 // En GitHub Actions lo ejecuta el workflow "Estado de issues" con la acción del evento. En local sirve para
 // sincronizar una PR ya fusionada (deduce la acción de su estado) o, con --simular, para ver qué haría.
 import { repoSlug, api } from '../hooks/lib/github.mjs';
-import { ETIQUETAS, transicion, extraerIssues, commitsDeTrabajo, debeActualizar } from '../hooks/lib/estado-issues.mjs';
+import { ETIQUETAS, transicion, extraerIssues, extraerIssuesDePR, commitsDeTrabajo, debeActualizar } from '../hooks/lib/estado-issues.mjs';
 
 const args = process.argv.slice(2);
 const valor = (f) => (args.includes(f) ? args[args.indexOf(f) + 1] : undefined);
@@ -25,7 +25,11 @@ if (!t) {
 }
 
 const commits = commitsDeTrabajo(await api(`repos/${slug}/pulls/${numero}/commits?per_page=100`));
-const candidatos = extraerIssues([pr.title, pr.body, ...commits.map((c) => c.commit.message)]).filter((n) => n !== numero);
+// De la PR, solo los issues tras una palabra clave; de los commits, cualquier #N (cada commit cita su issue).
+const candidatos = [...new Set([
+  ...extraerIssuesDePR(`${pr.title}\n${pr.body ?? ''}`),
+  ...extraerIssues(commits.map((c) => c.commit.message)),
+])].filter((n) => n !== numero).sort((a, b) => a - b);
 
 async function asegurarEtiquetas() {
   const existentes = new Set((await api(`repos/${slug}/labels?per_page=100`)).map((l) => l.name));
