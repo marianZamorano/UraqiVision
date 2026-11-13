@@ -12,7 +12,7 @@
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { findSecrets, isSecretPath, PROTECTED_BRANCHES } from './lib/guard.mjs';
-import { currentBranch } from './lib/git.mjs';
+import { currentBranch, generadosSinCommitear } from './lib/git.mjs';
 import { clasificar, compararClaves, sensiblesConValor, mensajePausa, parseClaves } from './lib/entorno.mjs';
 import { permitidos, revisar, compartir, clavesEn } from './lib/entorno-git.mjs';
 
@@ -77,18 +77,17 @@ if (problems.length) {
 }
 
 // Ayuda (ai/README.md) y configuración generada al día: si el commit toca una fuente, ai/sync.mjs --check debe pasar
-// y lo regenerado debe ir en el commit. ai/README.md lo genera ai/sync.mjs desde ai/docs/README.plantilla.md.
+// (BLOQUEA). Si lo regenerado aún no está agregado, solo AVISA: así se pueden dividir los commits por tema; el hook
+// pre-push impide subir la rama con generados sin commitear. ai/README.md sale de ai/docs/README.plantilla.md.
 const FUENTES = /^(\.agents\/skills\/|ai\/|\.githooks\/|\.github\/workflows\/|\.specify\/|specs\/|package\.json$|\.claude\/|\.gemini\/|\.codex\/|\.opencode\/|\.mcp\.json$|opencode\.json$)/;
-const GENERADOS = ['ai/README.md', '.claude', '.gemini', '.codex', '.opencode', '.mcp.json', 'opencode.json'];
 if (git('diff', '--cached', '--name-only').split('\n').some((f) => FUENTES.test(f))) {
   const root = git('rev-parse', '--show-toplevel').trim();
   const r = spawnSync(process.execPath, [path.join(root, 'ai', 'sync.mjs'), '--check'], { cwd: root, encoding: 'utf8' });
-  const sinAgregar = git('diff', '--name-only', '--', ...GENERADOS).split('\n').filter(Boolean);
-  if (r.status !== 0 || sinAgregar.length) {
-    const detalle = r.status !== 0
-      ? `${r.stdout ?? ''}${r.stderr ?? ''}`.split('\n').filter((l) => /desactualizado|sobra|no se puede generar|^- /.test(l)).slice(0, 12)
-      : sinAgregar.map((f) => `regenerado pero sin agregar al commit: ${f}`);
-    process.stderr.write(`[uraqi-guard:ayuda-desactualizada] Commit bloqueado: ai/README.md (la ayuda) o la configuración generada no están al día con las fuentes de este commit.\n- ${detalle.join('\n- ')}\nEjecuta \`npm run ai:sync\`, revisa el resultado y agrégalo (git add ai/README.md .claude .gemini .codex .opencode .mcp.json opencode.json).\n`);
+  if (r.status !== 0) {
+    const detalle = `${r.stdout ?? ''}${r.stderr ?? ''}`.split('\n').filter((l) => /desactualizado|sobra|no se puede generar|^- /.test(l)).slice(0, 12);
+    process.stderr.write(`[uraqi-guard:ayuda-desactualizada] Commit bloqueado: ai/README.md (la ayuda) o la configuración generada no están al día con las fuentes.\n- ${detalle.join('\n- ')}\nEjecuta \`npm run ai:sync\`, revisa el resultado y agrégalo al commit.\n`);
     process.exit(1);
   }
+  const sinAgregar = generadosSinCommitear(root, { soloSinAgregar: true });
+  if (sinAgregar.length) process.stderr.write(`[uraqi] Aviso: hay archivos regenerados sin agregar (${sinAgregar.slice(0, 5).join(', ')}${sinAgregar.length > 5 ? ', …' : ''}). Inclúyelos en este commit o en uno siguiente: el push se bloquea mientras falten.\n`);
 }
