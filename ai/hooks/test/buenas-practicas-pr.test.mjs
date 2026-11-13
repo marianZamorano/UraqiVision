@@ -1,7 +1,7 @@
 // Pruebas de las buenas prácticas de PR. Ejecutar: node --test ai/hooks/test/buenas-practicas-pr.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluarPR, tamano, esGenerado, secciones, extraerCierres, ramaBorrable, prPermitida } from '../lib/buenas-practicas-pr.mjs';
+import { evaluarPR, tamano, esGenerado, secciones, extraerCierres, prPermitida } from '../lib/buenas-practicas-pr.mjs';
 import { evaluateTool } from '../lib/guard.mjs';
 
 const cuerpoOk = '## Issues\n\nCloses #12\n\n## Qué cambia\n\n- Agrega el workflow.\n\n## Cómo se verificó\n\n- npm test en verde.\n';
@@ -62,11 +62,9 @@ test('tamaño: sin contar archivos generados; aviso en PR grandes', () => {
   assert.ok(r.avisos.some((a) => a.includes('PR grande')));
 });
 
-test('auxiliares: secciones, cierres, rama borrable y pares permitidos', () => {
+test('auxiliares: secciones, cierres y pares permitidos', () => {
   assert.equal(secciones('## Qué cambia\n<!-- nota -->\n- algo\n')['qué cambia'].trim(), '- algo');
   assert.deepEqual(extraerCierres('Closes #3, #5 y Refs #9\nFixes: #7'), [3, 5, 7]);
-  assert.equal(ramaBorrable('feat/12-x'), true);
-  assert.equal(ramaBorrable('dev'), false);
   assert.equal(prPermitida('dev', 'feat/1-x').ok, true);
   assert.equal(prPermitida('qa', 'dev').ok, true);
   assert.equal(prPermitida('main', 'qa').ok, true);

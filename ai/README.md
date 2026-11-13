@@ -136,10 +136,12 @@ para `git push` y `vercel` (Claude y opencode).
 
 | Hook | Qué hace |
 |---|---|
-| `pre-commit` | Bloquea commits en `dev`, `qa` o `main` y archivos o líneas con secretos (RNF-06) |
+| `pre-commit` | Bloquea commits en `dev`, `qa` o `main`, archivos o líneas con secretos (RNF-06), archivos `.env*` no permitidos y `.env` ≠ `.env.example` en estructura; si cambia la estructura de una plantilla, **pausa** para comunicarlo (copia el `.env` a Descargas) |
 | `prepare-commit-msg` | En ramas `tipo/N-descripcion` agrega `Refs #N` al mensaje |
 | `commit-msg` | Bloquea commits sin issue (`#N`) y valida Conventional Commits con commitlint (`commitlint.config.mjs`); detecta commits que mezclan temas (3+ grupos, o 2 grupos con 8+ archivos), muestra la división propuesta y **pregunta** (en terminal `[s/N]`; sin terminal se detiene hasta que la persona decida); avisa si falta un identificador o hay `Co-Authored-By` de IA |
 | `pre-push` | Bloquea el push a `dev`, `qa` o `main` y los commits sin issue; avisa si la rama no sigue `tipo/N-descripcion` |
+| `post-checkout` | Sube toda rama nueva a origin; si cambió `.env.example`, agrega al `.env` las claves nuevas vacías |
+| `post-merge` | Tras un pull o merge, si cambió `.env.example`, agrega al `.env` las claves nuevas vacías y avisa qué pedir |
 
 Requisitos: `npm install` en la raíz (instala commitlint 21.2.4) y `npm run hooks:activar`.
 
@@ -167,8 +169,20 @@ a la persona y solo entonces aplican con `--aplicar --si`. Un solo commit grande
   (creado al abrir la PR). Sin aprobación completa no cambia ningún estado. Simular: `npm run issues:estado -- --pr N --simular`.
 - **Buenas prácticas de PR** (`.github/workflows/buenas-practicas-pr.yml`, reglas en
   `ai/hooks/lib/buenas-practicas-pr.mjs`): título, rama, descripción, referencias, conflictos, secretos, archivos
-  generados y pruebas; etiquetas de tipo y tamaño, autor asignado, comentario de resumen y borrado de la rama de
-  trabajo al fusionar. Simular: `node ai/scripts/buenas-practicas-pr.mjs --pr N --simular`.
+  generados y pruebas; etiquetas de tipo y tamaño, autor asignado y comentario de resumen. Las ramas **nunca** se
+  borran al fusionar: son parte de la trazabilidad. Simular: `node ai/scripts/buenas-practicas-pr.mjs --pr N --simular`.
+- **Ramas**: toda rama nueva se sube sola (hook `post-checkout`); las guardas impiden a los asistentes borrar ramas
+  locales o remotas. Solo una persona decide borrar una rama, si crea confusión o su código ya no sirve.
+- **Entorno** (`ai/scripts/entorno.mjs`, reglas en `ai/hooks/lib/entorno.mjs`): solo `.env` (local) y
+  `.env.example` (versionado, misma estructura, claves sensibles vacías); otros `.env.<x>` solo si son
+  imprescindibles, declarados en `package.json` → `uraqi.envPermitidos` con su `.example`.
+  - `npm run env:check` revisa archivos y estructura; `npm run env:sync` crea o alinea el `.env` sin leer ni
+    mostrar valores (es la forma en que los asistentes lo generan); `npm run env:compartir` copia el `.env` a
+    Descargas para compartirlo.
+  - Si un commit cambia la estructura de una plantilla: **pausa** obligatoria para comunicarlo al equipo (el
+    `.env` se copia a Descargas); tras comunicarlo, `URAQI_ENV_COMUNICADO=1 git commit …`.
+  - Workflow `Entorno`: en la PR menciona a los colaboradores con las claves nuevas y eliminadas. Al hacer pull
+    o cambiar de rama (hooks `post-merge` y `post-checkout`), el `.env` local recibe las claves nuevas vacías.
 - **Issue a PR** (`.github/workflows/issue-a-pr.yml`, `ai/scripts/issue-a-pr.mjs`): al crear un issue de trabajo
   crea la rama `tipo/N-titulo` desde `dev` y una PR en borrador hacia `dev` con `Closes #N`.
 - **Protección de issues** (`.github/workflows/proteger-issues.yml`, `ai/scripts/proteger-issues.mjs`): revierte

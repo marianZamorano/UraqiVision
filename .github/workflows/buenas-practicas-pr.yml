@@ -1,22 +1,22 @@
 # Buenas prácticas de PR hacia dev, qa y main (reglas en ai/hooks/lib/buenas-practicas-pr.mjs):
 # título (Conventional Commits o "Promoción dev → qa"), rama tipo/N que cierra su issue, descripción completa
 # (salvo borrador), issues válidos, sin conflictos ni secretos, archivos generados al día y pruebas en verde.
-# Pone etiquetas de tipo y tamaño, asigna al autor, comenta un resumen y, al fusionar, borra la rama de trabajo.
+# Pone etiquetas de tipo y tamaño, asigna al autor y comenta un resumen.
+# Las ramas NUNCA se borran al fusionar: son parte de la trazabilidad.
 name: Buenas prácticas de PR
 
 on:
   pull_request:
     branches: [dev, qa, main]
-    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft, closed]
+    types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
 
 permissions:
-  contents: write
+  contents: read
   issues: write
   pull-requests: write
 
 jobs:
   buenas-practicas:
-    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,19 +42,3 @@ jobs:
 
       - name: Pruebas de las guardas y automatizaciones
         run: npm run -s test:guardas
-
-  limpiar-rama:
-    if: github.event.action == 'closed' && github.event.pull_request.merged
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Borrar la rama de trabajo fusionada
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: node ai/scripts/buenas-practicas-pr.mjs --pr "$PR_NUMBER" --borrar-rama

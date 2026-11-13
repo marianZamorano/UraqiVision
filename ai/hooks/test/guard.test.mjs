@@ -15,9 +15,32 @@ test('detecta secretos de alta confianza y no marca texto normal', () => {
   assert.deepEqual(findSecrets('HV en dB menos la línea base'), []);
 });
 
-test('rutas con secretos: .env y .netrc sí, plantillas no', () => {
-  for (const p of ['.env', 'web/.env.local', '.netrc', '_netrc', 'certs/server.pem', 'id_rsa']) assert.ok(isSecretPath(p), p);
-  for (const p of ['.env.example', 'web/.env.sample', 'src/env.ts', 'id_rsa.pub', 'README.md']) assert.ok(!isSecretPath(p), p);
+test('rutas con secretos: .env y .netrc sí; solo .env.example como plantilla', () => {
+  for (const p of ['.env', 'web/.env.local', '.env.sample', '.env.template', '.netrc', '_netrc', 'certs/server.pem', 'id_rsa']) assert.ok(isSecretPath(p), p);
+  for (const p of ['.env.example', '.env.test.example', 'src/env.ts', 'id_rsa.pub', 'README.md']) assert.ok(!isSecretPath(p), p);
+});
+
+test('entorno: los asistentes no escriben .env a mano; .env.example sí, sin secretos', () => {
+  const r = evaluateTool('Write', { file_path: '.env', content: 'A=' });
+  assert.equal(r.decision, 'deny');
+  assert.match(r.reason, /npm run env:sync/);
+  assert.ok(denied(evaluateTool('Write', { file_path: '.env.local', content: 'A=' })));
+  assert.equal(evaluateTool('Write', { file_path: '.env.example', content: 'INSIGHT_API_KEY=\nPORT=5173' }).decision, null);
+});
+
+test('lectura de secretos: sin falsos positivos con opciones --head ni menciones en texto', () => {
+  assert.equal(evaluateTool('Bash', { command: 'gh pr create --base dev --head feat/14-x --title "gestión del .env (#15)"' }, undefined, { branch: 'feat/14-x' }).decision, null);
+  assert.ok(denied(evaluateTool('Bash', { command: 'head -n 5 .env' })));
+  assert.ok(denied(evaluateTool('PowerShell', { command: 'Get-Content .env | Select -First 2' })));
+});
+
+test('ramas: borrar está prohibido para los asistentes', () => {
+  for (const command of ['git branch -d feat/1-x', 'git branch -D feat/1-x', 'git branch --delete x', 'git push origin --delete feat/1-x', 'git push origin -d feat/1-x', 'git push origin :feat/1-x', 'gh api repos/o/r/git/refs/heads/feat/1-x -X DELETE']) {
+    assert.ok(denied(evaluateTool('Bash', { command }, undefined, { branch: 'feat/2-y' })), command);
+  }
+  for (const command of ['git branch', 'git branch -vv', 'git branch --track feat/1-x origin/feat/1-x', 'git push -u origin feat/2-y']) {
+    assert.equal(evaluateTool('Bash', { command }, undefined, { branch: 'feat/2-y' }).decision, null, command);
+  }
 });
 
 test('comandos destructivos se bloquean en todas las plataformas', () => {
@@ -34,7 +57,7 @@ test('comandos destructivos se bloquean en todas las plataformas', () => {
 });
 
 test('comandos normales pasan', () => {
-  for (const command of ['git status', 'git push origin 001-pipeline-estacion', 'npm test', 'pytest -q', 'cat .env.example', 'rm -rf build/', 'git commit -m "feat: deslizador (RF-06)"']) {
+  for (const command of ['git status', 'git push origin 001-pipeline-estacion', 'npm test', 'pytest -q', 'cat .env.example', 'rm -rf build/', 'git commit -m "feat: deslizador (RF-06)"', 'npm run env:sync']) {
     assert.equal(evaluateTool('Bash', { command }).decision, null, command);
   }
 });
@@ -44,7 +67,7 @@ test('escrituras: rutas protegidas y contenido con secretos', () => {
   assert.ok(denied(evaluateTool('write_file', { file_path: 'docs/UraqiVisionDocumentoMaestrov1.0.pdf', content: '' })));
   assert.ok(denied(evaluateTool('edit', { filePath: 'src/insight.ts', newString: `const k = "${FAKE_ANTHROPIC}"` })));
   assert.ok(denied(evaluateTool('replace', { file_path: '.git/config', old_string: 'a', new_string: 'b' })));
-  assert.equal(evaluateTool('Write', { file_path: '.env.example', content: 'INSIGHT_API_KEY=' }).decision, null);
+  assert.equal(evaluateTool('Write', { file_path: '.env.example', content: 'X_API_KEY=' }).decision, null);
   assert.equal(evaluateTool('Edit', { file_path: 'web/src/App.tsx', new_string: 'export {}' }).decision, null);
 });
 

@@ -30,7 +30,8 @@ export function findSecrets(text) {
 
 // ------------------------------------------------------------------ Rutas
 
-const ENV_TEMPLATE = /^\.env\.(example|sample|template)$/i;
+// Única plantilla de entorno: .env.example (y .env.<x>.example de los entornos declarados en uraqi.envPermitidos).
+const ENV_TEMPLATE = /^\.env(\.[\w-]+)?\.example$/i;
 
 /** Archivos cuyo contenido no debe llegar al modelo ni modificarse desde un agente. */
 export function isSecretPath(p) {
@@ -68,9 +69,11 @@ export const SHELL_DENY = [
   { id: 'rm-root', re: new RegExp(String.raw`\brm\s+(?:-[a-zA-Z]*\s+)*-[a-zA-Z]*(?:rf|fr)[a-zA-Z]*\s+(?:--\s+)?${ROOTISH}(?:\s|$|;|&|\|)`, 'i'), why: 'Borrado recursivo de la raíz, del home o con comodín' },
   { id: 'remove-item-root', re: new RegExp(String.raw`Remove-Item\b[^;|&\n]*-Recurse[^;|&\n]*\s${ROOTISH}(?:\s|$)`, 'i'), why: 'Borrado recursivo de la raíz o del home' },
   { id: 'remote-code-exec', re: /\b(?:curl|wget|iwr|Invoke-WebRequest|irm|Invoke-RestMethod)\b[^\n;]*\|\s*(?:sudo\s+)?(?:sh|bash|zsh|python3?|node|pwsh|powershell|iex|Invoke-Expression)\b|\biex\s*\(\s*(?:iwr|irm|New-Object\s+Net\.WebClient)/i, why: 'Descarga y ejecuta código remoto' },
-  { id: 'secret-file-read', re: new RegExp(String.raw`\b(?:cat|type|more|less|head|tail|Get-Content|gc|bat|xxd|strings|base64|cp|copy|scp|Copy-Item)\b[^;&|\n]*${SECRET_FILE_IN_CMD}`, 'i'), why: 'Lee o copia un archivo con secretos (.env, .netrc, claves)' },
+  // (?<![\w-]) evita falsos positivos con opciones como `gh pr create --head …` o texto que mencione ".env".
+  { id: 'secret-file-read', re: new RegExp(String.raw`(?<![\w-])(?:cat|type|more|less|head|tail|Get-Content|gc|bat|xxd|strings|base64|cp|copy|scp|Copy-Item)\b[^;&|\n]*${SECRET_FILE_IN_CMD}`, 'i'), why: 'Lee o copia un archivo con secretos (.env, .netrc, claves)' },
   { id: 'env-exfiltration', re: /\b(?:env|printenv|Get-ChildItem\s+env:|gci\s+env:)\b[^;&\n]*\|\s*[^;&\n]*\b(?:curl|wget|nc|iwr|Invoke-WebRequest|irm|Invoke-RestMethod)\b/i, why: 'Envía variables de entorno a la red' },
   { id: 'publish-package', re: /\b(?:npm|yarn|pnpm)\s+publish\b|\btwine\s+upload\b|\bgh\s+release\s+create\b/i, why: 'Publicación de paquetes o releases (fuera del alcance de un agente)' },
+  { id: 'borrar-rama', re: /\bgit\s+branch\b[^;&|\n]*\s(?:-d|-D|--delete)\b|\bgit\s+push\b[^;&|\n]*\s(?:--delete|-d)\b|\bgit\s+push\s+[^\s;&|]+\s+:[\w./-]+|\bgh\s+api\b[^\n]*\/git\/refs\/[^\n]*(?:-X\s*DELETE|--method\s+DELETE)/i, why: 'Borrar ramas está prohibido: son parte de la trazabilidad entre issues, commits y PR. Solo una persona puede decidirlo, si la rama crea confusión o su código ya no sirve' },
   { id: 'pr-merge-directo', re: /\bgh\s+pr\s+merge\b|\bgh\s+api\b[^\n]*\/pulls\/\d+\/merge\b/i, why: 'Fusionar una PR solo con `npm run pr:fusionar -- <N>`: comprueba las aprobaciones (todos los colaboradores en qa y main) y pide confirmación' },
   { id: 'pr-aprobar-directo', re: /\bgh\s+pr\s+review\b[^;&|\n]*(?:--approve|\s-a\b)|\bgh\s+api\b[^\n]*\/pulls\/\d+\/reviews\b[^\n]*(?:-X\s*(?:POST|PUT)|--method\s+(?:POST|PUT)|\s-[fF]\s)/i, why: 'Aprobar una PR solo con `npm run pr:aprobar -- <N>`, que muestra el resumen y pide confirmación' },
   { id: 'disable-guards', re: /--dangerously-skip-permissions|disableAllHooks|bypassPermissions|core\.hooksPath\s+(?:\/dev\/null|""|'')/i, why: 'Intento de desactivar los permisos o las guardas' },
@@ -152,7 +155,10 @@ export function evaluateShell(command, ctx = {}) {
 
 export function evaluateWrite(filePath, content, cwd) {
   const reason = protectedWriteReason(filePath, cwd);
-  if (reason) return deny('protected-path', `No se escribe en ${filePath}: ${reason}. Usa .env.example para documentar variables.`);
+  if (reason && /^\.env/i.test(path.basename(String(filePath)))) {
+    return deny('entorno', `No se escribe ${path.basename(String(filePath))} a mano. Solo existen .env (local) y .env.example (sin credenciales): genera o actualiza el .env con \`npm run env:sync\` (no lee ni muestra valores) y documenta las claves en .env.example.`);
+  }
+  if (reason) return deny('protected-path', `No se escribe en ${filePath}: ${reason}.`);
   const secrets = findSecrets(content);
   if (secrets.length) return deny('secret-in-content', `El contenido a escribir en ${filePath} contiene un posible secreto (${secrets.join(', ')}). Usa una referencia a variable de entorno (RNF-06).`);
   return NONE;

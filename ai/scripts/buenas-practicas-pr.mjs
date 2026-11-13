@@ -1,35 +1,25 @@
 #!/usr/bin/env node
 // Revisa las buenas prácticas de una PR (reglas en ai/hooks/lib/buenas-practicas-pr.mjs): título, rama,
 // descripción, issues válidos, conflictos, secretos y tamaño. Pone etiquetas de tipo y tamaño, asigna al autor y
-// mantiene un comentario de resumen. Falla si hay errores.
+// mantiene un comentario de resumen. Falla si hay errores. Nunca borra ramas (son parte de la trazabilidad).
 //   node ai/scripts/buenas-practicas-pr.mjs --pr <N> [--simular]
-//   node ai/scripts/buenas-practicas-pr.mjs --pr <N> --borrar-rama    (tras fusionar: borra la rama de trabajo)
 import fs from 'node:fs';
 import { repoSlug, api } from '../hooks/lib/github.mjs';
 import { findSecrets } from '../hooks/lib/guard.mjs';
 import { extraerIssuesDePR } from '../hooks/lib/estado-issues.mjs';
-import { evaluarPR, extraerCierres, ramaBorrable } from '../hooks/lib/buenas-practicas-pr.mjs';
+import { evaluarPR, extraerCierres } from '../hooks/lib/buenas-practicas-pr.mjs';
 
 const args = process.argv.slice(2);
 const numero = Number((args.includes('--pr') ? args[args.indexOf('--pr') + 1] : undefined) ?? process.env.PR_NUMBER);
 const simular = args.includes('--simular');
 if (!Number.isInteger(numero)) {
-  console.error('Uso: node ai/scripts/buenas-practicas-pr.mjs --pr <N> [--simular | --borrar-rama]');
+  console.error('Uso: node ai/scripts/buenas-practicas-pr.mjs --pr <N> [--simular]');
   process.exit(2);
 }
 const slug = repoSlug();
 const MARCA = '<!-- uraqi-buenas-practicas -->';
 
 let raw = await api(`repos/${slug}/pulls/${numero}`);
-
-if (args.includes('--borrar-rama')) {
-  const mismoRepo = raw.head.repo?.full_name === raw.base.repo.full_name;
-  if (raw.merged_at && mismoRepo && ramaBorrable(raw.head.ref)) {
-    console.log(`Borrar la rama fusionada ${raw.head.ref}${simular ? ' [simulación]' : ''}`);
-    if (!simular) await api(`repos/${slug}/git/refs/heads/${raw.head.ref}`, { method: 'DELETE' }).catch((e) => console.log(`No se pudo borrar: ${e.message.slice(0, 120)}`));
-  } else console.log(`La rama ${raw.head.ref} no se borra (no fusionada, de otro repositorio o protegida).`);
-  process.exit(0);
-}
 
 // GitHub calcula "mergeable" en segundo plano: se reintenta unos segundos si todavía no está.
 for (let i = 0; i < 5 && raw.mergeable === null && raw.state === 'open'; i += 1) {

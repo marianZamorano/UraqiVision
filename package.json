@@ -14,8 +14,15 @@
     "commits:dividir": "node ai/scripts/dividir-commits.mjs --aplicar",
     "ai:sync": "node ai/sync.mjs",
     "ai:check": "node ai/sync.mjs --check",
-    "test:guardas": "node --test ai/hooks/test/guard.test.mjs ai/hooks/test/commit-groups.test.mjs ai/hooks/test/aprobaciones.test.mjs ai/hooks/test/estado-issues.test.mjs ai/hooks/test/buenas-practicas-pr.test.mjs",
+    "test:guardas": "node --test ai/hooks/test/guard.test.mjs ai/hooks/test/commit-groups.test.mjs ai/hooks/test/aprobaciones.test.mjs ai/hooks/test/estado-issues.test.mjs ai/hooks/test/buenas-practicas-pr.test.mjs ai/hooks/test/entorno.test.mjs",
+    "env:check": "node ai/scripts/entorno.mjs check",
+    "env:sync": "node ai/scripts/entorno.mjs sync",
+    "env:compartir": "node ai/scripts/entorno.mjs compartir",
     "hooks:activar": "git config core.hooksPath .githooks"
+  },
+  "uraqi": {
+    "$comentario": "envPermitidos: entornos extra (.env.<nombre>) solo si son imprescindibles para que algo funcione; cada uno necesita su .env.<nombre>.example. Por defecto solo existen .env y .env.example.",
+    "envPermitidos": []
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

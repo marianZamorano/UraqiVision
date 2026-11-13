@@ -1,0 +1,3 @@
+#!/bin/sh
+# Sube toda rama nueva a origin y sincroniza el .env local si cambió .env.example. Nunca bloquea.
+exec node "$(git rev-parse --show-toplevel)/ai/hooks/git-post-checkout.mjs" "$@"

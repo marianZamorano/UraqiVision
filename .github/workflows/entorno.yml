@@ -1,0 +1,33 @@
+# Variables de entorno (ai/scripts/aviso-entorno.mjs): cuando una PR cambia la estructura de .env.example (o de un
+# .env.<x>.example permitido), comenta mencionando a todos los colaboradores excepto el autor con las claves nuevas
+# y eliminadas, sin valores. Falla si una plantilla trae valores en claves sensibles.
+name: Entorno
+
+on:
+  pull_request:
+    branches: [dev, qa, main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.env.example'
+      - '.env.*.example'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  entorno:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Avisar cambios de estructura del .env
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node ai/scripts/aviso-entorno.mjs --pr "$PR_NUMBER"

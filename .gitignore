@@ -1,8 +1,9 @@
-# Secretos (RNF-06): solo se versionan las plantillas
+# Secretos (RNF-06): el .env es solo local; se versiona únicamente .env.example (y los .env.<x>.example de los
+# entornos declarados en package.json → uraqi.envPermitidos), sin credenciales.
 .env
 .env.*
 !.env.example
-!.env.sample
+!.env.*.example
 .netrc
 _netrc
 *.pem
