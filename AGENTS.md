@@ -111,6 +111,16 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
     sus estados solo cambian si la PR cumplió la aprobación completa. Cambiar estados a mano está prohibido:
     la automatización lo revierte.
   - Crear issues, ramas remotas o PR y hacer push requiere la aprobación de la persona.
+- **Ramas**: nunca borres una rama, ni local ni remota (son trazabilidad; solo una persona decide hacerlo si
+  crea confusión o su código ya no sirve). Toda rama nueva se sube a origin (el hook `post-checkout` lo hace).
+- **Variables de entorno** (RNF-06):
+  - Solo existen `.env` (local, nunca se sube) y `.env.example` (se sube, misma estructura, claves sensibles
+    vacías). Otro `.env.<x>` solo si es imprescindible, declarado en `package.json` → `uraqi.envPermitidos`.
+  - Genera o actualiza el `.env` **solo** con `npm run env:sync` (no lee ni muestra valores); revisa con
+    `npm run env:check`. Nunca leas ni escribas el `.env` a mano.
+  - Si cambias la estructura (agregas o quitas claves), **PAUSA**: dile a la persona que debe comunicarlo a su
+    equipo antes de continuar (`npm run env:compartir` copia su `.env` a Descargas). El commit se detiene hasta
+    que lo confirme (`URAQI_ENV_COMUNICADO=1`); nunca lo confirmes por ella.
 - No leas ni muestres `.env`, `.netrc` (credenciales de Earthdata) ni claves privadas.
 
 ## 7. Herramientas de IA del repositorio
