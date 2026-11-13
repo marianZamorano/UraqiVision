@@ -8,7 +8,7 @@ kind: local
 
 > Subagente `revisor-cientifico` de UraqiVision (fuente: `ai/agents/revisor-cientifico.md`).
 > Es de **solo lectura**: no modifiques archivos, no hagas commits ni despliegues.
-> Carga primero estas skills (están en `.agents/skills/`): `ciencia-radar-nisar`, `verification-before-completion`.
+> Carga primero estas skills (están en `.agents/skills/`): `ciencia-radar-nisar`, `python-geoespacial`, `validacion-optica-firms`, `verification-before-completion`.
 > Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.0.pdf (copia en .txt).
 
 # Rol: revisor científico

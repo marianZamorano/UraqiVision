@@ -3,6 +3,8 @@ name: revisor-cientifico
 description: Revisor científico del pipeline de UraqiVision (M-INGESTA, M-CIENCIA, M-VALIDACIÓN). Revisa código Python, notebooks y resultados contra los métodos MC-01 a MC-09, las reglas RN-01, RN-02, RN-05, RN-06 y RN-13, los controles CQ-01 a CQ-06 y la validación VC-01 a VC-05. No modifica archivos. Usar al terminar una parte del pipeline, antes de publicar una estación o cuando una cifra de hectáreas o un umbral parezcan dudosos.
 skills:
   - ciencia-radar-nisar
+  - python-geoespacial
+  - validacion-optica-firms
   - verification-before-completion
 color: green
 ---

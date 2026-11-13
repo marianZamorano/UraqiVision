@@ -48,7 +48,7 @@ con dos puntos de control (plan y feedback) y documenta en `.vibecodear/sprints/
 |---|---|---|
 | QA | `qa-project-discovery`, `qa-test-strategy`, `qa-test-design`, `qa-automation`, `qa-regression-analysis`, `qa-quality-gates`, `qa-test-reporting`, `qa-defect-analysis`, `qa-security-testing` | Rutas cambiadas a `ai/qa/scripts/`; scripts y fixtures incluidos |
 | QA (MIT, obra/superpowers) | `test-driven-development`, `systematic-debugging`, `verification-before-completion` | Copia idéntica, con `LICENSE` y `PROVENANCE.md` (SHA-256 verificado) |
-| Frontend | `react-component-architecture`, `frontend-testing`, `vite-bundle-optimization` | Tal cual |
+| Frontend | `react-component-architecture`, `frontend-testing`, `vite-bundle-optimization` | Adaptadas: motores de mapa aislados, dobles de WebGL en Vitest, CesiumJS con Vite |
 | Frontend / Fullstack | `frontend-data-fetching`, `typed-api-integration`, `react-components-and-state` | Reescritas: UraqiVision no tiene backend NestJS, lee archivos publicados e Insight |
 | UI/UX | `design-system-tokens`, `responsive-visual-testing` | Reescritas sin Figma ni tokens `--cc-*`, con las reglas de §20.2 |
 | DevSecOps | `devops-secrets-management`, `devops-dependency-security`, `devops-git-workflow`, `devops-release-readiness`, `devops-free-tier-audit`, `devops-supervised-execution` | Rutas cambiadas a `ai/devops/scripts/` |
@@ -71,6 +71,13 @@ las de API, contratos, integración con base de datos y carga.
 | `interfaz-bilingue-accesible` | es/en, WCAG 2.2 AA, estados de la vista, cifras y fechas | M-INTERFAZ, M-ATLAS |
 | `rigor-y-fuentes` | Citas, APA 7, hechos frente a hipótesis, nada inventado | M-ATLAS, contenidos |
 | `entrega-hackathon` | Estado frente al plan (§25), demo de 7 láminas, checklist de entrega | Todo el equipo |
+| `ingesta-nisar-asf` | Buscar GCOV con asf_search/earthaccess, recortar con GDAL ≥ 3.13, manifiesto y huellas (RF-26) | M-INGESTA |
+| `python-geoespacial` | COG float32 sin pérdida, NaN en lugar de 0, lineal → dB, pytest con rásters sintéticos | M-CIENCIA, M-PUBLICACIÓN |
+| `validacion-optica-firms` | dNBR de Sentinel-2, focos FIRMS, precisión, exhaustividad y Dice (VC-01 a VC-05) | M-VALIDACIÓN |
+| `notebook-reproducible` | Regenerar resultados desde el manifiesto, revisión visual y figuras de control (RNF-08) | M-CIENCIA |
+| `metodo-y-creditos` | Página de método, Fuente y calidad, Acerca de, licencias y citas (RF-15, RF-24, RF-37) | M-INTERFAZ |
+| `fichas-atlas` | Las 9 fichas, Tunari, relato local, hipótesis y preguntas sugeridas (RF-03, RF-12, RF-13, RF-17) | M-ATLAS |
+| `descargas-y-exportacion` | PNG y CSV con créditos, descarga de COG/GeoJSON/manifiesto, ficha imprimible (RF-21, RF-22, RF-31) | M-INTERFAZ, M-PUBLICACIÓN |
 | `verification-before-completion` | Evidencia antes de afirmar que algo funciona (MIT, de obra/superpowers) | Todos |
 
 ## Subagentes (`ai/agents/`)

@@ -88,12 +88,15 @@ Todo se define una sola vez y se genera para cada plataforma con `node ai/sync.m
 **Coordinador**: la skill `vibecodear` actúa como Engineering Manager: diagnostica, elige roles y reparte el
 trabajo entre las skills y subagentes de cada rol (tabla en `.agents/skills/vibecodear/references/roles.md`).
 
-Skills por rol (36; detalle en `ai/README.md`):
+Skills por rol (43; detalle en `ai/README.md`):
 
 | Rol | Skills |
 |---|---|
 | Proyecto y SDD | `documento-maestro`, `sdd-uraqivision`, `entrega-hackathon`, `rigor-y-fuentes`, `vibecodear` |
-| Ciencia y datos | `ciencia-radar-nisar`, `publicacion-estacion` |
+| Ingesta | `ingesta-nisar-asf`, `python-geoespacial` |
+| Ciencia y validación | `ciencia-radar-nisar`, `python-geoespacial`, `validacion-optica-firms`, `notebook-reproducible` |
+| Publicación | `publicacion-estacion`, `descargas-y-exportacion` |
+| Contenidos | `fichas-atlas`, `metodo-y-creditos`, `rigor-y-fuentes` |
 | Frontend | `globo-y-mapa`, `react-component-architecture`, `react-components-and-state`, `frontend-data-fetching`, `typed-api-integration`, `vite-bundle-optimization`, `frontend-testing` |
 | Insight | `insight-lector-radar` |
 | UX | `interfaz-bilingue-accesible`, `design-system-tokens`, `responsive-visual-testing` |

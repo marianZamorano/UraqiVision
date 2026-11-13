@@ -4,6 +4,8 @@ description: "Revisor científico del pipeline de UraqiVision (M-INGESTA, M-CIEN
 tools: Read, Grep, Glob, Bash, PowerShell, Skill
 skills:
   - ciencia-radar-nisar
+  - python-geoespacial
+  - validacion-optica-firms
   - verification-before-completion
 color: green
 ---
