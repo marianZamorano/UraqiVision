@@ -1,0 +1,100 @@
+{
+  "$comment": "Límites de planes gratuitos verificados en documentación oficial. Revisar si verifiedAt tiene más de 90 días. No es una garantía: el proveedor puede cambiarlos.",
+  "verifiedAt": "2026-10-18",
+  "staleAfterDays": 90,
+  "providers": {
+    "vercel": {
+      "role": "Hosting de frontend, Functions (Node.js/Python/Bun) y backends zero-config (Express, NestJS, Hono, FastAPI...).",
+      "sources": [
+        "https://vercel.com/docs/plans/hobby",
+        "https://vercel.com/docs/cron-jobs/usage-and-pricing",
+        "https://vercel.com/docs/functions/limitations",
+        "https://vercel.com/docs/git/vercel-for-github"
+      ],
+      "plans": {
+        "hobby": {
+          "priceUsdMonth": 0,
+          "creditCardRequired": false,
+          "commercialUse": false,
+          "onExceed": "Se pausa la funcionalidad hasta que pasen 30 días; no se factura (no hay ciclo de facturación).",
+          "spendManagement": false,
+          "monthly": {
+            "fastDataTransferGB": 100,
+            "fastOriginTransferGB": 10,
+            "cdnRequests": 1000000,
+            "activeCpuHours": 4,
+            "provisionedMemoryGBHours": 360,
+            "functionInvocations": 1000000,
+            "imageTransformations": 5000,
+            "webAnalyticsEvents": 50000
+          },
+          "projects": 200,
+          "deploymentsPerDay": 100,
+          "functionMaxDurationSeconds": 300,
+          "requestBodyMaxMB": 4.5,
+          "cronJobsPerProject": 100,
+          "cronMinInterval": "daily",
+          "cronPrecision": "±59 min",
+          "runtimeLogsRetention": "1 hora",
+          "buildVcpus": 2,
+          "buildMemoryGB": 8,
+          "wafCustomRules": 3,
+          "deploymentProtection": "Vercel Authentication (preview y producción); Password Protection NO incluido.",
+          "gitIntegrationNote": "Para conectar un repo de cuenta personal de GitHub hay que ser Owner del repo; un colaborador no puede importarlo."
+        }
+      }
+    },
+    "neon": {
+      "role": "PostgreSQL serverless con branching (dev/preview).",
+      "sources": ["https://neon.com/pricing"],
+      "plans": {
+        "free": {
+          "priceUsdMonth": 0,
+          "creditCardRequired": false,
+          "onExceed": "CU-hours o egress: el cómputo se suspende hasta el siguiente periodo. Storage: se bloquean escrituras. No se borran datos.",
+          "computeCuHoursPerProject": 100,
+          "maxAutoscaleCu": 2,
+          "scaleToZero": "Suspende tras 5 min de inactividad; no se puede desactivar (cold start).",
+          "storageGBPerProject": 1,
+          "storageGBAccount": 20,
+          "historyWindow": "6 horas",
+          "branchesPerProject": 10,
+          "projects": 100,
+          "egressGBPerProject": 5,
+          "manualSnapshots": 1,
+          "notIncluded": ["instant restore", "scheduled snapshots", "protected branches"]
+        }
+      }
+    },
+    "supabase": {
+      "role": "Alternativa: PostgreSQL + Auth + Storage.",
+      "sources": ["https://supabase.com/pricing"],
+      "plans": {
+        "free": {
+          "priceUsdMonth": 0,
+          "creditCardRequired": "no indicado en la página de precios",
+          "databaseSizeMB": 500,
+          "egressGB": 5,
+          "monthlyActiveUsers": 50000,
+          "activeProjects": 2,
+          "pauseAfterInactivityDays": 7,
+          "onExceed": "Ver política del proveedor; los proyectos inactivos se pausan."
+        }
+      }
+    },
+    "github-actions": {
+      "role": "CI (lint, typecheck, tests, auditorías) y despliegues con vercel deploy --prebuilt.",
+      "sources": ["https://docs.github.com/en/billing/concepts/product-billing/github-actions"],
+      "plans": {
+        "free": {
+          "priceUsdMonth": 0,
+          "publicRepos": "Runners estándar gratis e ilimitados.",
+          "privateRepoMinutesPerMonth": 2000,
+          "artifactStorageMB": 500,
+          "cacheStorageGBPerRepo": 10,
+          "onExceed": "Sin método de pago: el uso se bloquea al agotar la cuota. Con método de pago: puede facturarse según budgets."
+        }
+      }
+    }
+  }
+}
