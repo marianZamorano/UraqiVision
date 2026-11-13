@@ -91,6 +91,24 @@ el commit, el push o la PR se rechazan con el motivo.
    `node ai/scripts/issues-de-promocion.mjs dev qa` (o `qa main`) y pégala en la descripción. Antes de
    la PR a `main`, el subagente `release-readiness-reviewer` da su veredicto.
 
+## Estado automático de los issues
+
+El workflow `Estado de issues` (reglas en `ai/hooks/lib/estado-issues.mjs`) actualiza cada issue citado en la
+descripción de la PR o en sus commits. No hay que moverlos a mano:
+
+| Evento | Estado del issue |
+|---|---|
+| Se abre una PR hacia `dev` | etiqueta `estado: en revisión` |
+| Se fusiona en `dev` | `estado: en dev` y comentario con la PR |
+| Se fusiona en `qa` | `estado: en preproducción` y comentario |
+| Se fusiona en `main` | `estado: en producción`, comentario y **se cierra** |
+| La PR se cierra sin fusionar | se quita `estado: en revisión` |
+
+- GitHub solo cierra issues con `Closes #N` al fusionar en `main` (la rama por defecto); por eso un issue sigue
+  abierto mientras está en `dev` o en preproducción. No lo cierres a mano: se cierra al llegar a producción.
+- Un issue cerrado a mano no se modifica, salvo para marcarlo en producción.
+- Para revisar o sincronizar una PR: `npm run issues:estado -- --pr N --simular` (sin `--simular` aplica los cambios).
+
 ## Trazabilidad completa (sin excepciones)
 
 - **Todo commit** que llegue a `dev`, `qa` o `main` cita su issue y viaja en una PR.
