@@ -1,46 +1,56 @@
 ---
 name: vite-bundle-optimization
-description: "Practicas de rendimiento y bundle con Vite: code splitting, lazy loading, dependencias pesadas y metricas. Usar al añadir dependencias pesadas, rutas/pantallas nuevas o al revisar tiempos de carga."
+description: Rendimiento y bundle de la web de UraqiVision con Vite, incluidos la configuración de CesiumJS (archivos estáticos y CESIUM_BASE_URL), la carga diferida del globo, la división por rutas, las vistas WebP por fecha y la medición de la portada (RNF-01, RNF-02, RNF-05). Usar al configurar Vite, añadir dependencias pesadas, crear pantallas nuevas o revisar tiempos de carga.
 ---
 
-# Optimizacion de bundle con Vite
+# Bundle y rendimiento con Vite
 
-## Cuando aplicar
+Adaptada de la skill homónima de chapterCoreIEEE. Metas del documento maestro: **portada en menos de 3 s a
+10 Mbps** y CesiumJS cargado **solo al entrar al explorador** (RNF-01); vistas de una estación por debajo de
+**40 MB** (RNF-02); globo usable en celulares de gama media (RNF-05).
 
-- Anadir una dependencia nueva (sobre todo pesadas: graficos, mapas, editores).
-- Crear rutas/pantallas nuevas en el router.
-- Revisar por que la app tarda en cargar o el bundle crece sin control.
+## CesiumJS con Vite
+
+Según la guía oficial de CesiumJS (consultada el 12 nov 2026):
+
+- CesiumJS necesita servir como archivos estáticos cuatro carpetas de `node_modules/cesium/Build/Cesium/`:
+  `Workers`, `ThirdParty`, `Assets` y `Widgets`.
+- `window.CESIUM_BASE_URL` debe apuntar a donde se sirven esas carpetas y **definirse antes de importar
+  CesiumJS**.
+- Dos formas de lograrlo: copiar las carpetas en el build (por ejemplo con un plugin de copia estática) y
+  fijar `CESIUM_BASE_URL`, o usar un plugin que lo haga solo (la guía de Cesium menciona `vite-plugin-cesium`).
+  Elegir un plugin es añadir una dependencia: propónlo en el plan (§28) y verifica su versión con `context7`.
+- Importa también `cesium/Build/Cesium/Widgets/widgets.css` en el componente del globo.
+- Si el sitio se publica en una subruta (posible con GitHub Pages, DP-06), `base` de Vite y
+  `CESIUM_BASE_URL` deben incluirla.
 
 ## Reglas
 
-1. Rutas con `React.lazy` + `<Suspense>`: cada pantalla es un chunk separado;
-   el usuario descarga solo lo que visita.
-2. Dependencias pesadas se importan dinamicamente (`await import(...)`) o se
-   colocan en `build.rollupOptions.output.manualChunks` por vendor.
-3. Antes de anadir una libreria: buscar si la necesidad ya se cubre con
-   nativo (IntersectionObserver, `Intl`, fetch) o con tree-shakeable ESM.
-4. Imports de solo una funcion => importar el subpath
-   (`lodash-es/debounce`), no el paquete completo.
-5. Sin `console.log` ni debug en produccion ( ESLint `no-console` en CI ).
-6. Imagenes: assets <=20kB inlineados; el resto con `srcset`/formatos
-   modernos y lazy loading nativo.
-7. Medir antes y despues: `npx vite build --mode production` y revisar el
-   tamanio de los chunks; comparar con la rama base en el PR.
-8. `manualChunks` para vendors grandes que cambian poco: cache del navegador
-   aprovechable sin re-descargar la app.
+1. **El globo es su propio chunk**: el componente que importa CesiumJS se carga con `React.lazy` o
+   `await import("cesium")` al entrar al explorador. La portada no importa nada de CesiumJS (RNF-01).
+2. Rutas con `React.lazy` + `<Suspense>`: portada, explorador, análisis, método y Acerca de por separado.
+   El fallback de `Suspense` muestra el estado «cargando» traducido (RF-34).
+3. MapLibre y Recharts solo en las pantallas que los usan.
+4. Las **vistas WebP** de una fecha se piden cuando se eligen; no se precargan todas (RNF-02).
+5. Antes de añadir una librería, busca si lo cubre algo nativo (`Intl`, `fetch`, `IntersectionObserver`) o una
+   dependencia ya aprobada en §18. Una dependencia nueva se consulta (§28).
+6. Sin `console.log` ni código de depuración en producción.
+7. **Medir antes y después**: `vite build` y revisar el tamaño de los chunks; Lighthouse sobre la portada con
+   la limitación de red del navegador (RNF-01 se mide así).
+8. Ninguna variable `VITE_*` con secretos: Vite las incrusta en el bundle (RNF-06).
 
 ## Ejemplo
 
 ```tsx
 import { lazy, Suspense } from "react";
 
-const ReportsPage = lazy(() => import("./features/reports/ReportsPage"));
+const Explorador = lazy(() => import("./pages/Explorador")); // aquí dentro vive CesiumJS
 
 <Route
-  path="/reports"
+  path="/explorar"
   element={
-    <Suspense fallback={<Spinner />}>
-      <ReportsPage />
+    <Suspense fallback={<EstadoCargando />}>
+      <Explorador />
     </Suspense>
   }
 />;
@@ -48,13 +58,14 @@ const ReportsPage = lazy(() => import("./features/reports/ReportsPage"));
 
 ## Errores comunes
 
-- Lazy en componentes de 3kB: fragmenta el bundle sin beneficio.
-- Importar una libreria completa por una funcion => +200kB en el chunk.
-- Medir solo en dev: el build de desarrollo no representa el produccion.
+- Importar CesiumJS desde un archivo que también usa la portada: todo el globo entra en el primer chunk.
+- Olvidar `CESIUM_BASE_URL` o definirlo después del import: los workers fallan solo en producción.
+- Medir en modo desarrollo: no representa el build de producción.
 
 ## Checklist
 
-- [ ] Pantallas pesadas cargan con `lazy` + `Suspense`.
-- [ ] Cada dependencia nueva justifica su tamanio en el bundle.
-- [ ] Build de produccion revisado antes de abrir el PR.
-- [ ] Sin logs de debug ni imports sin tree-shaking.
+- [ ] Portada sin CesiumJS; globo en un chunk diferido.
+- [ ] Carpetas estáticas de CesiumJS servidas y `CESIUM_BASE_URL` correcto (también con subruta).
+- [ ] Vistas WebP pedidas por fecha; estación < 40 MB.
+- [ ] Portada < 3 s medida con Lighthouse.
+- [ ] Ninguna dependencia nueva sin consultar ni secretos en `VITE_*`.
