@@ -63,3 +63,20 @@ y posición de cámara.
 PS-04 (Vitest: sincronización de la línea de tiempo y estados), PS-08 (globo: Bolivia encuadrada, huellas,
 vuelo, volver a Bolivia, pantalla completa y respaldo 2D) y PS-09 (Playwright: portada → globo → estación →
 análisis → descarga, en escritorio y celular). Con el MCP `playwright`, solo contra `localhost`.
+
+## Referencias del documento maestro (§31)
+
+<!-- referencias:inicio (generado por ai/sync.mjs desde ai/referencias/catalogo.json; no editar a mano) -->
+
+Enlaces de §31 que aplican aquí. Cítalos (APA 7) donde implementes lo que respaldan y consulta la fuente antes de
+usar una afirmación concreta: el contenido de cada enlace no se resume aquí. Detalle: skill `referencias-documento`
+y `npm run referencias:revisar`.
+
+- **Cesium GS (2026). CesiumJS [Software]** — <https://github.com/CesiumGS/cesium>
+  Citada en: §18. Aplica a: RF-02, RF-25, RF-26, RF-27, RF-28, RF-29, RF-30, RF-32, RF-24, RNF-11. Usa la documentación vigente (MCP context7) al implementar el globo; muestra su atribución y licencia en el globo y en Acerca de (RF-24, RNF-11).
+- **MapBiomas Bolivia (s. f.). Capas** — <https://bolivia.mapbiomas.org/en/capas/>
+  Citada en: §10.3, §17. Aplica a: RF-14, RF-35, RF-03. Fuente de límites, áreas protegidas y territorios: cada capa que la use muestra fuente y año (RF-14, RF-35) y aparece en Acerca de.
+- **NISAR (2025). NASA-ISRO SAR (NISAR) mission science users' handbook (2.ª ed.)** — <https://doi.org/10.48577/jpl.UD4HV3>
+  Citada en: no la cita el cuerpo del documento (relación propuesta por el equipo). Aplica a: RN-11, RF-08, RF-15, RF-19, RF-24, RF-16. Fundamentos de la misión y del radar (§9): respalda el texto de qué resalta cada polarización (RF-08), el glosario (RF-19), la página de método y las citas de datos (RN-11, RF-24) y las explicaciones de Insight; el documento no la cita en el cuerpo.
+
+<!-- referencias:fin -->

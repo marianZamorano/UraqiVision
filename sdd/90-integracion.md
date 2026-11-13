@@ -65,6 +65,21 @@ Recorrido principal de §20.1 y demostración de §26. Historias: CU-01 a CU-05,
 - MCP: `playwright` (contra localhost), `qa-evidence`, `devops-readiness`.
 - Hooks: guarda de código vivo en las promociones, aprobaciones y estado de issues.
 
+**Referencias del documento maestro (§31)**
+
+<!-- referencias:inicio (generado por ai/sync.mjs desde ai/referencias/catalogo.json; no editar a mano) -->
+
+Enlaces de §31 que aplican aquí. Cítalos (APA 7) donde implementes lo que respaldan y consulta la fuente antes de
+usar una afirmación concreta: el contenido de cada enlace no se resume aquí. Detalle: skill `referencias-documento`
+y `npm run referencias:revisar`.
+
+- **Cesium GS (2026). CesiumJS [Software]** — <https://github.com/CesiumGS/cesium>
+  Citada en: §18. Aplica a: RF-02, RF-25, RF-26, RF-27, RF-28, RF-29, RF-30, RF-32, RF-24, RNF-11. Usa la documentación vigente (MCP context7) al implementar el globo; muestra su atribución y licencia en el globo y en Acerca de (RF-24, RNF-11).
+- **NISAR (2025). NASA-ISRO SAR (NISAR) mission science users' handbook (2.ª ed.)** — <https://doi.org/10.48577/jpl.UD4HV3>
+  Citada en: no la cita el cuerpo del documento (relación propuesta por el equipo). Aplica a: RN-11, RF-08, RF-15, RF-19, RF-24, RF-16. Fundamentos de la misión y del radar (§9): respalda el texto de qué resalta cada polarización (RF-08), el glosario (RF-19), la página de método y las citas de datos (RN-11, RF-24) y las explicaciones de Insight; el documento no la cita en el cuerpo.
+
+<!-- referencias:fin -->
+
 ## 7. Riesgos y pendientes
 
 - §24: costo o abuso de Insight → límites por sesión y plantillas de respaldo; reglas de Space Apps 2026 distintas
