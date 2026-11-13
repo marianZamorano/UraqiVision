@@ -1,0 +1,10 @@
+{
+  "areas": [
+    { "name": "autenticacion", "risk": "critical", "paths": ["src/auth/**", "src/**/*.guard.ts", "src/**/*.strategy.ts"], "suites": ["test/auth/**", "test/e2e/auth.e2e-spec.ts"], "tags": ["@auth", "@security"] },
+    { "name": "recursos", "risk": "high", "paths": ["src/items/**", "src/**/dto/*.ts"], "suites": ["test/items/**"], "tags": ["@items"] },
+    { "name": "persistencia", "risk": "high", "paths": ["src/**/*.entity.ts", "src/**/*.repository.ts", "prisma/**"], "suites": ["test/integration/**"], "tags": ["@db"] },
+    { "name": "cliente-web", "risk": "medium", "paths": ["web/src/**"], "suites": ["web/tests/**"], "tags": ["@ui"] }
+  ],
+  "alwaysRun": ["@smoke"],
+  "fullRegressionOn": ["package.json", "**/package-lock.json", "**/*.lock", "migrations/**", "tsconfig*.json", ".github/workflows/**", "src/main.ts", "src/app.module.ts"]
+}

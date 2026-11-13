@@ -1,0 +1,12 @@
+{
+  "gates": [
+    { "id": "sin-fallos", "metric": "failedTests", "op": "==", "value": 0, "description": "Ninguna prueba fallida o con error" },
+    { "id": "tasa-exito", "metric": "passRate", "op": ">=", "value": 100 },
+    { "id": "cobertura-lineas", "metric": "coverageLines", "op": ">=", "value": 80 },
+    { "id": "cobertura-ramas", "metric": "coverageBranches", "op": ">=", "value": 70 },
+    { "id": "contrato-compatible", "metric": "breakingChanges", "op": "==", "value": 0, "required": false },
+    { "id": "sin-secretos", "metric": "secretsFound", "op": "==", "value": 0 },
+    { "id": "latencia-p95", "metric": "p95Ms", "op": "<=", "value": 500, "required": false },
+    { "id": "tasa-error", "metric": "errorRate", "op": "<=", "value": 0.01, "required": false }
+  ]
+}

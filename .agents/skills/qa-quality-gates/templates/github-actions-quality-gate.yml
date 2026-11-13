@@ -1,0 +1,52 @@
+# PLANTILLA (no instalada). Copiar a .github/workflows/ solo con aprobación explícita y adaptar comandos/rutas.
+name: quality-gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Pruebas con cobertura y JUnit
+        # Adaptar al framework del proyecto. Ejemplo Vitest:
+        run: npx vitest run --coverage --coverage.reporter=json-summary --reporter=junit --outputFile=reports/junit.xml
+        continue-on-error: true
+
+      - name: Diff de contrato (si existe openapi.json)
+        if: hashFiles('openapi.json') != ''
+        run: |
+          git show origin/${{ github.base_ref }}:openapi.json > /tmp/openapi-base.json || echo '{}' > /tmp/openapi-base.json
+          node ai/qa/scripts/contract-diff.mjs --old /tmp/openapi-base.json --new openapi.json --json > reports/contract-diff.json || true
+
+      - name: Quality gate
+        if: always()
+        run: |
+          ARGS="--config .agents/skills/qa-quality-gates/templates/gates.example.json --results reports/junit.xml --coverage coverage/coverage-summary.json --secrets-scan src"
+          [ -f reports/contract-diff.json ] && ARGS="$ARGS --contract-diff reports/contract-diff.json"
+          node ai/qa/scripts/quality-gate.mjs $ARGS
+
+      - name: Publicar artefactos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-reports
+          path: |
+            reports/
+            coverage/coverage-summary.json
