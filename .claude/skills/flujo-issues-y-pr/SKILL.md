@@ -110,8 +110,17 @@ El workflow `Buenas prácticas de PR` (reglas en `ai/hooks/lib/buenas-practicas-
 | Calidad | `node ai/sync.mjs --check` y `npm run test:guardas` en verde | Sí |
 | Tamaño | Aviso si una PR de trabajo supera 800 líneas o 40 archivos (sin generados) | Aviso |
 
-También pone etiquetas `tipo: …` y `tamaño: XS…XL`, asigna la PR a su autor y, al fusionar, **borra la rama de
-trabajo** (nunca `dev`, `qa` ni `main`). En GitHub solo se permite fusionar con **merge commit**.
+También pone etiquetas `tipo: …` y `tamaño: XS…XL` y asigna la PR a su autor. En GitHub solo se permite
+fusionar con **merge commit**.
+
+## Ramas: nunca se borran y toda rama nueva se sube
+
+- **Ninguna rama se borra al fusionar**, ni local ni remota: las ramas son parte de la trazabilidad entre
+  issues, commits y PR. Las guardas impiden a los asistentes borrarlas (`git branch -d/-D`, `git push --delete`,
+  `git push origin :rama`, la API). Solo una persona decide borrar una rama, si crea confusión o su código ya no
+  sirve.
+- **Toda rama nueva se sube a origin**: el hook `post-checkout` hace `git push -u origin <rama>` al crearla (si
+  no hay red, avisa para subirla después) y el inicio de sesión avisa de ramas locales sin subir.
 
 Guarda local: `gh pr create` exige `--base` (sin él, gh apunta a `main`) y solo acepta `tipo/N → dev`,
 `dev → qa` y `qa → main`.

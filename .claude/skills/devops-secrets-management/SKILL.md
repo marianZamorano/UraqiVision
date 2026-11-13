@@ -11,6 +11,14 @@ allowed-tools: Read, Grep, Glob, Bash(node ai/devops/scripts/secret-scan.mjs *),
 ## Propósito
 Ningún secreto en el repositorio, en logs, en `vercel.json`, en scripts ni en el bundle del navegador; cada secreto en el almacén correcto y con un plan de rotación.
 
+## Regla de entorno de UraqiVision (prevalece)
+- Solo `.env` (local, nunca se sube) y `.env.example` (versionado, misma estructura, claves sensibles vacías).
+  Otro `.env.<x>` solo si es imprescindible, declarado en `package.json` → `uraqi.envPermitidos` con su `.example`.
+- `npm run env:check` revisa; `npm run env:sync` crea o alinea el `.env` sin leer ni mostrar valores (única forma
+  en que un asistente lo genera); `npm run env:compartir` copia el `.env` a Descargas para compartirlo.
+- Un cambio de estructura obliga a una **pausa** para comunicarlo al equipo antes de continuar (lo aplica el
+  hook `pre-commit`; el workflow `Entorno` menciona a los colaboradores en la PR).
+
 ## Cuándo usarla
 - `scan`: antes de un commit, PR o despliegue.
 - `plan`: al añadir una integración o un entorno (preview/producción).
