@@ -1,8 +1,8 @@
 # Estado de los issues según sus PR (reglas en ai/hooks/lib/estado-issues.mjs):
-#   PR abierta hacia dev → "estado: en revisión"; fusionada en dev → "estado: en dev";
-#   fusionada en qa → "estado: en preproducción"; fusionada en main → "estado: en producción" y se cierra;
-#   PR cerrada sin fusionar → se quita "estado: en revisión".
-# GitHub solo cierra issues con "Closes #N" al fusionar en main; esto cubre también dev y qa.
+#   PR abierta hacia dev → "estado: en revisión"; fusionada en dev → "estado: en dev" y se cierra;
+#   fusionada en qa → "estado: en preproducción"; fusionada en main → "estado: en producción"
+#   (estas dos, aunque el issue ya esté cerrado); PR cerrada sin fusionar → se quita "estado: en revisión".
+# GitHub solo cierra issues con "Closes #N" al fusionar en main; esto cierra al entrar a dev.
 name: Estado de issues
 
 on:
