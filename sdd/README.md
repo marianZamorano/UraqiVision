@@ -133,8 +133,8 @@ dependencias. Esta tabla se genera de los SDD (`npm run ai:sync`).
 | 40 | `P-ATLAS-07` | Verificar | [M-ATLAS](m-atlas.md) | `speckit-converge` | Angie | P-ATLAS-06 | Dom 14:00–19:00 |
 | 41 | `P-INTERFAZ-08` | Verificar | [M-INTERFAZ](m-interfaz.md) | `speckit-converge` | Marian (con Angie en método y descargas) | P-INTERFAZ-07 | Dom 14:00–19:00 |
 | 42 | `P-GLOBO-08` | Verificar | [M-GLOBO](m-globo.md) | `speckit-converge` | Joaco | P-GLOBO-07 | Dom 14:00–19:00 |
-| 43 | `P-INT-05` | Verificar el recorrido completo | [INTEGRACION](90-integracion.md) | `speckit-converge` | Angie, Marian | P-INT-04, P-MAPA-08, P-ATLAS-07, P-INTERFAZ-08, P-GLOBO-08 | Dom 14:00–19:00 |
-| 44 | `P-INT-06` | Preparar la entrega | [INTEGRACION](90-integracion.md) | `entrega-hackathon` | Angie, Marian | P-INT-05 | Dom 19:00–23:00 |
+| 43 | `P-INT-05` | Verificar el recorrido completo | [INTEGRACION](90-integracion.md) | `speckit-converge` | Marian | P-INT-04, P-MAPA-08, P-ATLAS-07, P-INTERFAZ-08, P-GLOBO-08 | Dom 14:00–19:00 |
+| 44 | `P-INT-06` | Preparar la entrega | [INTEGRACION](90-integracion.md) | `entrega-hackathon` | Angie | P-INT-05 | Dom 19:00–23:00 |
 | 45 | `P-INT-07` | Pedir la promoción a qa y main | [INTEGRACION](90-integracion.md) | `flujo-issues-y-pr` | Equipo | P-INT-06 | Dom 19:00–23:00, solo cuando la persona lo pida |
 
 <!-- /sdd:orden -->
