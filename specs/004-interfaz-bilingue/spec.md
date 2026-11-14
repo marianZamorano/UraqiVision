@@ -66,7 +66,7 @@ de RF-33 en ambos idiomas, y cada cifra coincide con su archivo de origen.
    de Bolivia y se indica la zona horaria (RN-07).
 4. **Given** hipótesis sobre la causa del cambio, **When** se muestran, **Then** se presentan como
    hipótesis con su fuente, nunca como certeza. Las clases de parche son cuatro: compatible con quema,
-   compatible con pérdida previa de estructura, evidencia ambigua y datos insuficientes (RN-05).
+   compatible con pérdida previa de estructura, evidencia ambigua y datos insuficientes (RN-05 para la regla de las hipótesis; las clases salen de §11.2 y MC-06).
 5. **Given** que no hubo imagen óptica válida para validar, **When** se muestra la validación, **Then**
    el panel dice «validación limitada» y nombra la alternativa usada (RF-11).
 6. **Given** una métrica que no se pudo calcular, **When** el panel la muestra, **Then** aparece como
@@ -250,8 +250,8 @@ incluye el mapa, las cifras, las fuentes y los límites.
 - **FR-003 (RN-06)**: Las hectáreas MUST mostrarse siempre con su rango de sensibilidad.
 - **FR-004 (RN-07)**: Las fechas de adquisición MUST mostrarse en hora de Bolivia (UTC−04), con la
   zona indicada. La fecha UTC original se ve en la fuente.
-- **FR-005 (RN-05)**: Las causas MUST presentarse como hipótesis con fuente, usando las cuatro clases de
-  parche de RN-05.
+- **FR-005 (RN-05; §11.2, MC-06)**: Las causas MUST presentarse como hipótesis con fuente (RN-05), usando las
+  cuatro clases de parche de §11.2 y MC-06.
 - **FR-006 (RF-33; muestra el contenido de RF-11, VC-02 y VC-05 que publica M-VALIDACIÓN)**: Si la estación no tuvo imagen óptica válida para validar, el panel
   MUST decir «validación limitada», nombrar la alternativa usada tal como se publica (focos de calor y
   revisión visual) con enlace al método, y mostrar las métricas frente a la referencia óptica como «no
@@ -336,8 +336,9 @@ incluye el mapa, las cifras, las fuentes y los límites.
   generación, y todo MUST coincidir con el manifiesto y el resultado de calidad publicados.
 - **FR-020 (RF-15, RN-08)**: El sitio MUST tener una página de método con el pipeline, los parámetros, la
   versión de los datos, los límites y la madurez del producto (PROVISIONAL), enlazada desde cada
-  estación. **A confirmar con el equipo**: RF-15 no tiene módulo asignado en §19. Se incluye aquí
-  porque §25 la agenda para Angie y Marian.
+  estación. RF-15 no tiene módulo asignado en §19. Se incluye aquí porque §25 la agenda para Angie y
+  Marian, y según el reparto acordado en #42 la hace **Angie**. Si se muestran PROVISIONAL y VALIDATED,
+  van como tramos separados (RN-02).
 - **FR-021 (RF-24, RN-11, RNF-11)**: El sitio MUST tener una página Acerca de, enlazada desde todo el
   sitio, con el equipo y sus roles, las licencias, las fuentes y las citas de datos de NISAR, FIRMS y
   las fuentes bolivianas según sus guías. **Pendiente (DP-02)**: si la página debe incluir la

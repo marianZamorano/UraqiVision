@@ -71,7 +71,7 @@ exista:
 | `panel.verMetodo` | Ver el método | See the method |
 | `panel.zonaHoraria` | hora de Bolivia, UTC−04 | Bolivia time, UTC−04 |
 
-### Clases de parche (RN-05, FR-005)
+### Clases de parche (§11.2, MC-06, FR-005)
 
 Las clases son las cuatro del documento. Los textos en inglés son una propuesta.
 
