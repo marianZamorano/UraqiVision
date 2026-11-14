@@ -17,11 +17,12 @@ vista, fuente y calidad, descargas y Acerca de. Es transversal: lo usan el globo
 |---|---|
 | Módulo (§19) | M-INTERFAZ · «Idiomas, glosario, descargas, accesibilidad, Acerca de, panel, estados, fuente y calidad» |
 | Responsables | Angie y Marian |
+| Reparto acordado (#42, #46) | Organización interna del equipo; §19 no cambia. **Marian**: panel (RF-33), estados (RF-34), glosario (RF-19), idioma (RF-20), fuente y calidad (RF-37), Acerca de (RF-24), Plus RF-23 y RF-31, y DP-02. **Angie**: método (RF-15) y descargas (RF-21, RF-22). El panel deja un espacio reservado para las descargas |
 | Revisora | Mimi |
 | Repositorio | `UraqiVision` (frontend) |
 | Spec | `specs/004-interfaz-bilingue` |
 | Momento (§25) | Sáb 9:00–13:00 panel de la estación · Sáb 14:00–20:00 estados de la vista · Sáb 20:00–24:00 glosario e idioma · Dom 9:00–14:00 método, Acerca de, fuente y calidad, descargas |
-| Sin módulo en §19 | RF-15 (página de método): §25 lo agenda para Angie y Marian el domingo de 9:00 a 14:00; se incluye aquí y conviene confirmarlo con el equipo |
+| Sin módulo en §19 | RF-15 (página de método): §25 lo agenda para Angie y Marian el domingo de 9:00 a 14:00; se incluye aquí y, según el reparto (#42), lo hace Angie |
 
 ## 2. Alcance del documento maestro
 
@@ -150,7 +151,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 22
 - **Fase:** 4 · Plan
 - **Comando:** speckit-plan
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian (con Angie en método y descargas)
 - **Revisa:** Mimi
 - **Depende de:** P-INTERFAZ-02
 - **Momento:** Antes del sábado 14
@@ -166,7 +167,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 23
 - **Fase:** 5 · Tareas
 - **Comando:** speckit-tasks
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian (con Angie en método y descargas)
 - **Revisa:** Mimi
 - **Depende de:** P-INTERFAZ-03
 - **Momento:** Antes del sábado 14
@@ -182,7 +183,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 24
 - **Fase:** 6 · Análisis
 - **Comando:** speckit-analyze
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian (con Angie en método y descargas)
 - **Revisa:** Mimi
 - **Depende de:** P-INTERFAZ-04
 - **Momento:** Antes del sábado 14
@@ -198,7 +199,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 27
 - **Fase:** 7 · Implementación
 - **Comando:** speckit-implement
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian
 - **Revisa:** Mimi
 - **Depende de:** P-INTERFAZ-05, P-PROY-07
 - **Momento:** Sáb 9:00–13:00 panel · Sáb 14:00–20:00 estados
@@ -214,7 +215,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 36
 - **Fase:** 7 · Implementación
 - **Comando:** speckit-implement
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian, Angie (Angie: método y descargas)
 - **Revisa:** Mimi
 - **Depende de:** P-INTERFAZ-06
 - **Momento:** Sáb 20:00–24:00 glosario e idioma · Dom 9:00–14:00 método, Acerca de, fuente y calidad, descargas
@@ -230,7 +231,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 41
 - **Fase:** 8 · Verificación
 - **Comando:** speckit-converge
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian (con Angie en método y descargas)
 - **Revisa:** Mimi
 - **Depende de:** P-INTERFAZ-07
 - **Momento:** Dom 14:00–19:00

@@ -99,7 +99,7 @@ dependencias. Esta tabla se genera de los SDD (`npm run ai:sync`).
 | 6 | `P-PROY-06` | Implementar el proyecto web base | [PROYECTO](01-proyecto.md) | `speckit-implement` | Joaco | P-PROY-05 | Antes del sábado 14, o sábado 9:00 si DP-02 no lo permite |
 | 7 | `P-PROY-07` | Verificar el proyecto web base | [PROYECTO](01-proyecto.md) | `speckit-converge` | Joaco | P-PROY-06 | Antes del sábado 14 |
 | 8 | `P-MAPA-01` | Especificar | [M-MAPA](m-mapa.md) | `speckit-specify` | Joaco | P-PROY-01 | Antes del sábado 14 |
-| 9 | `P-ATLAS-01` | Especificar | [M-ATLAS](m-atlas.md) | `speckit-specify` | Angie, Marian | P-PROY-01 | Antes del sábado 14 (textos de fichas) |
+| 9 | `P-ATLAS-01` | Especificar | [M-ATLAS](m-atlas.md) | `speckit-specify` | Angie | P-PROY-01 | Antes del sábado 14 (textos de fichas) |
 | 10 | `P-INTERFAZ-01` | Especificar | [M-INTERFAZ](m-interfaz.md) | `speckit-specify` | Angie, Marian | P-PROY-01 | Antes del sábado 14 |
 | 11 | `P-GLOBO-01` | Especificar | [M-GLOBO](m-globo.md) | `speckit-specify` | Joaco | P-PROY-01 | Antes del sábado 14 |
 | 12 | `P-INT-01` | Especificar la integración | [INTEGRACION](90-integracion.md) | `speckit-specify` | Equipo | P-MAPA-01, P-ATLAS-01, P-INTERFAZ-01, P-GLOBO-01 | Antes del sábado 14 |
@@ -107,17 +107,17 @@ dependencias. Esta tabla se genera de los SDD (`npm run ai:sync`).
 | 14 | `P-MAPA-03` | Planificar | [M-MAPA](m-mapa.md) | `speckit-plan` | Joaco | P-MAPA-02 | Antes del sábado 14 |
 | 15 | `P-MAPA-04` | Tareas | [M-MAPA](m-mapa.md) | `speckit-tasks` | Joaco | P-MAPA-03 | Antes del sábado 14 |
 | 16 | `P-MAPA-05` | Analizar | [M-MAPA](m-mapa.md) | `speckit-analyze` | Joaco | P-MAPA-04 | Antes del sábado 14 |
-| 17 | `P-ATLAS-02` | Aclarar | [M-ATLAS](m-atlas.md) | `speckit-clarify` | Angie, Marian | P-ATLAS-01 | Antes del sábado 14 |
-| 18 | `P-ATLAS-03` | Planificar | [M-ATLAS](m-atlas.md) | `speckit-plan` | Angie, Marian | P-ATLAS-02 | Antes del sábado 14 |
-| 19 | `P-ATLAS-04` | Tareas | [M-ATLAS](m-atlas.md) | `speckit-tasks` | Angie, Marian | P-ATLAS-03 | Antes del sábado 14 |
-| 20 | `P-ATLAS-05` | Analizar | [M-ATLAS](m-atlas.md) | `speckit-analyze` | Angie, Marian | P-ATLAS-04 | Antes del sábado 14 |
+| 17 | `P-ATLAS-02` | Aclarar | [M-ATLAS](m-atlas.md) | `speckit-clarify` | Angie | P-ATLAS-01 | Antes del sábado 14 |
+| 18 | `P-ATLAS-03` | Planificar | [M-ATLAS](m-atlas.md) | `speckit-plan` | Angie | P-ATLAS-02 | Antes del sábado 14 |
+| 19 | `P-ATLAS-04` | Tareas | [M-ATLAS](m-atlas.md) | `speckit-tasks` | Angie | P-ATLAS-03 | Antes del sábado 14 |
+| 20 | `P-ATLAS-05` | Analizar | [M-ATLAS](m-atlas.md) | `speckit-analyze` | Angie | P-ATLAS-04 | Antes del sábado 14 |
 | 21 | `P-INTERFAZ-02` | Aclarar | [M-INTERFAZ](m-interfaz.md) | `speckit-clarify` | Angie, Marian | P-INTERFAZ-01 | Antes del sábado 14 |
-| 22 | `P-INTERFAZ-03` | Planificar | [M-INTERFAZ](m-interfaz.md) | `speckit-plan` | Angie, Marian | P-INTERFAZ-02 | Antes del sábado 14 |
-| 23 | `P-INTERFAZ-04` | Tareas | [M-INTERFAZ](m-interfaz.md) | `speckit-tasks` | Angie, Marian | P-INTERFAZ-03 | Antes del sábado 14 |
-| 24 | `P-INTERFAZ-05` | Analizar | [M-INTERFAZ](m-interfaz.md) | `speckit-analyze` | Angie, Marian | P-INTERFAZ-04 | Antes del sábado 14 |
+| 22 | `P-INTERFAZ-03` | Planificar | [M-INTERFAZ](m-interfaz.md) | `speckit-plan` | Marian (con Angie en método y descargas) | P-INTERFAZ-02 | Antes del sábado 14 |
+| 23 | `P-INTERFAZ-04` | Tareas | [M-INTERFAZ](m-interfaz.md) | `speckit-tasks` | Marian (con Angie en método y descargas) | P-INTERFAZ-03 | Antes del sábado 14 |
+| 24 | `P-INTERFAZ-05` | Analizar | [M-INTERFAZ](m-interfaz.md) | `speckit-analyze` | Marian (con Angie en método y descargas) | P-INTERFAZ-04 | Antes del sábado 14 |
 | 25 | `P-MAPA-06` | Implementar mapa, deslizador, polarizaciones y capas | [M-MAPA](m-mapa.md) | `speckit-implement` | Joaco | P-MAPA-05, P-PROY-07 | Sáb 9:00–13:00 (primer par real) y Sáb 14:00–20:00 |
-| 26 | `P-ATLAS-06` | Implementar portada y fichas | [M-ATLAS](m-atlas.md) | `speckit-implement` | Angie, Marian | P-ATLAS-05, P-PROY-07 | Sáb 9:00–13:00 portada · Sáb 14:00–20:00 fichas |
-| 27 | `P-INTERFAZ-06` | Implementar panel y estados | [M-INTERFAZ](m-interfaz.md) | `speckit-implement` | Angie, Marian | P-INTERFAZ-05, P-PROY-07 | Sáb 9:00–13:00 panel · Sáb 14:00–20:00 estados |
+| 26 | `P-ATLAS-06` | Implementar portada y fichas | [M-ATLAS](m-atlas.md) | `speckit-implement` | Angie | P-ATLAS-05, P-PROY-07 | Sáb 9:00–13:00 portada · Sáb 14:00–20:00 fichas |
+| 27 | `P-INTERFAZ-06` | Implementar panel y estados | [M-INTERFAZ](m-interfaz.md) | `speckit-implement` | Marian | P-INTERFAZ-05, P-PROY-07 | Sáb 9:00–13:00 panel · Sáb 14:00–20:00 estados |
 | 28 | `P-GLOBO-02` | Aclarar | [M-GLOBO](m-globo.md) | `speckit-clarify` | Joaco | P-GLOBO-01 | Sáb 14:00 |
 | 29 | `P-GLOBO-03` | Planificar | [M-GLOBO](m-globo.md) | `speckit-plan` | Joaco | P-GLOBO-02 | Sáb 14:00–20:00 |
 | 30 | `P-GLOBO-04` | Tareas | [M-GLOBO](m-globo.md) | `speckit-tasks` | Joaco | P-GLOBO-03 | Sáb 14:00–20:00 |
@@ -126,12 +126,12 @@ dependencias. Esta tabla se genera de los SDD (`npm run ai:sync`).
 | 33 | `P-INT-02` | Planificar la integración | [INTEGRACION](90-integracion.md) | `speckit-plan` | Equipo | P-INT-01 | Sáb 14:00–20:00 |
 | 34 | `P-INT-03` | Tareas de la integración | [INTEGRACION](90-integracion.md) | `speckit-tasks` | Equipo | P-INT-02 | Sáb 14:00–20:00 |
 | 35 | `P-MAPA-07` | Implementar la línea de tiempo sincronizada | [M-MAPA](m-mapa.md) | `speckit-implement` | Joaco | P-MAPA-06 | Sáb 20:00–24:00 |
-| 36 | `P-INTERFAZ-07` | Implementar idioma, glosario, método, Acerca de, fuente y calidad y descargas | [M-INTERFAZ](m-interfaz.md) | `speckit-implement` | Angie, Marian | P-INTERFAZ-06 | Sáb 20:00–24:00 glosario e idioma · Dom 9:00–14:00 método, Acerca de, fuente y calidad, descargas |
+| 36 | `P-INTERFAZ-07` | Implementar idioma, glosario, método, Acerca de, fuente y calidad y descargas | [M-INTERFAZ](m-interfaz.md) | `speckit-implement` | Marian, Angie (Angie: método y descargas) | P-INTERFAZ-06 | Sáb 20:00–24:00 glosario e idioma · Dom 9:00–14:00 método, Acerca de, fuente y calidad, descargas |
 | 37 | `P-GLOBO-07` | Implementar huellas, cambio sobre el globo y respaldo 2D | [M-GLOBO](m-globo.md) | `speckit-implement` | Joaco | P-GLOBO-06 | Dom 9:00–14:00 huellas y cambio · Dom 14:00–19:00 respaldo 2D y celular |
 | 38 | `P-INT-04` | Implementar la integración | [INTEGRACION](90-integracion.md) | `speckit-implement` | Equipo | P-INT-03, P-MAPA-07, P-INTERFAZ-07, P-GLOBO-06 | Dom 9:00–14:00 |
 | 39 | `P-MAPA-08` | Verificar | [M-MAPA](m-mapa.md) | `speckit-converge` | Joaco | P-MAPA-07 | Dom 14:00–19:00 |
-| 40 | `P-ATLAS-07` | Verificar | [M-ATLAS](m-atlas.md) | `speckit-converge` | Angie, Marian | P-ATLAS-06 | Dom 14:00–19:00 |
-| 41 | `P-INTERFAZ-08` | Verificar | [M-INTERFAZ](m-interfaz.md) | `speckit-converge` | Angie, Marian | P-INTERFAZ-07 | Dom 14:00–19:00 |
+| 40 | `P-ATLAS-07` | Verificar | [M-ATLAS](m-atlas.md) | `speckit-converge` | Angie | P-ATLAS-06 | Dom 14:00–19:00 |
+| 41 | `P-INTERFAZ-08` | Verificar | [M-INTERFAZ](m-interfaz.md) | `speckit-converge` | Marian (con Angie en método y descargas) | P-INTERFAZ-07 | Dom 14:00–19:00 |
 | 42 | `P-GLOBO-08` | Verificar | [M-GLOBO](m-globo.md) | `speckit-converge` | Joaco | P-GLOBO-07 | Dom 14:00–19:00 |
 | 43 | `P-INT-05` | Verificar el recorrido completo | [INTEGRACION](90-integracion.md) | `speckit-converge` | Angie, Marian | P-INT-04, P-MAPA-08, P-ATLAS-07, P-INTERFAZ-08, P-GLOBO-08 | Dom 14:00–19:00 |
 | 44 | `P-INT-06` | Preparar la entrega | [INTEGRACION](90-integracion.md) | `entrega-hackathon` | Angie, Marian | P-INT-05 | Dom 19:00–23:00 |
