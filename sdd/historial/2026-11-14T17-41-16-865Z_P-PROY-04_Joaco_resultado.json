@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-PROY-04",
+  "resultado": "parcial",
+  "colaborador": "Joaco",
+  "nota": "Se generó specs/001-base-web/tasks.md con 51 tareas, responsables, identificadores, pruebas previas y paralelismo. npm run sdd:validar y git diff --check correctos. Bloqueo preexistente en dev: npm run ai:check informa ai/README.md desactualizado y npm run test:guardas falla 1 de 102 en ai/hooks/test/readme.test.mjs; tasks.md no modifica herramientas de IA.",
+  "hash": "3a353e6450",
+  "rama": "docs/64-tareas-base-web",
+  "fecha": "2026-11-14T17:41:16.865Z"
+}
