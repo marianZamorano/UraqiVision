@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-INTERFAZ-02",
+  "resultado": "hecho",
+  "colaborador": "Marian",
+  "nota": "5 aclaraciones: CQ-05 vista+cifra y 'control no reportado'; RF-11 marca+alternativa VC-02/VC-05+métricas no reportadas; glosario 22 términos de §30 + nuevos; créditos completos (URL pendiente DP-06); formatos por idioma en hora de Bolivia, CSV ISO UTC",
+  "hash": "335594c284",
+  "rama": "feat/43-spec-interfaz-bilingue",
+  "fecha": "2026-11-14T14:39:53.890Z"
+}
