@@ -1,4 +1,4 @@
-﻿import { expect, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 test('home page stays clear of Cesium and heavy globe assets before explore', async ({ page }) => {
   const heavyRequests: string[] = []
@@ -10,9 +10,16 @@ test('home page stays clear of Cesium and heavy globe assets before explore', as
     }
   })
 
-  await page.goto('http://127.0.0.1:4173/')
+  await page.goto('/')
   await page.waitForLoadState('networkidle')
 
   expect(heavyRequests).toEqual([])
   await expect(page.getByRole('link', { name: /explorar bolivia|explore bolivia/i })).toBeVisible()
+
+  await page.getByRole('link', { name: /explorar bolivia|explore bolivia/i }).click()
+
+  await expect.poll(
+    () => heavyRequests.some((url) => /cesium/i.test(url)),
+    { message: 'Cesium should load only after entering the explorer' },
+  ).toBe(true)
 })
