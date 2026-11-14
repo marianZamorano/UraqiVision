@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-INTERFAZ-01",
+  "decision": "ejecutar",
+  "colaborador": "Marian",
+  "nota": "Marian (#43), desde feat/42; con ajustes de guardian-alcance como notas en la spec: RF-15 a confirmar, RF-22 tal como se publica, CQ-05 sin umbral, DP-03 y DP-02 pendientes",
+  "hash": "6336f7a38c",
+  "rama": "feat/43-spec-interfaz-bilingue",
+  "fecha": "2026-11-14T14:33:20.977Z"
+}
