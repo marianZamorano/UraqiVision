@@ -5,6 +5,8 @@
 //   node ai/scripts/sdd.mjs ver <ID> [--asistente …]               un prompt concreto
 //   node ai/scripts/sdd.mjs confirmar <ID> --decision ejecutar|modificar|omitir [--nota "…"]
 //   node ai/scripts/sdd.mjs registrar <ID> --resultado hecho|parcial|conflicto|en-espera|omitido [--nota "…"]
+//   node ai/scripts/sdd.mjs registrar <ID> --vigente --nota "…"   el prompt cambió pero lo producido sigue vigente:
+//                                                                    actualiza la huella sin re-ejecutar (no propaga)
 //   node ai/scripts/sdd.mjs historial [--id ID] [--modulo M-…]     lo que pasó con cada prompt
 //   node ai/scripts/sdd.mjs validar                                estructura de todos los SDD (falla si hay errores)
 import fs from 'node:fs';
@@ -78,9 +80,15 @@ const comandos = {
   },
   registrar() {
     const p = buscar(posicional);
-    const resultado = valor('--resultado');
-    if (!RESULTADOS.includes(resultado)) { console.error(`--resultado debe ser ${RESULTADOS.join(', ')}`); process.exit(1); }
-    const archivo = escribirEntrada(root, { tipo: 'resultado', id: p.id, resultado, colaborador: yo, nota: valor('--nota') ?? '', hash: p.hash, rama: rama() });
+    const vigente = args.includes('--vigente');
+    const resultado = vigente ? 'hecho' : valor('--resultado');
+    if (!RESULTADOS.includes(resultado)) { console.error(`--resultado debe ser ${RESULTADOS.join(', ')} (o usa --vigente)`); process.exit(1); }
+    if (vigente) {
+      const previo = estados(prompts, leerHistorial(root)).get(p.id);
+      if (!previo?.hecho) { console.error(`${p.id} nunca se registró como «hecho»: --vigente solo confirma un resultado existente.`); process.exit(1); }
+      if (!valor('--nota')) { console.error('--vigente necesita --nota con el motivo por el que sigue vigente.'); process.exit(1); }
+    }
+    const archivo = escribirEntrada(root, { tipo: 'resultado', id: p.id, resultado, ...(vigente ? { vigente: true } : {}), colaborador: yo, nota: valor('--nota') ?? '', hash: p.hash, rama: rama() });
     const curso = leerEnCurso(root);
     if (resultado === 'en-espera') guardarEnCurso(root, { ...(curso ?? {}), id: p.id, estado: 'en-espera' });
     else if (curso?.id === p.id) borrarEnCurso(root);

@@ -107,6 +107,31 @@ test('estado, conflictos y siguiente prompt a partir del historial', () => {
   assert.match(textoSiguiente(null, est), /No quedan prompts pendientes/);
 });
 
+test('«vigente» actualiza la huella sin contar como re-ejecución para los dependientes', () => {
+  const s = parsearSdd(sdd({ prompts: prompt('P-MAPA-01', { orden: 1 }) + prompt('P-MAPA-02', { orden: 2, deps: 'P-MAPA-01' }) }), 'sdd/m-mapa.md');
+  const ps = s.prompts;
+  const r = (id, resultado, fecha, extra = {}) => ({ tipo: 'resultado', id, resultado, fecha, hash: ps.find((p) => p.id === id).hash, colaborador: 'Marian', ...extra });
+
+  // El prompt 01 cambió después de ejecutarse (huella vieja): aviso solo en 01.
+  let est = estados(ps, [r('P-MAPA-01', 'hecho', '2026-11-14T09:00:00Z', { hash: 'viejo' }), r('P-MAPA-02', 'hecho', '2026-11-14T10:00:00Z')]);
+  assert.match(est.get('P-MAPA-01').conflictos.join(), /cambió después de ejecutarse/);
+  assert.equal(est.get('P-MAPA-02').conflictos.length, 0);
+
+  // Registrar 01 como vigente: desaparece su aviso y 02 NO hereda «se ejecutó de nuevo».
+  est = estados(ps, [
+    r('P-MAPA-01', 'hecho', '2026-11-14T09:00:00Z', { hash: 'viejo' }),
+    r('P-MAPA-02', 'hecho', '2026-11-14T10:00:00Z'),
+    r('P-MAPA-01', 'hecho', '2026-11-14T11:00:00Z', { vigente: true }),
+  ]);
+  assert.equal(est.get('P-MAPA-01').conflictos.length, 0, 'vigente actualiza la huella');
+  assert.equal(est.get('P-MAPA-02').conflictos.length, 0, 'vigente no propaga a los dependientes');
+  assert.equal(est.get('P-MAPA-01').estado, 'hecho');
+
+  // Una re-ejecución real sí propaga.
+  est = estados(ps, [r('P-MAPA-01', 'hecho', '2026-11-14T09:00:00Z'), r('P-MAPA-02', 'hecho', '2026-11-14T10:00:00Z'), r('P-MAPA-01', 'hecho', '2026-11-14T11:00:00Z')]);
+  assert.match(est.get('P-MAPA-02').conflictos.join(), /P-MAPA-01 se ejecutó de nuevo después/);
+});
+
 test('adapta los comandos a cada asistente y detecta prompts modificados', () => {
   const t = '[SDD P-MAPA-01] /speckit-specify algo y luego /speckit-plan';
   assert.equal(paraAsistente(t, 'claude'), t);
