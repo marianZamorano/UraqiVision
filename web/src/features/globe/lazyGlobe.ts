@@ -1,4 +1,4 @@
-﻿// uraqi: vivo — lo carga el visor por nombre
+// uraqi: vivo — lo carga el visor por nombre
 export type GlobeModuleLoader<T> = () => Promise<T>
 
 export async function loadGlobeModule<T>(loader: GlobeModuleLoader<T>, fallback: T): Promise<T> {
@@ -8,4 +8,8 @@ export async function loadGlobeModule<T>(loader: GlobeModuleLoader<T>, fallback:
   catch {
     return fallback
   }
+}
+
+export async function loadCesiumModule() {
+  return import('cesium')
 }

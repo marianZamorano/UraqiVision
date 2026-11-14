@@ -1,5 +1,5 @@
-﻿// uraqi: vivo — lo carga el visor por nombre
-export type GlobeMode = 'ion' | 'textual'
+// uraqi: vivo — lo carga el visor por nombre
+export type GlobeMode = 'ion' | 'no-ion' | 'textual'
 
 export interface GlobeProviderOptions {
   token?: string
@@ -19,12 +19,20 @@ export function resolveGlobeProvider({
   textualFallback = true,
 }: GlobeProviderOptions = {}): GlobeProviderDecision {
   const normalizedToken = String(token ?? '').trim()
-  const canUseIon = webglAvailable && Boolean(normalizedToken) && Boolean(textualFallback)
+  const canUseIon = webglAvailable && Boolean(normalizedToken)
 
   if (canUseIon) {
     return {
       mode: 'ion',
       usesIonToken: true,
+      usesTextFallback: false,
+    }
+  }
+
+  if (webglAvailable) {
+    return {
+      mode: 'no-ion',
+      usesIonToken: false,
       usesTextFallback: false,
     }
   }
