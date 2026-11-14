@@ -12,6 +12,34 @@
 > del documento. Lo que el documento no fija se marca como **propuesta**, y lo que depende de §29 como
 > **pendiente (DP-xx)**.
 
+## Clarifications
+
+### Session 2026-11-14
+
+- Q: Cuando el resultado de calidad publicado marca el control de datos válidos (CQ-05) como
+  limitado, ¿qué hace la web? → A: La vista pasa al estado «datos limitados» y cada cifra afectada
+  lleva la marca «limitada». Si el control no viene publicado, se muestra «control de calidad no
+  reportado» con su motivo (RN-13), sin marcar la cifra como limitada y sin ocultarla.
+- Q: Si no hubo imagen Sentinel-2 válida, ¿qué muestra el panel en la validación? → A: La marca
+  «validación limitada», la alternativa usada tal como viene publicada en la validación (focos de calor
+  VC-02 y revisión visual VC-05) con enlace al método, y las métricas frente a Sentinel-2 como «no
+  reportadas» con su motivo (RN-13).
+- Q: ¿Qué términos entran en el glosario de la web? → A: Los 22 términos de §30 del documento, con su
+  definición, en español e inglés. Si el sitio usa otro término técnico que no está en §30, se añade y
+  se registra también en §30.
+- Q: ¿Qué créditos llevan el PNG del mapa y el CSV de hectáreas? → A: Nombre del sitio y de la
+  estación; fechas de adquisición en hora de Bolivia; fecha de generación y versión de los datos según
+  el manifiesto; fecha de descarga; cita de NISAR según su guía de citación (RN-11) y de FIRMS o
+  Sentinel-2 cuando aparezcan; licencia CC BY 4.0 (RNF-11). La URL del sitio queda pendiente de DP-06.
+- Q: ¿Cómo se formatean fechas y cifras en cada idioma? → A: Según el idioma y en hora de Bolivia
+  (UTC−04).
+  - En español: «14 nov 2026, 10:32 (hora de Bolivia, UTC−04)», con coma decimal y punto de miles
+    («1.234,5 ha»).
+  - En inglés: «Nov 14, 2026, 10:32 (Bolivia time, UTC−04)», con punto decimal y coma de miles
+    («1,234.5 ha»).
+  - La fecha UTC original se ve en la fuente.
+  - El CSV descargado usa siempre punto decimal y fechas ISO 8601 en UTC.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Entender una estación en un solo panel (Priority: P1)
@@ -196,12 +224,14 @@ incluye el mapa, las cifras, las fuentes y los límites.
 - **FR-002 (RN-03, HU-05)**: Cada cifra MUST mostrar su fuente, su fecha y su método, y enlazar a la
   página de método.
 - **FR-003 (RN-06)**: Las hectáreas MUST mostrarse siempre con su rango de sensibilidad.
-- **FR-004 (RN-07)**: Las fechas de adquisición MUST mostrarse en hora de Bolivia, con la indicación de
-  la zona. La fecha UTC original se conserva en la fuente.
+- **FR-004 (RN-07)**: Las fechas de adquisición MUST mostrarse en hora de Bolivia (UTC−04), con la
+  zona indicada. La fecha UTC original se ve en la fuente.
 - **FR-005 (RN-05)**: Las causas MUST presentarse como hipótesis con fuente, usando las cuatro clases de
   parche de RN-05.
-- **FR-006 (RF-11)**: Si la estación no tuvo imagen óptica válida para validar, el panel MUST decir
-  «validación limitada» y nombrar la alternativa usada.
+- **FR-006 (RF-11, VC-02, VC-05)**: Si la estación no tuvo imagen óptica válida para validar, el panel
+  MUST decir «validación limitada», nombrar la alternativa usada tal como se publica (focos de calor y
+  revisión visual) con enlace al método, y mostrar las métricas frente a la referencia óptica como «no
+  reportadas» con su motivo (RN-13).
 - **FR-007 (RF-33, DP-03)**: El panel MUST mostrar el porcentaje de datos válidos tal como se publica.
   **Pendiente (DP-03)**: su significado exacto depende de qué codifica la capa de máscara. Hasta que se
   resuelva, la web no interpreta ni recalcula ese valor.
@@ -214,16 +244,24 @@ incluye el mapa, las cifras, las fuentes y los límites.
 - **FR-009 (RN-13)**: Una métrica ausente MUST mostrarse como «no reportada» junto con su motivo. Ningún
   dato ausente se muestra como 0.
 - **FR-010 (CQ-05, RF-37)**: El estado «datos limitados» MUST salir de la marca publicada en el resultado
-  de calidad. La web no define ni calcula umbrales propios.
+  de calidad. La web no define ni calcula umbrales propios. Con esa marca, la vista pasa a «datos
+  limitados» y cada cifra afectada lleva la marca «limitada». Si el control no viene publicado, se
+  muestra «control de calidad no reportado» con su motivo, sin marcar ni ocultar la cifra (RN-13).
 - **FR-011 (RF-34)**: Los estados MUST poder reutilizarse en el mapa (M-MAPA) y en el globo (M-GLOBO).
 
 **Idioma y glosario**
 
 - **FR-012 (RF-20, RNF-03)**: La persona MUST poder alternar entre español e inglés sin recargar, sin
   perder la vista actual y con el 100 % de los textos traducidos.
-- **FR-013 (RN-07)**: Las cifras y fechas MUST formatearse según el idioma activo, sin cambiar su valor.
-- **FR-014 (RF-19)**: Cada término de radar que usa el sitio MUST tener una definición en los dos
-  idiomas, que se abre al pasar el cursor, al tocar o con el teclado.
+- **FR-013 (RN-07, RF-20)**: Las cifras y fechas MUST formatearse según el idioma activo y sin cambiar
+  su valor:
+  - Español: «14 nov 2026, 10:32 (hora de Bolivia, UTC−04)» y «1.234,5 ha».
+  - Inglés: «Nov 14, 2026, 10:32 (Bolivia time, UTC−04)» y «1,234.5 ha».
+  - El CSV descargado no depende del idioma: usa punto decimal y fechas ISO 8601 en UTC, para que se
+    pueda reutilizar.
+- **FR-014 (RF-19)**: El glosario MUST incluir los 22 términos de §30, con la definición del
+  documento en los dos idiomas, más cualquier otro término técnico que use el sitio (que se registra
+  también en §30). Cada término marcado se abre al pasar el cursor, al tocar o con el teclado.
 
 **Descargas**
 
@@ -231,6 +269,15 @@ incluye el mapa, las cifras, las fuentes y los límites.
   hectáreas, rango inferior y superior, fuente y créditos, y con cifras idénticas a las publicadas.
 - **FR-016 (RF-21)**: La persona MUST poder descargar una imagen del mapa que ve, con fecha, fuente y
   créditos.
+- **FR-016a (RF-21, RN-11, RNF-11)**: La tabla y la imagen descargadas MUST llevar:
+  - el nombre del sitio y de la estación;
+  - las fechas de adquisición en hora de Bolivia;
+  - la fecha de generación y la versión de los datos (del manifiesto);
+  - la fecha de descarga;
+  - la cita de NISAR según su guía, y la de FIRMS o Sentinel-2 cuando aparezcan;
+  - la licencia CC BY 4.0.
+
+  **Pendiente (DP-06)**: la URL del sitio.
 - **FR-017 (RF-22)**: La persona MUST poder descargar el archivo de cambio, el de cicatrices y el
   manifiesto de cada estación **tal como se publican**, sin transformarlos. El formato, la
   georreferenciación y la licencia de esos archivos son de M-PUBLICACIÓN (backend).
@@ -299,8 +346,8 @@ los recalcula.
   de contraste ni de accesibilidad graves en la revisión automática y manual.
 - **SC-007 (RF-20)**: Al cambiar de idioma no hay recarga y la vista (estación, fecha y capa) se conserva
   en el 100 % de las pantallas.
-- **SC-008 (RF-19)**: El 100 % de los términos de radar del sitio tienen una entrada en el glosario en
-  los dos idiomas.
+- **SC-008 (RF-19)**: Los 22 términos de §30 y cualquier otro término técnico del sitio tienen una
+  entrada en el glosario en los dos idiomas (100 %).
 
 ## Assumptions
 
@@ -308,11 +355,8 @@ los recalcula.
   (P-PROY-02 y P-PROY-03, de Joaco). Su implementación espera a P-PROY-07.
 - La estructura de archivos de §17.3 es una propuesta de diseño del equipo. Si M-PUBLICACIÓN la cambia,
   esta spec se actualiza.
-- **Propuesta**: los créditos del PNG y del CSV incluyen el nombre del sitio, la fuente de los datos
-  (NISAR y, cuando aplique, FIRMS y Sentinel-2) y la fecha de descarga. El texto exacto se fija en las
-  aclaraciones (P-INTERFAZ-02).
-- **Propuesta**: el glosario cubre al menos los términos de radar que aparecen en el panel, el método y
-  las capas. La lista se cierra en las aclaraciones.
+- El texto literal de la cita de NISAR (y de FIRMS y Sentinel-2) se toma de sus guías oficiales de
+  citación (RN-11, §31). No se redacta de memoria.
 - Fuera de alcance:
   - Insight (M-INSIGHT, backend; HU-03 solo se cubre aquí en lo que toca al glosario).
   - Todo lo de §8.2.
