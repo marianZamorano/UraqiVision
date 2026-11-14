@@ -147,15 +147,18 @@ export function escribirEntrada(root, entrada) {
 /**
  * Estado de cada prompt: { estado: 'pendiente'|RESULTADOS, ultima, hecho, conflictos: [] }.
  * Conflictos: resultado «conflicto»; el prompt cambió después de ejecutarse; una dependencia se ejecutó de nuevo
- * después que este prompt.
+ * después que este prompt. Un «hecho» con `vigente: true` (registrar --vigente) actualiza la huella del prompt
+ * pero no es una re-ejecución: no pone en conflicto a los prompts que dependen de él.
  */
 export function estados(prompts, historial) {
   const res = new Map();
   for (const p of prompts) {
     const propias = historial.filter((h) => h.id === p.id && h.tipo === 'resultado');
     const ultima = propias.at(-1) ?? null;
-    const hecho = [...propias].reverse().find((h) => h.resultado === 'hecho') ?? null;
-    res.set(p.id, { estado: ultima?.resultado ?? 'pendiente', ultima, hecho, conflictos: [] });
+    const hechos = propias.filter((h) => h.resultado === 'hecho');
+    const hecho = hechos.at(-1) ?? null;
+    const hechoReal = [...hechos].reverse().find((h) => !h.vigente) ?? null;
+    res.set(p.id, { estado: ultima?.resultado ?? 'pendiente', ultima, hecho, hechoReal, conflictos: [] });
   }
   for (const p of prompts) {
     const s = res.get(p.id);
@@ -163,7 +166,7 @@ export function estados(prompts, historial) {
     if (s.hecho && s.hecho.hash && p.hash && s.hecho.hash !== p.hash) s.conflictos.push(`el prompt cambió después de ejecutarse (${s.hecho.fecha.slice(0, 16)}): revisa si hay que ejecutarlo de nuevo`);
     for (const d of p.dependencias) {
       const ds = res.get(d);
-      if (s.hecho && ds?.hecho && ds.hecho.fecha > s.hecho.fecha) s.conflictos.push(`${d} se ejecutó de nuevo después: revisa si este resultado sigue vigente`);
+      if (s.hecho && ds?.hechoReal && ds.hechoReal.fecha > s.hecho.fecha) s.conflictos.push(`${d} se ejecutó de nuevo después: revisa si este resultado sigue vigente`);
     }
   }
   return res;

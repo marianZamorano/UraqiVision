@@ -52,6 +52,10 @@ análisis, una historia a la vez en la implementación). Si te detienes a espera
 - `npm run sdd:estado` marca como conflicto: un prompt **cambiado después de ejecutarse**, una **dependencia
   re-ejecutada** después y los resultados registrados como `conflicto`. Ante un conflicto, explícalo a la persona y
   propón: volver a ejecutar, modificar el prompt o registrar por qué sigue vigente.
+- **Sigue vigente**: si el prompt cambió pero lo que produjo ya es correcto, registra
+  `node ai/scripts/sdd.mjs registrar <ID> --vigente --nota "<motivo>"`. Actualiza la huella sin contar como
+  re-ejecución, así que **no** pone en conflicto a los prompts que dependen de él. Nunca uses
+  `--resultado hecho` para esto: cuenta como re-ejecución y propaga el conflicto a todos sus dependientes.
 - `npm run sdd:historial -- --id <ID>` muestra todo lo que pasó con un prompt.
 - Un cambio de estructura de un SDD debe seguir `sdd/00-estructura.md`; `npm run sdd:validar` y el hook pre-commit
   lo comprueban.
