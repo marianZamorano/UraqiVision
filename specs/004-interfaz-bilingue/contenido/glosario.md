@@ -1,7 +1,7 @@
 # Glosario bilingüe (RF-19) — borrador
 
 - **Estado**: borrador para revisar. Revisa Mimi (§19).
-- **Fuente**: §30 del documento maestro v1.0 (12 nov 2026).
+- **Fuente**: §30 del documento maestro v1.1 (14 nov 2026; §30 no cambia respecto de la v1.0).
 - **Spec**: FR-014 y FR-014a de `specs/004-interfaz-bilingue/spec.md`.
 
 La definición en español es **literal** del documento. La traducción al inglés es **propuesta** y hay
