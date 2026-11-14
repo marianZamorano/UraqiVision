@@ -39,7 +39,7 @@ App única en `web/`, definida por 001: `web/src/features/interface/`, `web/src/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear `web/src/features/interface/` con las subcarpetas `panel/`, `hectareas/`, `glosario/`, `fuente-calidad/` y `formato/`, según `plan.md`. Las carpetas `descargas/` e `idioma/` las crea quien las implemente, junto con su código (sin carpetas vacías, por código vivo) — Marian
+- [X] T001 Crear `web/src/features/interface/` con las subcarpetas `panel/`, `hectareas/`, `glosario/`, `fuente-calidad/` y `formato/`, según `plan.md`. Las carpetas `descargas/` e `idioma/` las crea quien las implemente, junto con su código (sin carpetas vacías, por código vivo) — Marian
 - [ ] T002 [P] Ampliar los datos de prueba de 001 (T024) en `web/tests/fixtures/published-data/` **solo con los juegos que faltan**: sin control CQ-05, sin Sentinel-2 válida y sin rango de hectáreas. Todos llevan `evidenceMode: "DEMO"` (RN-04, PS-04) — Marian
 
 ---
@@ -47,8 +47,8 @@ App única en `web/`, definida por 001: `web/src/features/interface/`, `web/src/
 ## Phase 2: Foundational (bloquea todas las historias)
 
 - [ ] T003 Llevar a una issue o PR conjunta con Joaco y Mimi la propuesta `contracts/interface-extensions.ts` y registrar lo acordado en `specs/004-interfaz-bilingue/contracts/README.md` (RN-05, RN-06, RF-11, RF-37, CQ-05) — Marian
-- [ ] T004 [P] Escribir pruebas de `formatearFecha` (hora de Bolivia, UTC−04, es y en; CP-05) y `formatearHectareas` (separadores por idioma; CP-02) en `web/tests/unit/formato.test.ts` (RN-07, PS-04) — Marian
-- [ ] T005 [P] Implementar `formatearFecha` y `formatearHectareas` con `Intl` y `timeZone: 'America/La_Paz'` en `web/src/features/interface/formato/formato.ts` (RN-07, FR-004, FR-013) — Marian
+- [X] T004 [P] Escribir pruebas de `formatearFecha` (hora de Bolivia, UTC−04, es y en; CP-05) y `formatearHectareas` (separadores por idioma; CP-02) en `web/tests/unit/formato.test.ts` (RN-07, PS-04) — Marian
+- [X] T005 [P] Implementar `formatearFecha` y `formatearHectareas` con `Intl` y `timeZone: 'America/La_Paz'` en `web/src/features/interface/formato/formato.ts` (RN-07, FR-004, FR-013) — Marian
 - [ ] T006 Añadir los tipos acordados en T003 a `web/src/contracts/` y sus validadores a la capa de datos de 001, sin normalizar ausencias a 0 (RN-13, RF-37) — Marian
 - [ ] T007 [P] Escribir pruebas del adaptador `aCifraMostrada`, que convierte `ReportableValue` y controles en `DisplayedFigure` con las marcas `none`, `limited`, `not-reported`, `range-not-reported` y `control-not-reported`, en `web/tests/unit/cifra.test.ts` (FR-009, FR-010, CP-03, CP-13, CP-20, PS-04) — Marian
 - [ ] T008 Implementar `aCifraMostrada` en `web/src/features/interface/panel/cifra.ts`, sin umbrales propios (CQ-05, RN-13) — Marian
