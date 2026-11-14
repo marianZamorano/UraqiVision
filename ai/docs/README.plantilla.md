@@ -10,8 +10,8 @@ interfaz bilingüe es/en), que traduce datos del radar NISAR en mapas, cifras e 
 archivos de cada estación (§17.3) y `POST /api/insight` (§21.1).
 
 - Reglas del proyecto para personas y asistentes de IA: [`AGENTS.md`](../AGENTS.md).
-- Fuente de verdad: [`docs/UraqiVisionDocumentoMaestrov1.0.pdf`](../docs/UraqiVisionDocumentoMaestrov1.0.pdf)
-  (copia para buscar: `docs/UraqiVisionDocumentoMaestrov1.0.txt`).
+- Fuente de verdad: [`docs/UraqiVisionDocumentoMaestrov1.1.pdf`](../docs/UraqiVisionDocumentoMaestrov1.1.pdf)
+  (copia para buscar: `docs/UraqiVisionDocumentoMaestrov1.1.txt`).
 
 > **Esta ayuda está siempre al día**: `ai/sync.mjs` genera este archivo a partir de
 > `ai/docs/README.plantilla.md` y de las fuentes de cada skill, subagente, servidor MCP, hook, workflow y script.

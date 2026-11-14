@@ -213,7 +213,7 @@
       "citadaEn": [
         {
           "seccion": "§18",
-          "uso": "globo 3D: licencia Apache 2.0, mapa base abierto, sin token de Cesium ion y con su atribución"
+          "uso": "globo 3D: licencia Apache 2.0, Cesium ion con token público restringido, respaldos sin ion/2D y atribución"
         }
       ],
       "aplicaA": {
