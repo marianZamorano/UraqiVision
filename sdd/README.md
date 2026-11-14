@@ -117,7 +117,7 @@ dependencias. Esta tabla se genera de los SDD (`npm run ai:sync`).
 | 24 | `P-INTERFAZ-05` | Analizar | [M-INTERFAZ](m-interfaz.md) | `speckit-analyze` | Marian (con Angie en método y descargas) | P-INTERFAZ-04 | Antes del sábado 14 |
 | 25 | `P-MAPA-06` | Implementar mapa, deslizador, polarizaciones y capas | [M-MAPA](m-mapa.md) | `speckit-implement` | Joaco | P-MAPA-05, P-PROY-07 | Sáb 9:00–13:00 (primer par real) y Sáb 14:00–20:00 |
 | 26 | `P-ATLAS-06` | Implementar portada y fichas | [M-ATLAS](m-atlas.md) | `speckit-implement` | Angie | P-ATLAS-05, P-PROY-07 | Sáb 9:00–13:00 portada · Sáb 14:00–20:00 fichas |
-| 27 | `P-INTERFAZ-06` | Implementar panel y estados | [M-INTERFAZ](m-interfaz.md) | `speckit-implement` | Marian | P-INTERFAZ-05, P-PROY-07 | Sáb 9:00–13:00 panel · Sáb 14:00–20:00 estados |
+| 27 | `P-INTERFAZ-06` | Implementar panel y estados | [M-INTERFAZ](m-interfaz.md) | `speckit-implement` | Marian | P-INTERFAZ-05, P-PROY-05 | Sáb 9:00–13:00 panel · Sáb 14:00–20:00 estados |
 | 28 | `P-GLOBO-02` | Aclarar | [M-GLOBO](m-globo.md) | `speckit-clarify` | Joaco | P-GLOBO-01 | Sáb 14:00 |
 | 29 | `P-GLOBO-03` | Planificar | [M-GLOBO](m-globo.md) | `speckit-plan` | Joaco | P-GLOBO-02 | Sáb 14:00–20:00 |
 | 30 | `P-GLOBO-04` | Tareas | [M-GLOBO](m-globo.md) | `speckit-tasks` | Joaco | P-GLOBO-03 | Sáb 14:00–20:00 |

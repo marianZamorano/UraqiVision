@@ -201,14 +201,14 @@ y `npm run referencias:revisar`.
 - **Comando:** speckit-implement
 - **Ejecuta:** Marian
 - **Revisa:** Mimi
-- **Depende de:** P-INTERFAZ-05, P-PROY-07
+- **Depende de:** P-INTERFAZ-05, P-PROY-05
 - **Momento:** Sáb 9:00–13:00 panel · Sáb 14:00–20:00 estados
 - **Produce:** panel de la estación (RF-33) y estados de la vista (RF-34)
 - **Herramientas:** skills `test-driven-development`, `interfaz-bilingue-accesible`, `flujo-issues-y-pr`
 - **Verificación:** PS-04 de estados y RN-13 en verde
 
 ```text
-[SDD P-INTERFAZ-06] /speckit-implement Implementa de specs/004-interfaz-bilingue las historias del panel de la estación (RF-33) y de los estados de la vista (RF-34), una tarea a la vez y prueba primero (PS-04, RN-13: nunca cero en lugar de un dato ausente). Las cifras salen tal cual de los archivos publicados, con su rango (RN-06). Crea el issue y la rama tipo/N desde dev (skill flujo-issues-y-pr); un commit por tarea con su identificador. Detente al terminar cada historia y muéstrame la evidencia.
+[SDD P-INTERFAZ-06] /speckit-implement Arranca solo cuando la fase 1 de specs/001-base-web (T001 a T004: web/ con React, Vite, Vitest y tokens) esté fusionada en dev; nunca crees web/ ni dupliques nada de 001. Implementa de specs/004-interfaz-bilingue primero el setup, la parte común y el panel de la estación (T001 a T017, RF-33) y después los estados de la vista (T018 a T023, RF-34), que esperan al ViewStatePresenter de 001 (T029); una tarea a la vez y prueba primero (PS-04, RN-13: nunca cero en lugar de un dato ausente). Las cifras salen tal cual de los archivos publicados, con su rango (RN-06). Crea el issue y la rama tipo/N desde dev (skill flujo-issues-y-pr); un commit por tarea con su identificador. Detente al terminar cada historia y muéstrame la evidencia.
 ```
 
 ### P-INTERFAZ-07 · Implementar idioma, glosario, método, Acerca de, fuente y calidad y descargas
