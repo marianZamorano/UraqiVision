@@ -24,15 +24,15 @@
   «validación limitada», la alternativa usada tal como viene publicada en la validación (focos de calor
   VC-02 y revisión visual VC-05) con enlace al método, y las métricas frente a Sentinel-2 como «no
   reportadas» con su motivo (RN-13).
-- Q: ¿Qué términos entran en el glosario de la web? → A: Los 22 términos de §30 del documento, con su
-  definición, en español e inglés. Si el sitio usa otro término técnico que no está en §30, se añade y
-  se registra también en §30.
+- Q: ¿Qué términos entran en el glosario de la web? → A: Todos los términos de §30 del documento (21 a
+  fecha de hoy), con su definición, en español e inglés. Si el sitio usa otro término técnico que no
+  está en §30, se propone al equipo para añadirlo a §30 (§1, §28) antes de incluirlo.
 - Q: ¿Qué créditos llevan el PNG del mapa y el CSV de hectáreas? → A: Nombre del sitio y de la
   estación; fechas de adquisición en hora de Bolivia; fecha de generación y versión de los datos según
   el manifiesto; fecha de descarga; cita de NISAR según su guía de citación (RN-11) y de FIRMS o
   Sentinel-2 cuando aparezcan; licencia CC BY 4.0 (RNF-11). La URL del sitio queda pendiente de DP-06.
 - Q: ¿Cómo se formatean fechas y cifras en cada idioma? → A: Según el idioma y en hora de Bolivia
-  (UTC−04).
+  (UTC−04). **Propuesta**: RN-07 solo fija «hora de Bolivia»; el formato concreto es decisión de diseño.
   - En español: «14 nov 2026, 10:32 (hora de Bolivia, UTC−04)», con coma decimal y punto de miles
     («1.234,5 ha»).
   - En inglés: «Nov 14, 2026, 10:32 (Bolivia time, UTC−04)», con punto decimal y coma de miles
@@ -123,7 +123,8 @@ abre con el ratón, con el tacto y con el teclado.
 2. **Given** cifras y fechas, **When** cambia el idioma, **Then** usan el formato de ese idioma (separador
    decimal y formato de fecha) sin cambiar su valor (RN-07).
 3. **Given** un término de radar marcado, **When** la persona pasa el cursor, lo toca o llega a él con el
-   teclado, **Then** ve su definición en el idioma activo y la puede cerrar con Escape (RF-19, RNF-04).
+   teclado, **Then** ve su definición en el idioma activo y la puede cerrar con Escape, con un botón
+   «cerrar» o tocando fuera. Al cerrarla, el foco vuelve al término (RF-19, RNF-04).
 4. **Given** todos los términos de radar que usa el sitio, **When** se revisa el glosario, **Then** cada
    uno tiene su definición en los dos idiomas (RF-19).
 
@@ -181,7 +182,30 @@ se puede llegar a ellas desde todo el sitio.
    sus roles, las licencias (código MIT; textos y datos derivados CC BY 4.0), las fuentes y las citas de
    datos de NISAR, FIRMS y las fuentes bolivianas según sus guías (RF-24, RN-11, RNF-11).
 4. **Given** contenido generado con IA en la página, **When** se muestra, **Then** no usa logos ni marcas
-   de la NASA (RN-12).
+   de la NASA, y las imágenes generadas con IA llevan marca de agua (RN-12).
+
+---
+
+### User Story 5b - Usar el panel y las descargas en el celular, en campo (Priority: P2)
+
+Un guardaparque consulta la estación desde su celular, al aire libre. Lee el panel sin desplazarse en
+horizontal, abre el glosario tocando y descarga la tabla y la imagen.
+
+**Why this priority**: RNF-05 exige que en el celular los paneles se puedan usar, y §20.2 pide contraste
+para leer en celular al aire libre.
+
+**Independent Test**: con 320 px de ancho y con 200 % de zoom, se recorren el panel, los estados, el
+glosario y las descargas en Safari de iOS y Chrome de Android (las dos últimas versiones).
+
+**Acceptance Scenarios**:
+
+1. **Given** una pantalla de 320 px de ancho o con 200 % de zoom, **When** se abre el panel, **Then** todo
+   se lee y se usa sin desplazamiento horizontal y sin perder información (RNF-05, WCAG 1.4.10).
+2. **Given** el celular, **When** la persona descarga la tabla o la imagen, **Then** la descarga funciona
+   en Safari de iOS y Chrome de Android (RF-21, RNF-05).
+3. **Given** uso al aire libre, **When** se ve el panel, **Then** el texto y las marcas cumplen el
+   contraste de §20.2. **Propuesta al equipo**: el umbral de contraste para uso al aire libre (el
+   documento no lo fija; como mínimo, el de WCAG 2.2 AA).
 
 ---
 
@@ -228,7 +252,7 @@ incluye el mapa, las cifras, las fuentes y los límites.
   zona indicada. La fecha UTC original se ve en la fuente.
 - **FR-005 (RN-05)**: Las causas MUST presentarse como hipótesis con fuente, usando las cuatro clases de
   parche de RN-05.
-- **FR-006 (RF-11, VC-02, VC-05)**: Si la estación no tuvo imagen óptica válida para validar, el panel
+- **FR-006 (RF-33; muestra el contenido de RF-11, VC-02 y VC-05 que publica M-VALIDACIÓN)**: Si la estación no tuvo imagen óptica válida para validar, el panel
   MUST decir «validación limitada», nombrar la alternativa usada tal como se publica (focos de calor y
   revisión visual) con enlace al método, y mostrar las métricas frente a la referencia óptica como «no
   reportadas» con su motivo (RN-13).
@@ -241,6 +265,12 @@ incluye el mapa, las cifras, las fuentes y los límites.
 - **FR-008 (RF-34)**: Toda vista que carga datos MUST estar siempre en uno de estos seis estados:
   cargando, resultado disponible, datos limitados, sin datos, fecha incompatible o error con reintento.
   Cada estado tiene su mensaje en los dos idiomas.
+- **FR-008a (RF-34, RNF-04)**: Los cambios de estado MUST anunciarse a los lectores de pantalla sin
+  mover el foco (WCAG 4.1.3).
+  - El error se anuncia de inmediato.
+  - El fin o el fallo de una descarga también se anuncian.
+  - Tras pulsar «reintentar», el foco MUST quedar en el contenido cargado o, si vuelve a fallar, en el
+    mensaje de error. Nunca se pierde.
 - **FR-009 (RN-13)**: Una métrica ausente MUST mostrarse como «no reportada» junto con su motivo. Ningún
   dato ausente se muestra como 0.
 - **FR-010 (CQ-05, RF-37)**: El estado «datos limitados» MUST salir de la marca publicada en el resultado
@@ -253,15 +283,26 @@ incluye el mapa, las cifras, las fuentes y los límites.
 
 - **FR-012 (RF-20, RNF-03)**: La persona MUST poder alternar entre español e inglés sin recargar, sin
   perder la vista actual y con el 100 % de los textos traducidos.
+- **FR-012a (RF-20, RNF-04)**: Al cambiar de idioma:
+  - el idioma declarado de la página MUST cambiar con él (WCAG 3.1.1);
+  - el foco MUST quedarse en el selector de idioma;
+  - el selector MUST tener un nombre accesible e indicar el idioma activo.
 - **FR-013 (RN-07, RF-20)**: Las cifras y fechas MUST formatearse según el idioma activo y sin cambiar
   su valor:
   - Español: «14 nov 2026, 10:32 (hora de Bolivia, UTC−04)» y «1.234,5 ha».
   - Inglés: «Nov 14, 2026, 10:32 (Bolivia time, UTC−04)» y «1,234.5 ha».
   - El CSV descargado no depende del idioma: usa punto decimal y fechas ISO 8601 en UTC, para que se
     pueda reutilizar.
-- **FR-014 (RF-19)**: El glosario MUST incluir los 22 términos de §30, con la definición del
-  documento en los dos idiomas, más cualquier otro término técnico que use el sitio (que se registra
-  también en §30). Cada término marcado se abre al pasar el cursor, al tocar o con el teclado.
+- **FR-014 (RF-19)**: El glosario MUST incluir todos los términos de §30, con la definición del
+  documento en los dos idiomas. Cualquier otro término técnico que use el sitio se propone antes al
+  equipo para añadirlo a §30. Cada término marcado se abre al pasar el cursor, al tocar o con el
+  teclado.
+- **FR-014a (RF-19, RNF-04)**: El término MUST ser un control con nombre accesible que no cambia de
+  página. Su definición:
+  - se cierra con Escape, con un botón «cerrar» de al menos 24 × 24 px o al tocar fuera;
+  - no desaparece mientras el cursor está sobre ella ni sin que la persona la cierre (WCAG 1.4.13).
+
+  Al cerrarla, el foco vuelve al término.
 
 **Descargas**
 
@@ -269,6 +310,9 @@ incluye el mapa, las cifras, las fuentes y los límites.
   hectáreas, rango inferior y superior, fuente y créditos, y con cifras idénticas a las publicadas.
 - **FR-016 (RF-21)**: La persona MUST poder descargar una imagen del mapa que ve, con fecha, fuente y
   créditos.
+  - La imagen MUST incluir la leyenda, las unidades, la órbita, la polarización y la trama de las zonas
+    sin dato, según las reglas de visualización de §20.
+  - Sus textos y créditos van en el idioma activo.
 - **FR-016a (RF-21, RN-11, RNF-11)**: La tabla y la imagen descargadas MUST llevar:
   - el nombre del sitio y de la estación;
   - las fechas de adquisición en hora de Bolivia;
@@ -281,8 +325,9 @@ incluye el mapa, las cifras, las fuentes y los límites.
 - **FR-017 (RF-22)**: La persona MUST poder descargar el archivo de cambio, el de cicatrices y el
   manifiesto de cada estación **tal como se publican**, sin transformarlos. El formato, la
   georreferenciación y la licencia de esos archivos son de M-PUBLICACIÓN (backend).
-- **FR-018 (RN-13)**: Si un archivo descargable no existe, MUST mostrarse como no disponible con su
-  motivo.
+- **FR-018 (RN-13, RNF-04)**: Si un archivo descargable no existe, MUST mostrarse como no disponible
+  con su motivo. El control MUST seguir siendo alcanzable con el teclado, y el lector de pantalla MUST
+  leer el motivo junto al control.
 
 **Fuente y calidad, método y Acerca de**
 
@@ -297,13 +342,22 @@ incluye el mapa, las cifras, las fuentes y los límites.
   sitio, con el equipo y sus roles, las licencias, las fuentes y las citas de datos de NISAR, FIRMS y
   las fuentes bolivianas según sus guías. **Pendiente (DP-02)**: si la página debe incluir la
   declaración de uso de IA y en qué forma depende de las guías 2026 de Space Apps.
-- **FR-022 (RN-12)**: Ningún contenido generado con IA MUST usar logos ni marcas de la NASA.
+- **FR-022 (RN-12)**: El contenido generado con IA MUST NOT usar logos ni marcas de la NASA. Las
+  imágenes generadas con IA MUST llevar marca de agua.
 
 **Accesibilidad**
 
 - **FR-023 (RNF-04)**: Todo lo anterior MUST poder usarse con el teclado, con el foco visible, con el
-  contraste WCAG 2.2 AA y con textos alternativos en las imágenes.
-- **FR-024 (RNF-12)**: Las animaciones MUST respetar la preferencia del sistema de reducir movimiento.
+  contraste WCAG 2.2 AA y con textos alternativos. En particular:
+  - El foco no queda tapado por paneles fijos (2.4.11).
+  - Los objetivos táctiles miden al menos 24 × 24 px (2.5.8).
+  - Las marcas «limitada», «no reportada» y «validación limitada» cumplen el contraste de componentes
+    (1.4.11) y no dependen solo del color o de un ícono (1.4.1).
+  - El texto alternativo de cada vista o imagen dice la fecha, la órbita, la polarización y qué
+    muestra (§20.2).
+- **FR-024 (RNF-12, PS-07)**: Las animaciones MUST respetar la preferencia del sistema de reducir
+  movimiento. Con esa preferencia activa, el estado «cargando» se sigue percibiendo con un texto o un
+  indicador estático, sin animación.
 
 **Plus (solo si sobra tiempo, §13)**
 
@@ -342,12 +396,18 @@ los recalcula.
 - **SC-004 (RF-22)**: Los archivos de datos descargados son idénticos byte a byte a los publicados.
 - **SC-005 (RF-33, HU-05)**: Una persona sin conocimientos de radar encuentra, en menos de 1 minuto, las
   hectáreas con su rango y la fuente de esa cifra a partir del panel.
-- **SC-006 (RNF-04)**: Todas las acciones de esta feature se completan solo con el teclado, sin errores
-  de contraste ni de accesibilidad graves en la revisión automática y manual.
+- **SC-006 (RNF-04)**: Todas las acciones de esta feature se completan solo con el teclado. La revisión
+  automática de accesibilidad da 0 violaciones serias o críticas en cada pantalla y estado, y la
+  revisión manual cumple los criterios de FR-008a, FR-012a, FR-014a y FR-023.
+- **SC-009 (RNF-05)**: El panel, los estados, el glosario y las descargas se usan sin desplazamiento
+  horizontal a 320 px de ancho y con 200 % de zoom, en las dos últimas versiones de Safari de iOS y de
+  Chrome de Android.
+- **SC-010 (RNF-12, PS-07)**: Con la preferencia de reducir movimiento activa, una prueba confirma que no
+  hay animaciones y que todos los estados se siguen percibiendo.
 - **SC-007 (RF-20)**: Al cambiar de idioma no hay recarga y la vista (estación, fecha y capa) se conserva
   en el 100 % de las pantallas.
-- **SC-008 (RF-19)**: Los 22 términos de §30 y cualquier otro término técnico del sitio tienen una
-  entrada en el glosario en los dos idiomas (100 %).
+- **SC-008 (RF-19)**: El 100 % de los términos de §30, y de los que el equipo añada, tienen una
+  entrada en el glosario en los dos idiomas.
 
 ## Assumptions
 
