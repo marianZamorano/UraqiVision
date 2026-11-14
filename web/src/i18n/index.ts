@@ -22,6 +22,12 @@ export const dictionaries = {
       explore: {
         title: 'Explorador',
         description: 'Seleccione una estación pública para abrir su análisis o detalle.',
+        globeAttribution: 'La experiencia 3D conserva una alternativa textual y reconoce el proveedor visual.',
+        globeAttributionLink: 'Atribución de Cesium',
+        stationListLabel: 'Estaciones disponibles',
+        fallbackWebglUnavailable:
+          'Este navegador no puede mostrar el globo 3D (WebGL no disponible). Usa la lista de estaciones para explorar.',
+        fallbackLoadFailed: 'No se pudo cargar el globo 3D. Usa la lista de estaciones para explorar.',
       },
       method: {
         title: 'Método',
@@ -67,6 +73,12 @@ export const dictionaries = {
       explore: {
         title: 'Explorer',
         description: 'Select a public station to open its analysis or detail view.',
+        globeAttribution: 'The 3D experience keeps a textual alternative and credits its visual provider.',
+        globeAttributionLink: 'Cesium attribution',
+        stationListLabel: 'Available stations',
+        fallbackWebglUnavailable:
+          'This browser cannot display the 3D globe (WebGL unavailable). Use the station list to explore.',
+        fallbackLoadFailed: 'The 3D globe could not be loaded. Use the station list to explore.',
       },
       method: {
         title: 'Method',

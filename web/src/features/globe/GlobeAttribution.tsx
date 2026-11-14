@@ -1,11 +1,16 @@
-﻿// uraqi: vivo — lo carga el visor por nombre
-export function GlobeAttribution() {
+// uraqi: vivo — lo carga el visor por nombre
+type GlobeAttributionProps = {
+  description: string
+  linkLabel: string
+}
+
+export function GlobeAttribution({ description, linkLabel }: GlobeAttributionProps) {
   return (
     <p aria-live="polite">
-      The globe is progressive and keeps a textual fallback available without exposing private credentials. See the
+      {description}
       {' '}
       <a href="/cesium/attribution.txt" target="_blank" rel="noreferrer">
-        Cesium attribution note
+        {linkLabel}
       </a>
       .
     </p>

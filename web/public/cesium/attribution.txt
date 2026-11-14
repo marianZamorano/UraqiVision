@@ -1,1 +1,7 @@
-﻿CesiumJS attribution is shown in the progressive globe experience, while the landing page remains lightweight and independent from the visual provider.
+CesiumJS
+Copyright 2011-2026 CesiumJS Contributors
+Apache License 2.0 — texto completo / full text: /cesium/LICENSE.md
+Código fuente / Source code: https://github.com/CesiumGS/cesium
+
+ES: UraqiVision usa CesiumJS para el globo 3D del explorador. La portada no carga CesiumJS.
+EN: UraqiVision uses CesiumJS for the explorer's 3D globe. The home page does not load CesiumJS.
