@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-INTERFAZ-01",
+  "resultado": "hecho",
+  "colaborador": "Marian",
+  "nota": "spec 004-interfaz-bilingue: 6 historias (P1 panel y estados, P2 idioma/glosario y descargas, P3 fuente y calidad/método/Acerca de, P4 Plus), FR-001..026 con identificadores, SC-001..008; checklist en verde; DP-02 y DP-03 pendientes, RF-15 a confirmar",
+  "hash": "6336f7a38c",
+  "rama": "feat/43-spec-interfaz-bilingue",
+  "fecha": "2026-11-14T14:35:31.690Z"
+}
