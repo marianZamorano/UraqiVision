@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-PROY-05",
+  "resultado": "hecho",
+  "colaborador": "Joaco",
+  "nota": "La persona escribió «apruebo» al informe de coherencia: 0 críticos, 4 altos, 9 medios y 7 bajos. guardian-alcance: dentro del alcance; contratos requieren acuerdo con M-PUBLICACIÓN y fronteras con M-GLOBO/M-INTERFAZ.",
+  "hash": "a2555d0285",
+  "rama": "docs/83-analisis-coherencia-base-web",
+  "fecha": "2026-11-14T19:48:19.077Z"
+}

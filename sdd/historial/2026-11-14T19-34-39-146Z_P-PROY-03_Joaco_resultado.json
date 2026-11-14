@@ -1,0 +1,11 @@
+{
+  "tipo": "resultado",
+  "id": "P-PROY-03",
+  "resultado": "hecho",
+  "vigente": true,
+  "colaborador": "Joaco",
+  "nota": "El prompt cambió al cerrar DP-07 (Cesium ion restringido con respaldos), pero el plan, la spec y las tareas producidas siguen vigentes: P-PROY-04 se ejecutó sobre ellos y el análisis P-PROY-05 los revisa.",
+  "hash": "6d610c9c39",
+  "rama": "dev",
+  "fecha": "2026-11-14T19:34:39.146Z"
+}
