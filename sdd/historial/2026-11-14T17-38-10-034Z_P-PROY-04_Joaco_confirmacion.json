@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-PROY-04",
+  "decision": "ejecutar",
+  "colaborador": "Joaco",
+  "nota": "Joaco confirmó ejecutar P-PROY-04 para generar las tareas de la base web común después de fusionar P-PROY-03 en dev.",
+  "hash": "3a353e6450",
+  "rama": "docs/64-tareas-base-web",
+  "fecha": "2026-11-14T17:38:10.034Z"
+}
