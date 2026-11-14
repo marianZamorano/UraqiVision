@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-INTERFAZ-06",
+  "resultado": "en-espera",
+  "colaborador": "Marian",
+  "nota": "Lanzado por Marian; no arranca: la fase 1 de 001 (T001 a T004, web/) aún no está en dev. Joaco está en P-PROY-05 (PR #84). Se retoma cuando web/ esté fusionada",
+  "hash": "dc4be2e67c",
+  "rama": "dev",
+  "fecha": "2026-11-14T19:51:58.721Z"
+}

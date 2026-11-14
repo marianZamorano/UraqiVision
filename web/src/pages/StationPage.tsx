@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from '../app/router'
 import type { Language, PublishedStation, ViewState } from '../contracts/view-state'
 import { createLoadingState, createPublishedStationState, createErrorState } from '../data/viewState'
 import { fetchStation } from '../data/publicationRepository'
@@ -7,11 +7,11 @@ import { ViewStatePresenter } from '../app/ViewStatePresenter'
 import { getDictionary } from '../i18n'
 
 type StationPageProps = {
+  stationId?: string
   lang: Language
 }
 
-export function StationPage({ lang }: StationPageProps) {
-  const { stationId } = useParams()
+export function StationPage({ lang, stationId }: StationPageProps) {
   const dict = getDictionary(lang)
   const [state, setState] = useState<ViewState<PublishedStation>>(createLoadingState(lang))
 

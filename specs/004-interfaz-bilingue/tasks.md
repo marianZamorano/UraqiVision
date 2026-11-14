@@ -39,7 +39,7 @@ App única en `web/`, definida por 001: `web/src/features/interface/`, `web/src/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear `web/src/features/interface/` con las subcarpetas `panel/`, `hectareas/`, `glosario/`, `fuente-calidad/` y `formato/`, según `plan.md`. Las carpetas `descargas/` e `idioma/` las crea quien las implemente, junto con su código (sin carpetas vacías, por código vivo) — Marian
+- [X] T001 Crear `web/src/features/interface/` con las subcarpetas `panel/`, `hectareas/`, `glosario/`, `fuente-calidad/` y `formato/`, según `plan.md`. Las carpetas `descargas/` e `idioma/` las crea quien las implemente, junto con su código (sin carpetas vacías, por código vivo) — Marian
 - [ ] T002 [P] Ampliar los datos de prueba de 001 (T024) en `web/tests/fixtures/published-data/` **solo con los juegos que faltan**: sin control CQ-05, sin Sentinel-2 válida y sin rango de hectáreas. Todos llevan `evidenceMode: "DEMO"` (RN-04, PS-04) — Marian
 
 ---
@@ -47,8 +47,8 @@ App única en `web/`, definida por 001: `web/src/features/interface/`, `web/src/
 ## Phase 2: Foundational (bloquea todas las historias)
 
 - [ ] T003 Llevar a una issue o PR conjunta con Joaco y Mimi la propuesta `contracts/interface-extensions.ts` y registrar lo acordado en `specs/004-interfaz-bilingue/contracts/README.md` (RN-05, RN-06, RF-11, RF-37, CQ-05) — Marian
-- [ ] T004 [P] Escribir pruebas de `formatearFecha` (hora de Bolivia, UTC−04, es y en; CP-05) y `formatearHectareas` (separadores por idioma; CP-02) en `web/tests/unit/formato.test.ts` (RN-07, PS-04) — Marian
-- [ ] T005 [P] Implementar `formatearFecha` y `formatearHectareas` con `Intl` y `timeZone: 'America/La_Paz'` en `web/src/features/interface/formato/formato.ts` (RN-07, FR-004, FR-013) — Marian
+- [X] T004 [P] Escribir pruebas de `formatearFecha` (hora de Bolivia, UTC−04, es y en; CP-05) y `formatearHectareas` (separadores por idioma; CP-02) en `web/tests/unit/formato.test.ts` (RN-07, PS-04) — Marian
+- [X] T005 [P] Implementar `formatearFecha` y `formatearHectareas` con `Intl` y `timeZone: 'America/La_Paz'` en `web/src/features/interface/formato/formato.ts` (RN-07, FR-004, FR-013) — Marian
 - [ ] T006 Añadir los tipos acordados en T003 a `web/src/contracts/` y sus validadores a la capa de datos de 001, sin normalizar ausencias a 0 (RN-13, RF-37) — Marian
 - [ ] T007 [P] Escribir pruebas del adaptador `aCifraMostrada`, que convierte `ReportableValue` y controles en `DisplayedFigure` con las marcas `none`, `limited`, `not-reported`, `range-not-reported` y `control-not-reported`, en `web/tests/unit/cifra.test.ts` (FR-009, FR-010, CP-03, CP-13, CP-20, PS-04) — Marian
 - [ ] T008 Implementar `aCifraMostrada` en `web/src/features/interface/panel/cifra.ts`, sin umbrales propios (CQ-05, RN-13) — Marian
@@ -74,8 +74,8 @@ válidos, validación, advertencias, hipótesis y el enlace al método (RF-33).
 - [ ] T011 [US1] Implementar `aPanelEstacion` en `web/src/features/interface/panel/aPanelEstacion.ts` a partir de `PublishedStationBundle` y sus extensiones (RF-33, FR-001 a FR-007) — Marian
 - [ ] T012 [US1] Implementar `PanelEstacion` y `CifraMostrada` (valor, marca con texto o ícono además de color, motivo, fuente, fecha y método) en `web/src/features/interface/panel/PanelEstacion.tsx` (RF-33, RN-03, WCAG 1.4.1) — Marian
 - [ ] T013 [US1] Implementar la lista de hipótesis con el aviso «son hipótesis con fuente» y las cuatro clases de §11.2 y MC-06 en `web/src/features/interface/panel/Hipotesis.tsx` (RN-05, §11.2, MC-06, FR-005) — Marian
-- [ ] T014 [P] [US1] Escribir pruebas del gráfico y la tabla de hectáreas (banda `[mín, máx]`, hueco con `null` y nunca 0, tabla alternativa con los mismos datos) en `web/tests/unit/Hectareas.test.tsx` (RN-06, RN-13, CP-02, CP-03, PS-04) — Marian
-- [ ] T015 [US1] Implementar `GraficoHectareas` (Recharts `ComposedChart` con `Area` de rango, `Line` e `isAnimationActive="auto"`) y `TablaHectareas` en `web/src/features/interface/hectareas/` (RN-06, RNF-12, R4) — Marian
+- [X] T014 [P] [US1] Escribir pruebas del gráfico y la tabla de hectáreas (banda `[mín, máx]`, hueco con `null` y nunca 0, tabla alternativa con los mismos datos) en `web/tests/unit/Hectareas.test.tsx` (RN-06, RN-13, CP-02, CP-03, PS-04) — Marian
+- [X] T015 [US1] Implementar `GraficoHectareas` (Recharts `ComposedChart` con `Area` de rango, `Line` e `isAnimationActive="auto"`) y `TablaHectareas` en `web/src/features/interface/hectareas/` (RN-06, RNF-12, R4) — Marian
 - [ ] T016 [US1] Añadir a `PanelEstacion` la prop opcional `acciones` (contenido que pinta solo si se pasa), con su prueba en `web/tests/unit/PanelEstacion.test.tsx`. Así Angie inserta las descargas en T040 sin tocar el panel y no hay ningún contenedor vacío (código vivo) en `web/src/features/interface/panel/PanelEstacion.tsx` (RF-21, RF-22) — Marian
 - [ ] T017 [US1] Añadir las claves `panel.*`, `validacion.*`, `clase.*` y `marca.*` de `contenido/textos-interfaz.md` a `web/src/i18n/es.json` y `web/src/i18n/en.json` (RNF-03) — Marian
 
@@ -116,14 +116,14 @@ ratón, tacto y teclado (RF-19, RF-20).
 ### Tests for User Story 3
 
 - [ ] T024 [P] [US3] Escribir pruebas del selector de idioma: `lang` del documento, foco que se queda en el selector, nombre accesible, carga diferida de `en.json` y conservación de la vista (CP-31, CP-34, PS-04, PS-07) en `web/tests/unit/idioma.test.tsx` — Marian
-- [ ] T025 [P] [US3] Escribir pruebas del glosario: los 21 términos con es y en, apertura con ratón, tacto y teclado, cierre con Escape, botón «cerrar» ≥ 24 px o toque fuera, foco de vuelta al término y WCAG 1.4.13 (CP-40 a CP-44, PS-07) en `web/tests/unit/glosario.test.tsx` — Marian
+- [X] T025 [P] [US3] Escribir pruebas del glosario: los 21 términos con es y en, apertura con ratón, tacto y teclado, cierre con Escape, botón «cerrar» ≥ 24 px o toque fuera, foco de vuelta al término y WCAG 1.4.13 (CP-40 a CP-44, PS-07) en `web/tests/unit/glosario.test.tsx` — Marian
 - [ ] T026 [P] [US3] Escribir la prueba E2E del cambio a inglés en la estación sin recarga y sin textos en español (CP-30, CP-33, SC-001, SC-007) en `web/tests/e2e/idioma.spec.ts` — Marian
 
 ### Implementation for User Story 3
 
 - [ ] T027 [US3] **Extender** `web/src/app/LanguageSwitcher.tsx` de 001 (T032), sin crear otro selector. Añadir lo que exige 004: la sincronización de `document.documentElement.lang`, el foco que se queda en el selector y el `import()` de `en.json` la primera vez (`addResourceBundle`), si 001 no lo hace ya (RF-20, FR-012a, R1, R2) — Marian
 - [ ] T028 [US3] Pasar los 21 términos de `contenido/glosario.md` a `web/src/i18n/es.json` y `en.json` bajo `glosario.terminos.*`, después de que Mimi revise las traducciones (RF-19, RNF-03) — Marian
-- [ ] T029 [US3] Implementar `TerminoGlosario` (botón con nombre accesible) y `DefinicionGlosario` (no modal, persistente, «cerrar» ≥ 24 px) en `web/src/features/interface/glosario/` (RF-19, FR-014a) — Marian
+- [X] T029 [US3] Implementar `TerminoGlosario` (botón con nombre accesible) y `DefinicionGlosario` (no modal, persistente, «cerrar» ≥ 24 px) en `web/src/features/interface/glosario/` (RF-19, FR-014a) — Marian
 - [ ] T030 [US3] Marcar con `TerminoGlosario` los términos de §30 que aparecen en `web/src/features/interface/panel/PanelEstacion.tsx`, `web/src/app/ViewStatePresenter.tsx` y `web/src/features/interface/fuente-calidad/` (FR-014) — Marian
 
 **Checkpoint**: US1 a US3 completas en los dos idiomas.

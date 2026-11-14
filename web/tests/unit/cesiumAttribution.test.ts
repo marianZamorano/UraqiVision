@@ -8,7 +8,7 @@ describe('Cesium attribution notice', () => {
   const license = readFileSync(join(process.cwd(), 'node_modules/cesium/LICENSE.md'), 'utf8')
 
   it('quotes the copyright line of the installed CesiumJS license', () => {
-    const copyrightLine = license.split(/\r?\n/)[0].trim()
+    const copyrightLine = (license.split(/\r?\n/)[0] ?? '').trim()
 
     expect(copyrightLine).toMatch(/^Copyright /)
     expect(notice).toContain(copyrightLine)

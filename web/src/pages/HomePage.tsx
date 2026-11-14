@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from '../app/router'
 import type { Language } from '../contracts/view-state'
 import { getDictionary } from '../i18n'
 

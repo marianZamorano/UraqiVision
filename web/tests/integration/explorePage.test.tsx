@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ExplorePage } from '../../src/pages/ExplorePage'
 
@@ -19,11 +18,7 @@ vi.mock('../../src/features/globe/lazyGlobe', async (importOriginal) => {
 })
 
 function renderExplore(lang: 'es' | 'en' = 'es') {
-  return render(
-    <MemoryRouter>
-      <ExplorePage lang={lang} />
-    </MemoryRouter>,
-  )
+  return render(<ExplorePage lang={lang} />)
 }
 
 afterEach(() => {

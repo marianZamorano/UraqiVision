@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildViewStateFromResult, createLoadingState } from './viewState'
+import { buildViewStateFromResult, createLoadingState } from '../../src/data/viewState'
 
 describe('view state machine', () => {
   it('creates a loading state in the selected language', () => {

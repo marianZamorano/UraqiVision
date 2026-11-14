@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../app/router'
+import { serializeRoute } from '../app/routeState'
 import type { Language } from '../contracts/view-state'
 import { demoStations } from '../data/publicationRepository'
 import { getDictionary } from '../i18n'
@@ -57,7 +58,7 @@ export function ExplorePage({ lang }: ExplorePageProps) {
         <ul className="station-list" aria-label={dict.pages.explore.stationListLabel}>
           {Object.values(demoStations).map((station) => (
             <li key={station.stationId}>
-              <Link to={`/station/${station.stationId}`}>
+              <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
                 {station.label[lang]}
               </Link>
             </li>

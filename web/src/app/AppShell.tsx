@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink } from './router'
+import './shell.css'
 import type { Language } from '../contracts/view-state'
 import { getDictionary } from '../i18n'
 
@@ -39,7 +40,7 @@ export function AppShell({ lang, onChangeLanguage, children }: AppShellProps) {
         </button>
       </header>
 
-      <main className="page-shell">{children}</main>
+      <main id="contenido" className="page-shell">{children}</main>
     </div>
   )
 }
