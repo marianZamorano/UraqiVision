@@ -43,8 +43,8 @@ description: "Tareas de implementación de la base web navegable y confiable"
 - [ ] T009 Implementar validadores puros desde `unknown` en `web/src/data/validatePublishedData.ts` para que datos inválidos produzcan un estado controlado y no resultados parciales (FR-004 a FR-006, FR-010).
 - [ ] T010 [P] Escribir pruebas de la máquina de estados, reintento, cancelación y respuestas tardías en `web/tests/unit/viewState.test.ts` (RF-34, RN-13, PS-04).
 - [ ] T011 Implementar la máquina de los seis estados RF-34 y el control de solicitudes vigentes en `web/src/data/viewState.ts` (RF-34, FR-007 a FR-010, FR-022).
-- [ ] T012 [P] Escribir pruebas del analizador y serializador de rutas recargables en `web/tests/unit/routes.test.ts` (§20.1, RF-29).
-- [ ] T013 Implementar el adaptador History API y el estado territorial de URL en `web/src/app/router.ts` y `web/src/app/routeState.ts` (FR-001, FR-002, RF-29).
+- [X] T012 [P] Escribir pruebas del analizador y serializador de rutas recargables en `web/tests/unit/routes.test.ts` (§20.1, RF-29).
+- [X] T013 Implementar el adaptador History API y el estado territorial de URL en `web/src/app/router.tsx` (exporta `Link` y `NavLink`; pruebas en `web/tests/unit/router.test.tsx`) y `web/src/app/routeState.ts` (FR-001, FR-002, RF-29).
 - [ ] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
 - [ ] T015 Implementar i18n español/inglés con `react-i18next`, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
 - [ ] T016 Configurar el shell de la aplicación, navegación semántica y región de anuncios de estados en `web/src/app/App.tsx` y `web/src/app/AppShell.tsx` (RNF-04, RF-34).
