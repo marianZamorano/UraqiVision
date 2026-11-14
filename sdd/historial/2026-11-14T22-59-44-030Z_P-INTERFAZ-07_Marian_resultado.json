@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-INTERFAZ-07",
+  "resultado": "parcial",
+  "colaborador": "Marian",
+  "nota": "Adelanto: componente del glosario T025 y T029 hecho (35/35 pruebas, build ok). Falta: T028 (21 términos a es/en, espera revisión de Mimi e i18n de 001), T030, idioma (T024, T026, T027), fuente y calidad, Acerca de, y método y descargas de Angie",
+  "hash": "81607ae5b5",
+  "rama": "feat/98-glosario-accesible",
+  "fecha": "2026-11-14T22:59:44.030Z"
+}

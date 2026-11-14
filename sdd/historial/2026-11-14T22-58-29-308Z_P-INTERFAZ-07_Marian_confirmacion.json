@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-INTERFAZ-07",
+  "decision": "ejecutar",
+  "colaborador": "Marian",
+  "nota": "Adelanto parcial (Marian): solo el componente del glosario T025 y T029 de 004, que no dependen de 001 ni de los contratos; P-INTERFAZ-06 sigue parcial",
+  "hash": "81607ae5b5",
+  "rama": "dev",
+  "fecha": "2026-11-14T22:58:29.308Z"
+}
