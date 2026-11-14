@@ -8,7 +8,7 @@
 **Issue**: #43 · **Prompt SDD**: P-INTERFAZ-01
 **Input**: prompt P-INTERFAZ-01 de `sdd/m-interfaz.md`, con los ajustes que pidió `guardian-alcance`.
 
-> Fuente de verdad: `docs/UraqiVisionDocumentoMaestrov1.0.pdf`. Cada requisito conserva su identificador
+> Fuente de verdad: `docs/UraqiVisionDocumentoMaestrov1.1.pdf`. Cada requisito conserva su identificador
 > del documento. Lo que el documento no fija se marca como **propuesta**, y lo que depende de §29 como
 > **pendiente (DP-xx)**.
 
