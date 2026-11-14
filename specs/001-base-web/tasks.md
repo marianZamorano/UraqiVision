@@ -127,11 +127,11 @@ description: "Tareas de implementación de la base web navegable y confiable"
 **Independent Test**: La portada no solicita chunks del explorador; el explorador difiere sus proveedores y los respaldos funcionan con ion o WebGL indisponible, sin secretos en bundle o repositorio.
 
 - [ ] T040 [P] [US5] Escribir prueba de red para que la portada no descargue recursos del explorador en `web/tests/e2e/home-performance.spec.ts` (RNF-01).
-- [ ] T041 [P] [US5] Escribir pruebas unitarias del selector ion, sin ion y 2D/textual con dobles de WebGL en `web/tests/unit/globeProvider.test.ts` (RF-30, DP-07, PS-08).
+- [X] T041 [P] [US5] Escribir pruebas unitarias del selector ion, sin ion y 2D/textual con dobles de WebGL en `web/tests/unit/globeProvider.test.ts` (RF-30, DP-07, PS-08).
 - [ ] T042 [P] [US5] Escribir prueba de seguridad de bundle y archivos versionados sin credenciales privadas en `web/tests/integration/secrets.test.ts` (RNF-06, PS-06).
-- [ ] T043 [US5] Implementar las fronteras de importación diferida del explorador y proveedores visuales en `web/src/features/globe/lazyGlobe.ts` y `web/src/features/globe/GlobeProvider.ts` (RNF-01, RF-30).
-- [ ] T044 [US5] Implementar la configuración de ion restringida a assets 1 y 2, sin serializar ni registrar el token, en `web/src/features/globe/ionProvider.ts` (DP-07, RNF-06).
-- [ ] T045 [US5] Implementar proveedor sin ion y selección de respaldo 2D/textual en `web/src/features/globe/fallbackProvider.ts` y `web/src/features/globe/GlobeProvider.ts` (RF-30, RNF-04).
+- [X] T043 [US5] Implementar las fronteras de importación diferida del explorador y proveedores visuales en `web/src/features/globe/lazyGlobe.ts` y `web/src/features/globe/GlobeProvider.ts` (RNF-01, RF-30).
+- [X] T044 [US5] Implementar la configuración de ion restringida a assets 1 y 2, sin serializar ni registrar el token, en `web/src/features/globe/ionProvider.ts` (DP-07, RNF-06).
+- [X] T045 [US5] Implementar proveedor sin ion y selección de respaldo 2D/textual en `web/src/features/globe/fallbackProvider.ts` y `web/src/features/globe/GlobeProvider.ts` (RF-30, RNF-04).
 - [ ] T046 [US5] Configurar Vite para separar los recursos de Cesium y verificar atribuciones sin cargarlo desde portada en `web/vite.config.ts` y `web/src/features/globe/GlobeAttribution.tsx` (RNF-01, RNF-11).
 
 **Checkpoint**: La portada permanece independiente del globo y la exploración conserva respaldos obligatorios.
