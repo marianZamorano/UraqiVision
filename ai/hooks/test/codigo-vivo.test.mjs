@@ -42,6 +42,15 @@ const SINTETICO = {
   'pipeline/huerfano.py': 'def g():\n    pass\n',
 };
 
+test('un import con sufijo de Vite (?raw, ?url, ?inline) resuelve al archivo real', () => {
+  const r = analizar(repo({
+    'web/package.json': '{"name":"w"}',
+    'web/src/estilos.css': ':root{}',
+    'web/tests/a.test.ts': "import css from '../src/estilos.css?raw';\nimport u from '../src/estilos.css?url';\nimport n from '../src/falta.css?raw';",
+  }));
+  assert.deepEqual(de(r, 'import-roto').map((h) => h.detalle), ['importa «../src/falta.css?raw», que no existe']);
+});
+
 test('detecta código roto: imports y referencias a archivos inexistentes, paquetes sin declarar', () => {
   const r = analizar(repo({ ...SINTETICO, '.github/workflows/ci.yml': `${SINTETICO['.github/workflows/ci.yml']}      - run: python pipeline/run.py\n` }));
   assert.deepEqual(de(r, 'import-roto').map((h) => [h.archivo, h.linea]), [['src/cli.mjs', 5]]);

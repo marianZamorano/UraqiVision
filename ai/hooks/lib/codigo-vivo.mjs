@@ -202,7 +202,8 @@ export function entradas({ archivos, leer, existe }) {
 // ------------------------------------------------------------------ Análisis
 
 function resolverJs(desde, spec, existe) {
-  const base = P.normalize(P.join(P.dirname(desde), spec));
+  // Sufijos de consulta de Vite (`?raw`, `?url`, `?inline`…) no forman parte de la ruta del archivo.
+  const base = P.normalize(P.join(P.dirname(desde), spec.replace(/\?.*$/, '')));
   const candidatos = [base, ...EXTS.map((e) => base + e), ...EXTS.map((e) => P.join(base, `index${e}`))];
   if (/\.js$/.test(base)) candidatos.push(base.replace(/\.js$/, '.ts'), base.replace(/\.js$/, '.tsx'));
   return candidatos.find((c) => existe(c)) ?? null;

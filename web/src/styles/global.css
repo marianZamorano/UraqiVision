@@ -1,0 +1,35 @@
+/* Estilos globales (001 T004): base tipográfica, foco visible (RNF-04) y movimiento reducido (RNF-12). */
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente-base);
+  font-size: var(--texto-base);
+  line-height: var(--interlineado);
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}
+
+/* Foco visible solo con teclado; nunca se quita sin reemplazo (RNF-04, WCAG 2.4.7) */
+:focus-visible {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-separacion);
+}
+
+/* Movimiento reducido: sin animaciones ni transiciones no esenciales (RNF-12, §20.2) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

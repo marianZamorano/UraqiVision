@@ -1,0 +1,5 @@
+# Artefactos de las pruebas en el navegador (Playwright) y de la build
+test-results/
+playwright-report/
+blob-report/
+dist/
