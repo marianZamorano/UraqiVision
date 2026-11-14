@@ -1,32 +1,36 @@
-# React + TypeScript + Vite
+# Web de UraqiVision
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+App de una sola página (React + TypeScript en modo estricto + Vite, con `react-router-dom`), definida en
+`specs/001-base-web` (§18). La web solo **lee** los archivos publicados de cada estación (§17.3). No recalcula nada
+(RF-37).
 
-Currently, two official plugins are available:
+## Comandos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install        # dependencias
+npm run dev        # servidor local (también en la red local para probar desde el celular)
+npm run build      # comprobación de tipos (tsc -b) y build
+npm run lint       # oxlint
+npm test           # Vitest (pruebas unitarias y de componentes)
+npm run test:e2e   # Playwright (navegador). La primera vez: npx playwright install chromium
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+`npm test` arranca Vitest con `scripts/vitest.mjs`. Ese script normaliza la letra de la unidad en Windows: si la
+ruta llega como `c:\…`, Vitest carga dos veces el mismo módulo y falla.
+
+## Estructura
+
+Cada carpeta se crea **con su primer archivo real**: no hay carpetas vacías, por la regla de código vivo de la
+constitución.
+
+| Ruta | Contenido |
+|---|---|
+| `src/main.tsx` · `src/App.tsx` | Entrada, router y rutas (`/`, `/explore`, `/station/:stationId`, `/method`, `/about`) |
+| `src/app/` | `AppShell` (shell e idioma) y `ViewStatePresenter` (estados de RF-34) |
+| `src/pages/` | Portada, explorador, estación, método y Acerca de |
+| `src/data/` | Máquina `ViewState`, repositorio de publicaciones |
+| `src/contracts/` | Tipos de los archivos publicados y de Insight |
+| `src/i18n/` | Idiomas es/en |
+| `src/styles/` | Tokens (`tokens.css`) y estilos globales (`global.css`): foco visible y movimiento reducido |
+| `src/features/` | Áreas: `globe/`, `map/`, `atlas/` e `interface/` (specs 002 a 005) |
+| `tests/unit/` · `tests/integration/` · `tests/e2e/` | Vitest y Playwright. También hay pruebas junto al código (`src/**/*.test.tsx`) |

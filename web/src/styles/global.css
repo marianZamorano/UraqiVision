@@ -1,3 +1,6 @@
+/* Estilos globales (001 T004 + diseño de Joaco, #94): foco visible (RNF-04) y movimiento reducido (RNF-12). */
+@import "./tokens.css";
+
 :root {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
@@ -54,8 +57,7 @@ textarea {
   min-height: 100vh;
 }
 
-button:focus-visible,
-a:focus-visible {
+:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }

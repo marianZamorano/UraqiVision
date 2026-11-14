@@ -23,10 +23,10 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Purpose**: Crear el proyecto web estático sin cargar visualizaciones pesadas en la portada.
 
-- [ ] T001 Crear `web/` con React, TypeScript estricto y Vite en `web/package.json`, `web/tsconfig.json`, `web/vite.config.ts` e `web/index.html` (RNF-01, RNF-05).
-- [ ] T002 Configurar scripts de desarrollo, build, preview, Vitest y Playwright y declarar `react-i18next` e `i18next` en `web/package.json` (PS-04, PS-07, PS-09, RNF-03).
-- [ ] T003 [P] Configurar la estructura inicial de `web/src/app/`, `web/src/pages/`, `web/src/data/`, `web/src/contracts/`, `web/src/i18n/`, `web/src/styles/` y `web/src/test/` según `plan.md`.
-- [ ] T004 [P] Configurar tokens CSS, foco visible y la regla global de movimiento reducido en `web/src/styles/tokens.css` y `web/src/styles/global.css` (RNF-04, RNF-12).
+- [X] T001 Crear `web/` con React, TypeScript estricto y Vite en `web/package.json`, `web/tsconfig.json`, `web/vite.config.ts` e `web/index.html` (RNF-01, RNF-05).
+- [X] T002 Configurar scripts de desarrollo, build, preview, Vitest y Playwright y declarar `react-i18next` e `i18next` en `web/package.json` (PS-04, PS-07, PS-09, RNF-03).
+- [X] T003 [P] Configurar la estructura inicial de `web/src/app/`, `web/src/pages/`, `web/src/data/`, `web/src/contracts/`, `web/src/i18n/`, `web/src/styles/` y `web/src/test/` según `plan.md`.
+- [X] T004 [P] Configurar tokens CSS, foco visible y la regla global de movimiento reducido en `web/src/styles/tokens.css` y `web/src/styles/global.css` (RNF-04, RNF-12).
 - [ ] T005 [P] Declarar solo `VITE_CESIUM_ION_TOKEN=` en `web/.env.example`; ejecutar `npm run env:sync` y pedir a la persona que introduzca el valor localmente, sin leer ni modificar `web/.env` (RNF-06, DP-07).
 
 ---

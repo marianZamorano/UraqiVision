@@ -1,0 +1,48 @@
+/*
+ * Tokens de diseño (001 T004; §20.2, RNF-04).
+ * PROPUESTA: el documento fija las reglas (paleta de un solo tono, más oscuro = más cambio, trama gris sin dato,
+ * contraste para celular al aire libre), no los valores concretos. tests/unit/estilos.test.ts comprueba:
+ *   - texto/fondo ≥ 7:1 (AAA, propuesta para el aire libre); el mínimo exigible es AA;
+ *   - foco/fondo ≥ 3:1 (WCAG 1.4.11);
+ *   - la escala de cambio baja de luminancia en cada paso.
+ * Tema oscuro: los colores de superficie, texto y foco siguen el diseño de Joaco (#94).
+ * Nunca escribas colores, espaciados ni tipografías a mano en los componentes: usa estos tokens.
+ */
+:root {
+  /* Superficie y texto */
+  --color-fondo: #06141f; /* = --bg-deep del diseño de Joaco (#94) */
+  --color-superficie: #0d2233; /* = --bg-soft */
+  --color-texto: #ebf7ff; /* = --text */
+  --color-texto-secundario: #b8d2e2; /* = --muted */
+  --color-borde: #6f8aa3;
+
+  /* Foco visible (RNF-04) */
+  --color-foco: #fbbf24; /* = --accent */
+  --foco-grosor: 3px;
+  --foco-separacion: 2px;
+
+  /* Paleta de cambio: un solo tono, más oscuro = más cambio (§20.2) */
+  --cambio-1: #fde4cf;
+  --cambio-2: #f9b98a;
+  --cambio-3: #ef8a4c;
+  --cambio-4: #c9561f;
+  --cambio-5: #8a3210;
+
+  /* Zonas sin dato válido: trama gris, explicada en la leyenda (§20.2, RN-13) */
+  --color-sin-dato: #9a9a9a;
+  --trama-sin-dato: repeating-linear-gradient(
+    45deg,
+    var(--color-sin-dato) 0 2px,
+    transparent 2px 6px
+  );
+
+  /* Tipografía y espaciado */
+  --fuente-base: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --texto-base: 1rem;
+  --interlineado: 1.5;
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 1rem;
+  --espacio-4: 1.5rem;
+  --objetivo-tactil-min: 24px; /* WCAG 2.5.8 */
+}
