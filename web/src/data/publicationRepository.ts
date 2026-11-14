@@ -1,29 +1,31 @@
 import type { PublishedStation } from '../contracts/view-state'
 
+// RN-04: ejemplos de interfaz en memoria, siempre DEMO y sin cifras, hasta que existan
+// publicaciones reales de M-PUBLICACIÓN (T027, T047). RN-13: ausencia = «no reportada».
 export const demoStations: Record<string, PublishedStation> = {
   'santa-cruz': {
     stationId: 'santa-cruz',
     departmentId: 'santa-cruz',
     label: { es: 'Santa Cruz', en: 'Santa Cruz' },
-    evidenceMode: 'REAL',
+    evidenceMode: 'DEMO',
     area: {
-      value: 382.4,
+      value: null,
       unit: 'ha',
-      source: 'atlas/departments.geojson',
-      measuredAt: '2026-11-14T00:00:00Z',
-      method: 'Publicación validada',
-      status: 'reported',
+      source: 'demo',
+      method: 'Ejemplo de interfaz',
+      status: 'not-reported',
+      reason: 'No reportado',
     },
-    orbit: 'NISAR',
-    periods: [{ name: '2026-11', before: '2026-11-01T00:00:00Z', after: '2026-11-30T00:00:00Z' }],
+    orbit: 'DEMO',
+    periods: [{ name: 'demo' }],
     provenance: {
-      source: 'M-PUBLICACIÓN',
-      publishedAt: '2026-11-14T15:00:00Z',
-      version: 'v1.0',
+      source: 'demo',
+      publishedAt: '2026-11-14T00:00:00Z',
+      version: 'demo',
     },
     summary: {
-      es: 'Estación de referencia con disponibilidad de datos y procedencia verificada.',
-      en: 'Reference station with verified data availability and provenance.',
+      es: 'Estación de ejemplo para pruebas de interfaz; no es un resultado.',
+      en: 'Example station for interface testing; not a result.',
     },
   },
   'tarija': {
@@ -35,7 +37,6 @@ export const demoStations: Record<string, PublishedStation> = {
       value: null,
       unit: 'ha',
       source: 'demo',
-      measuredAt: '2026-11-14T00:00:00Z',
       method: 'Ejemplo de interfaz',
       status: 'not-reported',
       reason: 'No reportado',
