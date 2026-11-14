@@ -232,7 +232,7 @@ guía las fases y dice cuál sigue (`/sdd-uraqivision estado`):
 Estado actual:
 
 - **Constitución** (`.specify/memory/constitution.md`): versión 1.1.0.
-- **Specs** (`specs/`): `001-base-web` (spec.md, plan.md), `003-portada-atlas` (spec.md), `004-interfaz-bilingue` (spec.md).
+- **Specs** (`specs/`): `001-base-web` (spec.md, plan.md, tasks.md), `003-portada-atlas` (spec.md), `004-interfaz-bilingue` (spec.md).
 - **Plantillas** (`.specify/templates/`): `checklist-template.md`, `constitution-template.md`, `plan-template.md`, `spec-template.md`, `tasks-template.md`.
 
 Skills de Spec Kit instaladas:
