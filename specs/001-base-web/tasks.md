@@ -24,7 +24,7 @@ description: "Tareas de implementación de la base web navegable y confiable"
 **Purpose**: Crear el proyecto web estático sin cargar visualizaciones pesadas en la portada.
 
 - [ ] T001 Crear `web/` con React, TypeScript estricto y Vite en `web/package.json`, `web/tsconfig.json`, `web/vite.config.ts` e `web/index.html` (RNF-01, RNF-05).
-- [ ] T002 Configurar scripts de desarrollo, build, preview, Vitest y Playwright en `web/package.json` (PS-04, PS-07, PS-09).
+- [ ] T002 Configurar scripts de desarrollo, build, preview, Vitest y Playwright y declarar `react-i18next` e `i18next` en `web/package.json` (PS-04, PS-07, PS-09, RNF-03).
 - [ ] T003 [P] Configurar la estructura inicial de `web/src/app/`, `web/src/pages/`, `web/src/data/`, `web/src/contracts/`, `web/src/i18n/`, `web/src/styles/` y `web/src/test/` según `plan.md`.
 - [ ] T004 [P] Configurar tokens CSS, foco visible y la regla global de movimiento reducido en `web/src/styles/tokens.css` y `web/src/styles/global.css` (RNF-04, RNF-12).
 - [ ] T005 [P] Declarar solo `VITE_CESIUM_ION_TOKEN=` en `web/.env.example`; ejecutar `npm run env:sync` y pedir a la persona que introduzca el valor localmente, sin leer ni modificar `web/.env` (RNF-06, DP-07).
@@ -33,8 +33,10 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Establecer los contratos, la navegación y las garantías transversales que bloquean todas las historias.
+**Purpose**: Ejecutar las compuertas de análisis y contratos, y establecer los contratos, la navegación y las garantías transversales que bloquean todas las historias.
 
+- [ ] T051 Confirmar que P-PROY-05 está aprobado y que sus hallazgos altos se corrigieron o aceptaron por escrito antes de implementar contratos (SDD fase 6, FR-006).
+- [ ] T047 Acordar con M-PUBLICACIÓN los campos de `contracts/published-data.ts` e `insight.ts` que exceden §17.3 y §21.1; registrar qué queda como propuesta y qué se estabiliza (FR-006, §17.3, §21.1).
 - [ ] T006 [P] Copiar y adaptar los contratos propuestos de publicación en `web/src/contracts/published-data.ts`, conservando `REAL | DEMO`, procedencia, UTC y ausencia distinta de cero (RN-03, RN-04, RN-07, RN-13).
 - [ ] T007 [P] Copiar y adaptar los contratos de Insight y de estado de vista en `web/src/contracts/insight.ts` y `web/src/contracts/view-state.ts`, sin cambiar `POST /api/insight` ni implementar backend (RF-34, §21.1).
 - [ ] T008 [P] Escribir pruebas de validación para IDs, UTC, campos obligatorios, coherencia de publicación y ausencia frente a cero en `web/tests/unit/contracts.test.ts` (RN-13, PS-04).
@@ -44,10 +46,10 @@ description: "Tareas de implementación de la base web navegable y confiable"
 - [ ] T012 [P] Escribir pruebas del analizador y serializador de rutas recargables en `web/tests/unit/routes.test.ts` (§20.1, RF-29).
 - [ ] T013 Implementar el adaptador History API y el estado territorial de URL en `web/src/app/router.ts` y `web/src/app/routeState.ts` (FR-001, FR-002, RF-29).
 - [ ] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
-- [ ] T015 Implementar i18n español/inglés, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
+- [ ] T015 Implementar i18n español/inglés con `react-i18next`, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
 - [ ] T016 Configurar el shell de la aplicación, navegación semántica y región de anuncios de estados en `web/src/app/App.tsx` y `web/src/app/AppShell.tsx` (RNF-04, RF-34).
 
-**Checkpoint**: La base de contratos, rutas, idiomas y estados está lista antes de implementar una historia.
+**Checkpoint**: Las compuertas T051 y T047 están cerradas y la base de contratos, rutas, idiomas y estados está lista antes de implementar una historia.
 
 ---
 
@@ -94,7 +96,7 @@ description: "Tareas de implementación de la base web navegable y confiable"
 **Independent Test**: Al alternar idioma en cada ruta y estado, la ubicación, selección y mensajes permanecen coherentes y sin claves faltantes.
 
 - [ ] T031 [P] [US3] Escribir pruebas de cambio de idioma en rutas y estados de carga/error en `web/tests/integration/languageSwitch.test.tsx` (RF-20, RNF-03, PS-04).
-- [ ] T032 [US3] Implementar el selector de idioma accesible y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
+- [ ] T032 [US3] Implementar el selector de idioma accesible con `react-i18next` y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
 - [ ] T033 [US3] Completar las claves de navegación, páginas, estados, errores y acciones en `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
 - [ ] T034 [US3] Verificar que los mensajes producidos por `ViewStatePresenter` se traduzcan sin alterar estado o selección en `web/src/app/ViewStatePresenter.tsx` (FR-013, FR-014).
 
@@ -138,13 +140,11 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-**Purpose**: Verificar el incremento completo antes de pasar a P-PROY-05.
+**Purpose**: Verificar el incremento completo antes de pasar a P-PROY-07.
 
-- [ ] T047 [P] Revisar que los contratos en `web/src/contracts/` sigan rotulados como propuesta y acordarlos con M-PUBLICACIÓN antes de estabilizarlos (FR-006, §17.3).
 - [ ] T048 [P] Medir portada a 10 Mbps, 320 px y movimiento reducido, y documentar evidencia en `web/tests/e2e/` (RNF-01, RNF-05, RNF-12).
 - [ ] T049 Ejecutar `npm test`, `npm run build` y `npm run preview` desde `web/` cuando el proyecto exista y registrar la evidencia de arranque (PS-04, PS-09).
 - [ ] T050 Ejecutar `npm run env:check`, `npm run ai:check`, `npm run sdd:validar`, `npm run test:guardas` y `git diff --check` antes de commit (RNF-06, trazabilidad).
-- [ ] T051 Ejecutar P-PROY-05 sobre `specs/001-base-web/` y detenerse hasta el «apruebo» antes de implementar (SDD fase 6).
 
 ---
 
@@ -157,7 +157,7 @@ description: "Tareas de implementación de la base web navegable y confiable"
 - **US1 y US2 (P1)**: dependen de la fase 2; US2 puede preparar sus fixtures en paralelo, pero conecta a la ruta de estación después de US1.
 - **US3 y US4 (P2)**: dependen del shell, i18n y estados de la fase 2; pueden implementarse en paralelo tras su infraestructura.
 - **US5 (P3)**: depende del shell, alternativa textual y rutas de las fases anteriores; no habilita aún requisitos específicos de M-GLOBO.
-- **Polish (Phase 8)**: depende de las historias deseadas y prepara el análisis P-PROY-05.
+- **Polish (Phase 8)**: depende de las historias deseadas y prepara la verificación P-PROY-07.
 
 ### User Story Dependencies
 
@@ -169,7 +169,7 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 ### Parallel Opportunities
 
-- T003, T004 y las tareas de contrato T006 a T008 pueden avanzar en paralelo tras T001 y T002.
+- T003 y T004 pueden avanzar en paralelo tras T001 y T002; las tareas de contrato T006 a T008 empiezan tras cerrar T051 y T047.
 - Las pruebas de cada historia marcadas `[P]` se escriben en paralelo antes de sus tareas de implementación.
 - US3 y US4 pueden avanzar en paralelo cuando estén disponibles T015, T016 y T029.
 
@@ -186,11 +186,12 @@ description: "Tareas de implementación de la base web navegable y confiable"
 1. Añadir US2 para datos y estados honestos.
 2. Añadir US3 y US4 para bilingüismo y accesibilidad transversal.
 3. Añadir US5 para rendimiento, seguridad y la frontera de proveedores que necesitará M-GLOBO.
-4. Ejecutar P-PROY-05; no iniciar P-PROY-06 sin su análisis y aprobación explícita.
+4. Ejecutar la verificación final y entregar la evidencia para P-PROY-07; no abrir P-PROY-07 sin el análisis aprobado.
 
 ## Notes
 
 - `[P]` indica archivos distintos sin dependencia de una tarea incompleta.
+- Las compuertas T051 y T047 se ejecutan al inicio de la fase 2 y conservan su identificador para no romper las referencias de `specs/003`, `specs/004` y `sdd/m-interfaz.md`; su orden lo fija este archivo.
 - Las tareas de implementación de CesiumJS, huellas, vuelo, selección y cambio en el globo pertenecen a `specs/005-globo` y no se sustituyen aquí.
 - DP-06 continúa pendiente: no se configura hospedaje, dominio ni despliegue.
 - El valor de `VITE_CESIUM_ION_TOKEN` nunca se lee, imprime, versiona ni incluye en pruebas.
