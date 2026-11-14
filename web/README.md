@@ -31,3 +31,16 @@ constitución.
 | `src/styles/` | Tokens CSS, foco visible y movimiento reducido | 001 T004 |
 | `src/features/` | Áreas: `globe/`, `map/`, `atlas/` e `interface/` (specs 002 a 005) | Cada área |
 | `tests/unit/` · `tests/integration/` · `tests/e2e/` | Vitest y Playwright | 001 T001, T002 y las siguientes |
+
+## CesiumJS y el token público (001 US5)
+
+- CesiumJS se carga con `import('cesium')` **solo** al entrar a `/explore` y nunca sin WebGL (RNF-01, RF-30). La
+  portada no pide ningún recurso de Cesium (`tests/e2e/home-performance.spec.ts`).
+- `vite.config.ts` define `CESIUM_BASE_URL=/cesium`, sirve en desarrollo `Assets`, `ThirdParty`, `Widgets`,
+  `Workers` y `LICENSE.md` de `node_modules/cesium`, y los copia a `dist/cesium` en el build (RNF-11).
+- `VITE_CESIUM_ION_TOKEN` es el token **público** de Cesium ion, restringido a `assets:read`, a los assets 1 (World
+  Terrain) y 2 (Bing Maps Aerial) y a las URLs del sitio (DP-07, RNF-06). Vive solo en `web/.env` (créalo con
+  `npm run env:sync` desde la raíz); nunca se registra, imprime ni versiona. Sin token se usa CesiumJS sin ion, y
+  sin WebGL, el respaldo textual.
+- La ruta absoluta `/cesium` supone que el sitio se sirve desde la raíz del dominio; si el hospedaje usa un
+  subdirectorio hay que ajustarla (depende de DP-06, pendiente).

@@ -1,0 +1,167 @@
+/* Shell, páginas base y estados de la vista (001 T016, T019–T022, T029). Solo tokens de src/styles/tokens.css:
+   sin colores, espaciados ni tipografías escritos a mano (§20.2, RNF-04). */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-4);
+  border-bottom: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.brand-block strong,
+.brand-block small {
+  display: block;
+}
+
+.brand-block small {
+  color: var(--color-texto-secundario);
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--objetivo-tactil-min);
+  min-height: var(--objetivo-tactil-min);
+  padding: var(--espacio-1);
+  border-radius: 50%;
+  background: var(--color-foco);
+  color: var(--color-fondo);
+  font-weight: 700;
+}
+
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+.main-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--objetivo-tactil-min);
+  color: var(--color-texto-secundario);
+}
+
+.main-nav a.active {
+  color: var(--color-texto);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.language-switcher,
+.button-primary,
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--objetivo-tactil-min);
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--espacio-2);
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-primary {
+  border-color: var(--color-foco);
+  background: var(--color-foco);
+  color: var(--color-fondo);
+  font-weight: 700;
+}
+
+.page-shell {
+  width: min(70rem, 100% - 2 * var(--espacio-3));
+  margin: var(--espacio-4) auto;
+}
+
+.page {
+  display: grid;
+  gap: var(--espacio-4);
+}
+
+.panel,
+.view-state {
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--espacio-2);
+  background: var(--color-superficie);
+}
+
+.eyebrow,
+.view-state__label {
+  margin: 0 0 var(--espacio-2);
+  color: var(--color-texto-secundario);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+.station-list,
+.info-list {
+  display: grid;
+  gap: var(--espacio-2);
+  margin: var(--espacio-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.station-list a {
+  display: block;
+  min-height: var(--objetivo-tactil-min);
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--espacio-2);
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--espacio-3);
+  margin: var(--espacio-3) 0 0;
+}
+
+.meta-grid div {
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--espacio-2);
+  background: var(--color-fondo);
+}
+
+.meta-grid dt {
+  color: var(--color-texto-secundario);
+}
+
+.meta-grid dd {
+  margin: var(--espacio-1) 0 0;
+  font-weight: 700;
+}
+
+.station-actions {
+  margin-top: var(--espacio-4);
+}
