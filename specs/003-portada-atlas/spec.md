@@ -61,7 +61,7 @@ sin ella no hay forma de llegar al atlas ni a la estación.
 2. **Given** la portada abierta, **When** la persona pulsa «Explorar Bolivia», **Then** llega al atlas en un
    solo clic (criterio de aceptación de RF-01).
 3. **Given** una cifra del problema en la portada (por ejemplo, hectáreas afectadas o focos de calor),
-   **When** se muestra, **Then** lleva su fuente y su fecha (RN-03), tomadas de §4.2 del documento.
+   **When** se muestra, **Then** lleva su fuente, su fecha y su método (RN-03), tomados de §4.2 del documento.
 4. **Given** la portada, **When** se carga, **Then** no espera al globo 3D: el explorador se carga solo al
    entrar a él (RNF-01).
 5. **Given** la portada en inglés, **When** se lee, **Then** todo el texto, la imagen (texto alternativo) y el
@@ -169,7 +169,7 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
 - **Sin dato**: si un campo de una ficha no tiene valor publicado, se muestra «no reportado» con el motivo,
   nunca un cero ni un campo vacío (RN-13).
 - **Pronósticos**: si una ficha cita un pronóstico de SENAMHI, se presenta como contexto de la fuente, nunca
-  como pronóstico del sitio (RN-10).
+  como pronóstico del sitio (los pronósticos están fuera del MVP, §8.2).
 - **Imagen generada con IA**: si la imagen de la portada se genera con IA, lleva marca de agua y ningún logo
   ni marca de la NASA (RN-12).
 - **Globo no disponible**: si el globo no carga o aún no existe, «Explorar Bolivia» lleva igual al explorador
@@ -194,8 +194,9 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
 - **FR-003**: El botón «Explorar Bolivia» DEBE llevar al atlas en un solo clic (criterio de RF-01): al
   explorador con el globo (M-GLOBO) y la lista textual de FR-018 siempre disponible. Si el globo no está
   disponible o no carga, el destino muestra la lista sola, desde la que se abre cualquier ficha.
-- **FR-004**: Cada cifra de la portada DEBE mostrar su fuente y su fecha (RN-03), y DEBE salir de §4.2 del
-  documento o de otra fuente verificada.
+- **FR-004**: Cada cifra de la portada DEBE mostrar su fuente, su fecha y su método (RN-03), y DEBE salir de
+  §4.2 del documento o de otra fuente verificada. El método es el que da la fuente (por ejemplo, «FAN (2023),
+  con Landsat y MapBiomas Bolivia»); si la fuente no lo da, se indica «método no reportado por la fuente».
 - **FR-005**: La imagen radar frente a óptica DEBE tener fuente, licencia y texto alternativo en ambos
   idiomas. Las imágenes las aporta el equipo (aclaración del 2026-11-14); mientras no lleguen, el espacio
   muestra «imagen pendiente». Una imagen sin fuente o licencia NO DEBE publicarse. Si se genera con IA, se
@@ -301,14 +302,15 @@ verifiquen una fuente y el equipo la registre en §31.
   sin traducir (RNF-03, HU-06).
 - **SC-006**: Toda la portada, la lista y las fichas se recorren solo con teclado, con foco visible, y pasan la
   revisión de accesibilidad WCAG 2.2 AA (RNF-04, PS-07).
-- **SC-007**: El 100 % de las cifras de la portada y de las fichas muestran fuente y fecha (RN-03).
+- **SC-007**: El 100 % de las cifras de la portada y de las fichas muestran fuente, fecha y método, o «método
+  no reportado por la fuente» (RN-03).
 - **SC-008**: Una persona de La Paz encuentra la ficha de su departamento y ve fenómeno, escenas y fuentes
   (HU-07).
 
 ## Assumptions
 
-- La feature reutiliza la aplicación base de `specs/001-base-web` (P-PROY-02 a P-PROY-06, de Joaco), que aún
-  no existe; por eso el plan (P-ATLAS-03) espera a esa base.
+- La feature reutiliza la aplicación base de `specs/001-base-web` (Joaco). Su spec, plan y tareas ya existen
+  (P-PROY-02 a 04); la implementación (P-PROY-06 y 07) está pendiente, por eso P-ATLAS-06 espera a esa base.
 - Los conteos de escenas de §10.4 son los de §10.2 («las fichas del atlas usan los mismos conteos») y se
   muestran tal cual, sin recalcularlos.
 - Las cifras de la portada salen de §4.2, con la fuente y la fecha que da el documento.
@@ -319,4 +321,4 @@ verifiquen una fuente y el equipo la registre en §31.
 - El selector de idioma, los estados de la vista y la página de método son de la spec 004 (M-INTERFAZ); esta
   spec solo exige que la portada y las fichas los respeten.
 - Fuera de alcance: la estación de Tunari y las inundaciones del Beni 2026–2027 (§8.2), los pronósticos propios
-  (RN-10) y cualquier procesamiento de datos (la web solo lee lo publicado, §17).
+  (§8.2) y cualquier procesamiento de datos (la web solo lee lo publicado, §17).

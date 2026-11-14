@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-ATLAS-05",
+  "resultado": "hecho",
+  "colaborador": "Angie",
+  "nota": "análisis aprobado por Angie («apruebo y corrige»): 0 críticos, 1 alto (archivo de fichas, acordado por el equipo, pendiente de registro en el documento), 5 medios y 6 bajos corregidos; 31 tareas (#63)",
+  "hash": "bf6da052d0",
+  "rama": "feat/63-plan-portada-atlas",
+  "fecha": "2026-11-14T18:45:29.573Z"
+}
