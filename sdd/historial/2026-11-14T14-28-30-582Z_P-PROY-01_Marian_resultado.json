@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-PROY-01",
+  "resultado": "hecho",
+  "colaborador": "Marian",
+  "nota": "Constitución v1.0.0 con principios I-VII; RNF-02 corregido según el documento (peso < 40 MB, Cesium diferido es RNF-01); 'TypeScript strict' marcado como convención del equipo; pendiente revisión de Joaco, Angie y Mimi en la PR (#42)",
+  "hash": "66c965c658",
+  "rama": "feat/42-constitucion-del-frontend",
+  "fecha": "2026-11-14T14:28:30.582Z"
+}
