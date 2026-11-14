@@ -54,12 +54,17 @@ Lo que el documento no fija está marcado como **propuesta**.
 
 ## R5. Estados de la vista reutilizables (RF-34, FR-008, FR-008a, FR-011)
 
-- **Decisión:** un componente de presentación `VistaConEstado` que recibe el `ViewState<T>` de 001 y pinta el
-  mensaje, la marca y el reintento de cada estado.
-  - Los anuncios van por una región viva educada; el error, por una alerta.
-  - El foco se gestiona como pide FR-008a.
-  - El mapa (M-MAPA) y el globo (M-GLOBO) lo reutilizan sin depender de la interfaz.
+- **Decisión (corregida en el análisis P-INTERFAZ-05, hallazgo I2):** **extender** el `ViewStatePresenter`
+  que crea 001 (T029). No se crea un componente nuevo. 004 le añade:
+  - los mensajes, las marcas y los motivos;
+  - la alerta del error;
+  - las reglas de foco de FR-008a.
+
+  La región de anuncios (001 T016), la base de foco y ARIA (001 T039) y `useReducedMotion` (001 T037) son de 001
+  y se reutilizan. El mapa (M-MAPA) y el globo (M-GLOBO) usan el mismo presentador.
 - **Motivo:** una sola fuente de mensajes y de accesibilidad para los tres módulos (§24: evitar duplicar trabajo).
+- **Alternativa descartada:** un `VistaConEstado` propio en `features/interface/estados/`, porque duplicaría el
+  presentador de 001.
 
 ## R6. Glosario accesible en ratón, tacto y teclado (RF-19, FR-014a)
 
@@ -102,6 +107,6 @@ propuestas** de `contracts/interface-extensions.ts`, que hay que acordar con Joa
 | `sensitivityRange` solo existe en la variante `limited` | RN-06: rango siempre; §17.3 `hectares.csv` trae el rango | Rango en toda cifra reportada de hectáreas |
 | `QualityDocument` no marca CQ-05 ni distingue «no reportado» | FR-010 | Lista de controles CQ-01 a CQ-06, cada uno con un resultado o «not-reported» |
 | `ValidationDocument` no dice si la validación es limitada ni la alternativa usada | RF-11, FR-006 | `limited` y `alternatives` (VC-02, VC-05) |
-| `StationDocument` no trae hipótesis ni advertencias | RF-33, §17.3 `station.json` | `hypotheses[]` con clase RN-05 y fuente, y `warnings[]` |
-| `ManifestDocument` no trae la madurez ni la fuente de validación | RF-37 | `productMaturity`, `validationSource` |
+| `StationDocument` no trae hipótesis ni advertencias | RF-33, §17.3 `station.json` | `hypotheses[]` con clase de §11.2 y MC-06 y fuente (RN-05), y `warnings[]` |
+| `ManifestDocument` no trae la madurez ni la fuente de validación | RF-37, RN-02 | `maturitySegments` (tramos PROVISIONAL y VALIDATED con su CRID y fechas) y `validationSource` |
 | Porcentaje de datos válidos | RF-33, CQ-05 | `validDataPercent: ReportableValue<number>`, **pendiente de DP-03** |
