@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "jsdom",
+    // Las pruebas de T004 leen los tokens y estilos globales; sin esto Vitest entrega el CSS vacío.
+    css: { include: [/src\/styles\/.+\.css/] },
     include: ["tests/unit/**/*.test.{ts,tsx}", "tests/integration/**/*.test.{ts,tsx}"],
   },
 });
