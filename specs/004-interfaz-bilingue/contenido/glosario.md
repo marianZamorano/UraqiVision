@@ -39,4 +39,4 @@ propone al equipo para incluirlo en §30 (§1, §28).
 - **TIOC (20)**: en inglés se conserva la sigla y el nombre oficial en español entre paréntesis, porque
   es una figura legal boliviana. Es una propuesta.
 - **Referencia sugerida** para revisar la redacción técnica en inglés: el NISAR science users' handbook
-  (§31, `https://doi.org/10.48577/jpl.UD4HV3`). No se copió texto de él.
+  (§31, <https://doi.org/10.48577/jpl.UD4HV3>). No se copió texto de él.
