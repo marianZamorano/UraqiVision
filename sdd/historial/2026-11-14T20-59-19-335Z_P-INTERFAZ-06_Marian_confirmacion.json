@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-INTERFAZ-06",
+  "decision": "ejecutar",
+  "colaborador": "Marian",
+  "nota": "Marian («hazlo»); web/ ya está en dev (#90). Prompt modificado en #86 (arranca con la fase 1 de 001)",
+  "hash": "dc4be2e67c",
+  "rama": "dev",
+  "fecha": "2026-11-14T20:59:19.335Z"
+}
