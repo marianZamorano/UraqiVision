@@ -6,7 +6,7 @@ compuertas del plan.
 ## 1. Prerrequisitos
 
 - Node 20 o superior, Git y dependencias del repositorio instaladas.
-- Rama de issue creada desde `dev` y contratos revisados con M-PUBLICACIÓN.
+- Rama de issue creada desde `dev`, P-PROY-05 aprobado y contratos acordados con M-PUBLICACIÓN.
 - DP-07 está cerrada: ion es preferido, pero la ruta sin ion y el fallback 2D siguen siendo obligatorios.
 
 ## 2. Entorno local
@@ -28,8 +28,8 @@ o documentación. Vite lo hará visible: solo sirve el token público restringid
 4. Lectura, cancelación y caché.
 5. Lista textual/2D accesible.
 6. CesiumJS diferido con ion restringido y respaldos sin ion/2D.
-7. Cliente Insight validado.
-8. Pruebas de recorrido, seguridad y rendimiento.
+7. Pruebas de recorrido, seguridad y rendimiento.
+8. (Fuera de esta feature) Cliente Insight de M-INTERFAZ sobre el contrato de `contracts/insight.ts`.
 
 ## 4. Verificación mínima
 
