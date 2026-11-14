@@ -1,7 +1,7 @@
 # SDD de UraqiVision · frontend
 
 Guía para implementar la web de UraqiVision **desde cero**, tal como la define el documento maestro
-(`docs/UraqiVisionDocumentoMaestrov1.0.pdf`), con **Spec-Driven Development** (Spec Kit): primero la
+(`docs/UraqiVisionDocumentoMaestrov1.1.pdf`), con **Spec-Driven Development** (Spec Kit): primero la
 especificación, después el código. Este repositorio es la web; el pipeline y la función Insight tienen su propio
 SDD en [`UraqiVisionBack`](https://github.com/marianZamorano/UraqiVisionBack).
 

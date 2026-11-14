@@ -10,7 +10,7 @@ Joaco como revisor
 **Input**: prompt P-ATLAS-01 de `sdd/m-atlas.md`, con los ajustes que pidió `guardian-alcance`; aclarado con
 P-ATLAS-02.
 
-> Fuente de verdad: `docs/UraqiVisionDocumentoMaestrov1.0.pdf`. Cada requisito conserva su identificador
+> Fuente de verdad: `docs/UraqiVisionDocumentoMaestrov1.1.pdf`. Cada requisito conserva su identificador
 > del documento. Lo que el documento no fija se marca como **propuesta**; lo que falta verificar, como
 > **pendiente**; y lo que depende de §29, como **pendiente (DP-xx)**. Ninguna fuente se inventa (§28).
 

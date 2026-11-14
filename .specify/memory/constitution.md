@@ -1,6 +1,6 @@
 <!--
 Sync Impact Report
-- Versión: plantilla sin valores → 1.0.0 (primera ratificación)
+- Versión: 1.0.0 → 1.1.0 (DP-07 cerrada y política de token público de Cesium ion)
 - Principios: se definen I a VII (la plantilla traía 5 marcadores genéricos)
   I. Documento maestro primero · II. Mostrar con honestidad · III. Arquitectura estática primero ·
   IV. Bilingüe y accesible · V. Rendimiento · VI. Seguridad y costo · VII. Trazabilidad
@@ -12,6 +12,8 @@ Sync Impact Report
     issue #42 y no se considera ratificada por todo el equipo hasta que Joaco, Angie y Mimi la revisen
     en la PR.
   - «TypeScript estricto» es una convención del equipo (prompt P-PROY-01); §18 solo dice TypeScript.
+- DP-07 se cerró el 14 de noviembre de 2026 en el documento maestro v1.1: Cesium ion usa assets 1 y 2 con
+  token público `assets:read` restringido; los respaldos sin ion y 2D siguen siendo obligatorios.
 - Corrección frente al prompt: en el documento, RNF-02 es el peso de los archivos de vista (< 40 MB)
   y la carga diferida de CesiumJS es parte de RNF-01. Prevalece el documento.
 -->
@@ -19,8 +21,8 @@ Sync Impact Report
 # Constitución del frontend de UraqiVision
 
 Este repositorio es **solo la web** de UraqiVision. El pipeline en Python y la función Insight viven en el
-repositorio `UraqiVisionBack`. La fuente de verdad es `docs/UraqiVisionDocumentoMaestrov1.0.pdf`
-(copia para búsquedas: `docs/UraqiVisionDocumentoMaestrov1.0.txt`). Si esta constitución contradice al
+repositorio `UraqiVisionBack`. La fuente de verdad es `docs/UraqiVisionDocumentoMaestrov1.1.pdf`
+(copia para búsquedas: `docs/UraqiVisionDocumentoMaestrov1.1.txt`). Si esta constitución contradice al
 documento maestro, **prevalece el documento** (§1, §28), y es esta constitución la que se corrige.
 
 ## Core Principles
@@ -65,7 +67,8 @@ decisiones con lo que la web muestra.
   (§21.1: `POST /api/insight` con `station_id`, `question` y `lang`).
 - La web MUST NOT recalcular resultados que ya vienen publicados; sus cifras coinciden con esos archivos
   (RF-09, RF-37).
-- Cambiar el stack de §18 (React, TypeScript, Vite, CesiumJS sin token de ion, MapLibre GL JS, Recharts,
+- Cambiar el stack de §18 (React, TypeScript, Vite, CesiumJS con Cesium ion restringido y respaldos sin ion/2D,
+  MapLibre GL JS, Recharts,
   react-i18next), un formato de archivo o el contrato de Insight requiere acordarlo con el backend y con
   el equipo, y registrarlo en el documento maestro antes de implementarlo.
 - Las reglas del pipeline (RN-01, RN-02, promedio lineal antes que dB, COG sin pérdida) pertenecen a
@@ -98,8 +101,10 @@ Razón: se usa en campo, con conexiones limitadas y en el celular.
 
 ### VI. Seguridad y costo
 
-- **RNF-06**: la clave del proveedor de IA nunca llega al navegador ni al repositorio. Ninguna clave,
-  token ni credencial aparece en el código, los commits, los prompts ni los argumentos de herramientas.
+- **RNF-06**: la clave del proveedor de IA nunca llega al navegador ni al repositorio. Ninguna clave privada,
+  token con escritura ni credencial aparece en el código, los commits, los prompts ni los argumentos de herramientas.
+- El token público de Cesium ion puede llegar al navegador únicamente con `assets:read`, restringido a los assets
+  1 y 2 y a las URLs autorizadas. Su valor vive en el entorno local o del hospedaje y nunca se documenta ni versiona.
 - Las variables de entorno se reducen a `.env`, que es local y nunca se sube, y `.env.example`, que se
   sube sin valores sensibles.
 - **RNF-10**: todo el stack funciona en planes gratuitos, salvo el consumo del proveedor de IA. El
@@ -153,4 +158,4 @@ cada requisito.
   del repositorio comprueban esta constitución. Cualquier PR que la incumpla se corrige antes de
   fusionarse.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-14 | **Last Amended**: 2026-11-14
+**Version**: 1.1.0 | **Ratified**: 2026-11-14 | **Last Amended**: 2026-11-14

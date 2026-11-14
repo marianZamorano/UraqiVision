@@ -41,12 +41,12 @@ huella de las escenas y el resumen del cambio. Historias: CU-01, CU-03. Fuera de
 
 ## 3. Reglas y decisiones que aplican
 
-- §18: CesiumJS con un mapa base abierto, **sin token de Cesium ion** y con su atribución.
+- §18 y DP-07 cerrada: Cesium ion con World Terrain (asset 1), Bing Maps Aerial (asset 2), token público
+  `assets:read` restringido a activos/URLs, atribución y respaldos sin ion/2D.
 - RNF-01 (CesiumJS se carga solo al entrar al explorador), RNF-04 (lista textual de departamentos y estaciones como
   alternativa al globo), RNF-05 (usable en el celular), RNF-12 (vuelo instantáneo con movimiento reducido).
 - RN-13 (zonas sin dato transparentes, nunca como cero), RN-07 (fechas en hora de Bolivia).
-- **DP-07 pendiente** (Joaco, sábado por la mañana): elegir el mapa base del globo y confirmar sus términos y
-  atribución. No se elige en un prompt: el plan lo deja configurable hasta que se decida.
+- **DP-07 cerrada** (Joaco, 14 de noviembre): proveedor, activos, restricciones, atribución y respaldos fijados.
 
 ## 4. Contratos e integración
 
@@ -87,7 +87,7 @@ y `npm run referencias:revisar`.
 
 - §24: el globo 3D es lento en celulares de gama media → carga diferida, menos detalle en el celular y respaldo en
   el mapa 2D (RF-30). Dos motores de mapa duplican trabajo → el globo solo explora.
-- DP-07 (mapa base) sin decidir: el globo funciona con uno configurable hasta que Joaco lo resuelva.
+- Cesium ion puede fallar por cuota, red o restricción de URL: el proveedor sin ion y el respaldo 2D son obligatorios.
 - El apoyo de Angie y Marian (§19) se reparte por tareas en P-GLOBO-04.
 
 ## 8. Secuencia de prompts
@@ -102,10 +102,10 @@ y `npm run referencias:revisar`.
 - **Momento:** Antes del sábado 14
 - **Produce:** specs/005-globo/spec.md
 - **Herramientas:** skills `documento-maestro`, `globo-y-mapa`
-- **Verificación:** cada requisito conserva su identificador; DP-07 marcada como pendiente
+- **Verificación:** cada requisito conserva su identificador; DP-07 aplicada sin eliminar respaldos
 
 ```text
-[SDD P-GLOBO-01] /speckit-specify Feature 005-globo (número 005, nombre corto globo) del frontend de UraqiVision, módulo M-GLOBO de §19 (responsable Joaco, con apoyo de Angie y Marian). Explorador 3D que inicia con Bolivia encuadrada y muestra los nueve departamentos con su resumen y las estaciones, seleccionables (RF-02); vuelo de cámara hacia el departamento o la estación elegidos, instantáneo con movimiento reducido (RF-25, RNF-12); huellas de las escenas NISAR usadas con órbita, dirección, fechas y polarizaciones, que coinciden con el catálogo CMR (RF-26); cambio sobre el globo con leyenda y opacidad y zonas sin dato transparentes (RF-27, RN-13); botones para volver a Bolivia y pantalla completa con mouse, tacto y teclado (RF-28); «Analizar» abre el mapa 2D y al volver se conservan departamento, estación, fecha, capa activa y cámara (RF-29); si el globo no inicia, el atlas se abre en el mapa 2D sin perder funciones esenciales (RF-30); y la selección y su ruta (departamento, estación, periodo) resaltadas en el globo y en el mapa (RF-32). El globo explora; las mediciones se hacen en el mapa 2D (§20.2). Lista textual alternativa al globo (RNF-04); usable en el celular (RNF-05). El mapa base del globo es una decisión pendiente (DP-07): no la decidas. Historias CU-01 y CU-03.
+[SDD P-GLOBO-01] /speckit-specify Feature 005-globo (número 005, nombre corto globo) del frontend de UraqiVision, módulo M-GLOBO de §19 (responsable Joaco, con apoyo de Angie y Marian). Explorador 3D que inicia con Bolivia encuadrada y muestra los nueve departamentos con su resumen y las estaciones, seleccionables (RF-02); vuelo de cámara hacia el departamento o la estación elegidos, instantáneo con movimiento reducido (RF-25, RNF-12); huellas de las escenas NISAR usadas con órbita, dirección, fechas y polarizaciones, que coinciden con el catálogo CMR (RF-26); cambio sobre el globo con leyenda y opacidad y zonas sin dato transparentes (RF-27, RN-13); botones para volver a Bolivia y pantalla completa con mouse, tacto y teclado (RF-28); «Analizar» abre el mapa 2D y al volver se conservan departamento, estación, fecha, capa activa y cámara (RF-29); si el globo no inicia, el atlas se abre en el mapa 2D sin perder funciones esenciales (RF-30); y la selección y su ruta (departamento, estación, periodo) resaltadas en el globo y en el mapa (RF-32). El globo explora; las mediciones se hacen en el mapa 2D (§20.2). Lista textual alternativa al globo (RNF-04); usable en el celular (RNF-05). DP-07 fija Cesium ion con World Terrain (asset 1), Bing Maps Aerial (asset 2), token público assets:read restringido a activos/URLs y respaldos sin ion/2D obligatorios. Historias CU-01 y CU-03.
 ```
 
 ### P-GLOBO-02 · Aclarar
@@ -118,10 +118,10 @@ y `npm run referencias:revisar`.
 - **Momento:** Sáb 14:00
 - **Produce:** sección Clarifications de specs/005-globo/spec.md
 - **Herramientas:** skill `documento-maestro`
-- **Verificación:** máximo 5 preguntas; DP-07 sigue pendiente
+- **Verificación:** máximo 5 preguntas; DP-07 se trata como cerrada
 
 ```text
-[SDD P-GLOBO-02] /speckit-clarify Aclara la spec 005-globo con un máximo de 5 preguntas, una a la vez, con una opción recomendada basada en el documento maestro. Prioriza: qué resumen muestra cada departamento en el globo, qué pasa en el celular de gama media (§24), cómo se ve la ruta territorial de RF-32, qué conserva exactamente RF-29 al volver y cómo se comporta el respaldo 2D de RF-30. El mapa base (DP-07) se mantiene como pendiente.
+[SDD P-GLOBO-02] /speckit-clarify Aclara la spec 005-globo con un máximo de 5 preguntas, una a la vez, con una opción recomendada basada en el documento maestro. Prioriza: qué resumen muestra cada departamento en el globo, qué pasa en el celular de gama media (§24), cómo se ve la ruta territorial de RF-32, qué conserva exactamente RF-29 al volver y cómo se comportan los respaldos sin ion y 2D de RF-30. No reabras DP-07.
 ```
 
 ### P-GLOBO-03 · Planificar
@@ -134,10 +134,10 @@ y `npm run referencias:revisar`.
 - **Momento:** Sáb 14:00–20:00
 - **Produce:** specs/005-globo/plan.md, research.md
 - **Herramientas:** skills `globo-y-mapa`, `vite-bundle-optimization`, `react-components-and-state`; MCP `context7`
-- **Verificación:** CesiumJS diferido, sin token de Cesium ion; estado compartido con M-MAPA
+- **Verificación:** CesiumJS diferido, token público restringido y respaldos; estado compartido con M-MAPA
 
 ```text
-[SDD P-GLOBO-03] /speckit-plan CesiumJS (§18) aislado detrás de componentes propios, cargado de forma diferida solo al entrar al explorador (RNF-01) y sin token de Cesium ion, con un mapa base configurable hasta que se decida DP-07 y su atribución visible. Reutiliza la capa de datos y el estado de selección compartido que creó 002-mapa-analisis (RF-29, RF-36); no dupliques estado. Respaldo 2D con MapLibre si CesiumJS falla (RF-30). Menos detalle en el celular (§24). Consulta la documentación vigente de CesiumJS con el MCP context7. Marca como hipótesis lo que el documento no fija.
+[SDD P-GLOBO-03] /speckit-plan CesiumJS (§18) aislado detrás de componentes propios y cargado de forma diferida solo al entrar al explorador (RNF-01). Implementa DP-07 con Cesium World Terrain (asset 1), Bing Maps Aerial (asset 2) y token público assets:read restringido a activos/URLs, cuyo valor vive solo en el entorno; conserva atribución, proveedor sin ion y respaldo 2D con MapLibre (RF-30). Reutiliza la capa de datos y el estado de selección compartido que creó 002-mapa-analisis (RF-29, RF-36); no dupliques estado. Menos detalle en celular (§24). Consulta la documentación vigente de CesiumJS con context7. Marca como hipótesis lo que el documento no fija.
 ```
 
 ### P-GLOBO-04 · Tareas
@@ -169,7 +169,7 @@ y `npm run referencias:revisar`.
 - **Verificación:** sin hallazgos críticos; la persona escribe «apruebo»
 
 ```text
-[SDD P-GLOBO-05] /speckit-analyze Revisa la coherencia entre spec.md, plan.md y tasks.md de specs/005-globo y pásalos por el subagente guardian-alcance (alcance de §8, reglas de §16 y §20.2, pendiente DP-07). Lista los hallazgos por severidad y detente hasta que la persona escriba «apruebo».
+[SDD P-GLOBO-05] /speckit-analyze Revisa la coherencia entre spec.md, plan.md y tasks.md de specs/005-globo y pásalos por el subagente guardian-alcance (alcance de §8, reglas de §16 y §20.2, DP-07 cerrada con respaldos obligatorios). Lista los hallazgos por severidad y detente hasta que la persona escriba «apruebo».
 ```
 
 ### P-GLOBO-06 · Implementar departamentos, vuelo, controles y selección
@@ -225,6 +225,6 @@ y `npm run referencias:revisar`.
 - [ ] Bolivia encuadrada con sus nueve departamentos y las estaciones, seleccionables.
 - [ ] Vuelo, controles, huellas y cambio sobre el globo cumplen su criterio de §13.
 - [ ] Al volver del análisis se conserva la selección completa (RF-29); el respaldo 2D funciona (RF-30).
-- [ ] CesiumJS diferido, sin token de Cesium ion, con atribución; DP-07 resuelta o configurable.
+- [ ] CesiumJS diferido, token público ion restringido, atribución y respaldos sin ion/2D; DP-07 aplicada.
 - [ ] PS-07 y PS-08 en verde; revisado por Angie; sin código muerto.
 - [ ] PR a dev fusionada y el historial del SDD registrado.

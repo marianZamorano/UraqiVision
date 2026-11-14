@@ -9,7 +9,7 @@ kind: local
 > Subagente `react-performance-auditor` de UraqiVision (fuente: `ai/agents/react-performance-auditor.md`).
 > Puede escribir **solo** lo que su rol permite y tras aprobación explícita; no hace commits, push ni despliegues.
 > Carga primero estas skills (están en `.agents/skills/`): `react-component-architecture`, `vite-bundle-optimization`, `frontend-data-fetching`, `globo-y-mapa`.
-> Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.0.pdf (copia en .txt).
+> Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.1.pdf (copia en .txt).
 
 # Rol: react-performance-auditor
 

@@ -249,9 +249,9 @@ el producto entregado para confirmar que no contiene credenciales privadas.
 - M-GLOBO, M-MAPA, M-ATLAS y M-INTERFAZ aportan su contenido en SDD separados; esta feature entrega únicamente
   rutas, contexto, contratos comunes y comportamientos transversales.
 - La decisión de hospedaje permanece fuera de esta feature mientras DP-06 no se cierre.
-- La elección del proveedor visual del globo y su configuración pertenecen a DP-07 y M-GLOBO. El acuerdo del
-  equipo sobre Cesium ion debe registrarse allí; esta especificación solo exige que ninguna credencial privada se
-  exponga y que exista un recorrido funcional aunque una visualización especializada no esté disponible.
+- DP-07 quedó cerrada en el documento maestro v1.1: Cesium ion usa World Terrain (asset 1) y Bing Maps Aerial
+  (asset 2) con token público `assets:read` restringido. Ninguna credencial privada se expone y los respaldos sin
+  ion y 2D mantienen el recorrido cuando la visualización especializada no está disponible.
 - Si no puede recuperarse una preferencia previa de idioma, la base inicia en español y permite cambiar a inglés
   inmediatamente.
 - Los estados y comportamientos transversales se coordinan con `specs/004-interfaz-bilingue/spec.md`; ante una

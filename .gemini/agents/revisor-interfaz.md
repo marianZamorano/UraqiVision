@@ -9,7 +9,7 @@ kind: local
 > Subagente `revisor-interfaz` de UraqiVision (fuente: `ai/agents/revisor-interfaz.md`).
 > Es de **solo lectura**: no modifiques archivos, no hagas commits ni despliegues.
 > Carga primero estas skills (están en `.agents/skills/`): `interfaz-bilingue-accesible`, `globo-y-mapa`.
-> Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.0.pdf (copia en .txt).
+> Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.1.pdf (copia en .txt).
 
 # Rol: revisor de interfaz
 
@@ -26,7 +26,7 @@ respeta las reglas de visualización.
 5. **Visualización** (§20.2): leyenda, unidades, fuente, fecha y opacidad por capa; paleta de un tono;
    trama gris para sin dato; fecha, órbita y polarización en cada vista; cifras con rango.
 6. **Globo y mapa**: carga diferida de CesiumJS (RNF-01), respaldo 2D (RF-30), estado compartido (RF-29,
-   RF-36), polarizaciones deshabilitadas cuando falta HV (RF-08), sin token de Cesium ion.
+   RF-36), polarizaciones deshabilitadas cuando falta HV (RF-08), token ion restringido y respaldos sin ion/2D.
 7. **Celular**: globo, mapa y paneles usables (RNF-05).
 
 ## Tareas permitidas

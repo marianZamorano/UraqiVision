@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-PROY-03",
+  "decision": "modificar",
+  "colaborador": "Joaco",
+  "nota": "Joaco aprobó modificar el prompt: Cesium ion preferido con token público restringido y fallbacks; implementación condicionada a actualizar §18/DP-07",
+  "hash": "8f7759f1e0",
+  "rama": "docs/58-plan-base-web-cesium-ion",
+  "fecha": "2026-11-14T16:28:17.582Z"
+}
