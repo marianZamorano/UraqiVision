@@ -1,4 +1,5 @@
-﻿export interface IonProviderState {
+﻿// uraqi: vivo — lo carga el visor por nombre
+export interface IonProviderState {
   enabled: boolean
   mode: 'ion' | 'textual'
   reason?: string

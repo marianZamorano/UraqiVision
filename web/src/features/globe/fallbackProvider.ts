@@ -1,4 +1,5 @@
-﻿export interface FallbackProviderState {
+﻿// uraqi: vivo — lo carga el visor por nombre
+export interface FallbackProviderState {
   mode: 'textual' | 'scaled'
   enabled: boolean
   reason?: string

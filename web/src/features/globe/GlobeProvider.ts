@@ -1,4 +1,5 @@
-﻿export type GlobeMode = 'ion' | 'textual'
+﻿// uraqi: vivo — lo carga el visor por nombre
+export type GlobeMode = 'ion' | 'textual'
 
 export interface GlobeProviderOptions {
   token?: string

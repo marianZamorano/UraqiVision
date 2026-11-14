@@ -1,4 +1,5 @@
-﻿export { GlobeAttribution } from './GlobeAttribution'
+﻿// uraqi: vivo — lo carga el visor por nombre
+export { GlobeAttribution } from './GlobeAttribution'
 export { hasWebGLSupport, resolveGlobeProvider } from './GlobeProvider'
 export { resolveFallbackProvider } from './fallbackProvider'
 export { resolveIonProvider } from './ionProvider'

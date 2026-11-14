@@ -1,0 +1,1 @@
+﻿CesiumJS attribution is shown in the progressive globe experience, while the landing page remains lightweight and independent from the visual provider.

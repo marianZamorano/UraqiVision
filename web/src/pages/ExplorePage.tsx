@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Language } from '../contracts/view-state'
-import { getDictionary } from '../i18n'
 import { demoStations } from '../data/publicationRepository'
+import { getDictionary } from '../i18n'
 
 type ExplorePageProps = {
   lang: Language
