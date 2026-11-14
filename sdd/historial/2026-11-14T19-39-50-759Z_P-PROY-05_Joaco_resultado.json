@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-PROY-05",
+  "resultado": "en-espera",
+  "colaborador": "Joaco",
+  "nota": "Informe de coherencia emitido: 0 hallazgos críticos; 4 altos (contrato Insight sin source y alcance del cliente sin tarea; contratos omiten campos documentados de §17.3; compuertas de contratos/análisis mal ordenadas en tasks.md; i18n sin react-i18next), 9 medios y 7 bajos. guardian-alcance: dentro del alcance; DP-06 no implementada; contratos requieren acuerdo con M-PUBLICACIÓN. Se espera «apruebo».",
+  "hash": "a2555d0285",
+  "rama": "docs/83-analisis-coherencia-base-web",
+  "fecha": "2026-11-14T19:39:50.759Z"
+}

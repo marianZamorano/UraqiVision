@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-PROY-05",
+  "decision": "ejecutar",
+  "colaborador": "Joaco",
+  "nota": "La persona pidió ejecutar P-PROY-05 tras revisar el plan; se analiza la coherencia de spec/plan/tasks con guardian-alcance.",
+  "hash": "a2555d0285",
+  "rama": "docs/83-analisis-coherencia-base-web",
+  "fecha": "2026-11-14T19:35:27.261Z"
+}
