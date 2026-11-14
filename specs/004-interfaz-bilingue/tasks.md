@@ -116,14 +116,14 @@ ratón, tacto y teclado (RF-19, RF-20).
 ### Tests for User Story 3
 
 - [ ] T024 [P] [US3] Escribir pruebas del selector de idioma: `lang` del documento, foco que se queda en el selector, nombre accesible, carga diferida de `en.json` y conservación de la vista (CP-31, CP-34, PS-04, PS-07) en `web/tests/unit/idioma.test.tsx` — Marian
-- [ ] T025 [P] [US3] Escribir pruebas del glosario: los 21 términos con es y en, apertura con ratón, tacto y teclado, cierre con Escape, botón «cerrar» ≥ 24 px o toque fuera, foco de vuelta al término y WCAG 1.4.13 (CP-40 a CP-44, PS-07) en `web/tests/unit/glosario.test.tsx` — Marian
+- [X] T025 [P] [US3] Escribir pruebas del glosario: los 21 términos con es y en, apertura con ratón, tacto y teclado, cierre con Escape, botón «cerrar» ≥ 24 px o toque fuera, foco de vuelta al término y WCAG 1.4.13 (CP-40 a CP-44, PS-07) en `web/tests/unit/glosario.test.tsx` — Marian
 - [ ] T026 [P] [US3] Escribir la prueba E2E del cambio a inglés en la estación sin recarga y sin textos en español (CP-30, CP-33, SC-001, SC-007) en `web/tests/e2e/idioma.spec.ts` — Marian
 
 ### Implementation for User Story 3
 
 - [ ] T027 [US3] **Extender** `web/src/app/LanguageSwitcher.tsx` de 001 (T032), sin crear otro selector. Añadir lo que exige 004: la sincronización de `document.documentElement.lang`, el foco que se queda en el selector y el `import()` de `en.json` la primera vez (`addResourceBundle`), si 001 no lo hace ya (RF-20, FR-012a, R1, R2) — Marian
 - [ ] T028 [US3] Pasar los 21 términos de `contenido/glosario.md` a `web/src/i18n/es.json` y `en.json` bajo `glosario.terminos.*`, después de que Mimi revise las traducciones (RF-19, RNF-03) — Marian
-- [ ] T029 [US3] Implementar `TerminoGlosario` (botón con nombre accesible) y `DefinicionGlosario` (no modal, persistente, «cerrar» ≥ 24 px) en `web/src/features/interface/glosario/` (RF-19, FR-014a) — Marian
+- [X] T029 [US3] Implementar `TerminoGlosario` (botón con nombre accesible) y `DefinicionGlosario` (no modal, persistente, «cerrar» ≥ 24 px) en `web/src/features/interface/glosario/` (RF-19, FR-014a) — Marian
 - [ ] T030 [US3] Marcar con `TerminoGlosario` los términos de §30 que aparecen en `web/src/features/interface/panel/PanelEstacion.tsx`, `web/src/app/ViewStatePresenter.tsx` y `web/src/features/interface/fuente-calidad/` (FR-014) — Marian
 
 **Checkpoint**: US1 a US3 completas en los dos idiomas.

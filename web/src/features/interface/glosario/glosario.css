@@ -1,0 +1,44 @@
+/* 004 T029: término y definición del glosario. Solo tokens (§20.2); objetivo táctil ≥ 24 px (WCAG 2.5.8). */
+.glosario {
+  position: relative;
+  display: inline-block;
+}
+
+.glosario__termino {
+  min-height: var(--objetivo-tactil-min);
+  padding: 0 var(--espacio-1);
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: help;
+}
+
+.glosario__definicion {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  display: flex;
+  gap: var(--espacio-2);
+  align-items: flex-start;
+  width: max-content;
+  max-width: min(20rem, 90vw);
+  margin-top: var(--espacio-1);
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+}
+
+.glosario__cerrar {
+  flex: none;
+  min-width: var(--objetivo-tactil-min);
+  min-height: var(--objetivo-tactil-min);
+  border: 1px solid var(--color-borde);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
