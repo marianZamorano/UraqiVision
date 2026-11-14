@@ -210,6 +210,15 @@ emit(path.join('.codex', 'config.toml'), [
   '# Codex se lanza desde la raíz del repositorio. La capa .codex/ del proyecto (hooks incluidos) solo se carga',
   '# si confías en el proyecto; revisa y confía los hooks con /hooks.',
   '',
+  '# Sandbox con red (#59): sin ella, `gh` no llega a GitHub y no se pueden crear issues ni PR desde Codex.',
+  '# Las guardas de ai/hooks/pre-tool.mjs siguen activas (secretos, .env, comandos destructivos); los',
+  '# comandos fuera del sandbox siguen pidiendo aprobación (on-request).',
+  'approval_policy = "on-request"',
+  'sandbox_mode = "workspace-write"',
+  '',
+  '[sandbox_workspace_write]',
+  'network_access = true',
+  '',
   codexMcp,
 ].join('\n'));
 
