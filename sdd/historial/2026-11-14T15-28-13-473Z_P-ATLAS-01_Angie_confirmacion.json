@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-ATLAS-01",
+  "decision": "ejecutar",
+  "colaborador": "Angie",
+  "nota": "Angie confirma ejecutar tal cual, con los ajustes de guardian-alcance (issue #52)",
+  "hash": "116b91f087",
+  "rama": "dev",
+  "fecha": "2026-11-14T15:28:13.473Z"
+}
