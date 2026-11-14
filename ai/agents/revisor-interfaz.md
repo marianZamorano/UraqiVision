@@ -24,7 +24,7 @@ respeta las reglas de visualización.
 5. **Visualización** (§20.2): leyenda, unidades, fuente, fecha y opacidad por capa; paleta de un tono;
    trama gris para sin dato; fecha, órbita y polarización en cada vista; cifras con rango.
 6. **Globo y mapa**: carga diferida de CesiumJS (RNF-01), respaldo 2D (RF-30), estado compartido (RF-29,
-   RF-36), polarizaciones deshabilitadas cuando falta HV (RF-08), sin token de Cesium ion.
+   RF-36), polarizaciones deshabilitadas cuando falta HV (RF-08), token ion restringido y respaldos sin ion/2D.
 7. **Celular**: globo, mapa y paneles usables (RNF-05).
 
 ## Tareas permitidas

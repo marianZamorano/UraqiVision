@@ -11,7 +11,7 @@ permission:
 > Subagente `react-ui-reviewer` de UraqiVision (fuente: `ai/agents/react-ui-reviewer.md`).
 > Puede escribir **solo** lo que su rol permite y tras aprobación explícita; no hace commits, push ni despliegues.
 > Carga primero estas skills (están en `.agents/skills/`): `react-components-and-state` (herramienta skill), `typed-api-integration` (herramienta skill), `interfaz-bilingue-accesible` (herramienta skill).
-> Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.0.pdf (copia en .txt).
+> Sigue AGENTS.md. La fuente de verdad es docs/UraqiVisionDocumentoMaestrov1.1.pdf (copia en .txt).
 
 # Rol: react-ui-reviewer
 
