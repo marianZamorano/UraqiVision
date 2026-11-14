@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-INTERFAZ-06",
+  "resultado": "parcial",
+  "colaborador": "Marian",
+  "nota": "Hechas T001, T004, T005 (formatos de fecha en hora de Bolivia y hectáreas por idioma; 16/16 pruebas, build ok). Bloqueadas: T002 (datos de prueba de 001 T024), T003 (acuerdo de contratos #81), T006-T008 y US1 (contratos en web/src/contracts, 001 T006; Recharts sin instalar), US2 (ViewStatePresenter, 001 T029). formato.ts aún solo lo usan las pruebas hasta T012",
+  "hash": "dc4be2e67c",
+  "rama": "feat/91-panel-y-estados",
+  "fecha": "2026-11-14T21:02:47.953Z"
+}
