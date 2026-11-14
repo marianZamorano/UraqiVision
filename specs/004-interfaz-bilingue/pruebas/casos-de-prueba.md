@@ -18,7 +18,7 @@
 | CP-03 | Hectáreas sin rango publicado | Se abre el panel | Muestra «Rango no reportado» con el motivo, nunca un rango inventado ni 0 | FR-003, FR-009 | U |
 | CP-04 | Cualquier cifra del panel | Se inspecciona | Muestra fuente, fecha y método, con enlace a la página de método | FR-002 | U |
 | CP-05 | Adquisición 2026-11-14T03:30Z | Se muestra | En hora de Bolivia (13 nov, 23:30, UTC−04); la fecha UTC está en la fuente | FR-004, RN-07 | U |
-| CP-06 | Hipótesis publicadas | Se muestran | Llevan la etiqueta de hipótesis y su fuente; la clase es una de las cuatro de RN-05 | FR-005 | U |
+| CP-06 | Hipótesis publicadas | Se muestran | Llevan la etiqueta de hipótesis y su fuente; la clase es una de las cuatro de §11.2 y MC-06 | FR-005 | U |
 | CP-07 | `validation.json` sin Sentinel-2 válida | Se abre el panel | «Validación limitada», la alternativa publicada y las métricas como «no reportadas» con su motivo | FR-006 | U |
 | CP-08 | Porcentaje de datos válidos publicado | Se muestra | Aparece tal cual, sin recalcular (pendiente de DP-03) | FR-007 | U |
 

@@ -91,36 +91,39 @@ specs/004-interfaz-bilingue/
 
 ```text
 web/src/
+├── app/                  # de 001; 004 lo EXTIENDE, no lo duplica
+│   ├── ViewStatePresenter.tsx   # 001 T029 + mensajes, marcas y reglas de foco de 004 (RF-34, FR-008a)
+│   └── LanguageSwitcher.tsx     # 001 T032 + lang del documento e inglés diferido (RF-20, FR-012a)
 ├── features/interface/
-│   ├── estados/          # VistaConEstado: mensajes, anuncios, foco y reintento (RF-34). Lo usan el mapa y el globo.
-│   ├── panel/            # PanelEstacion y CifraMostrada (RF-33)
+│   ├── panel/            # PanelEstacion (prop opcional `acciones`) y CifraMostrada (RF-33)
 │   ├── hectareas/        # gráfico con banda de rango y tabla alternativa (RN-06)
 │   ├── glosario/         # TerminoGlosario y su definición (RF-19)
-│   ├── idioma/           # SelectorIdioma y sincronización de lang (RF-20)
 │   ├── fuente-calidad/   # SeccionFuenteCalidad (RF-37)
-│   ├── descargas/        # Angie: enlaces RF-22, CSV y PNG RF-21 (espacio reservado en el panel)
+│   ├── descargas/        # Angie: enlaces RF-22, CSV y PNG RF-21; se insertan en el panel por `acciones`
 │   └── formato/          # formatearFecha y formatearHectareas (Intl, America/La_Paz)
-├── pages/
-│   ├── AboutPage         # Acerca de (RF-24)
-│   └── MethodPage        # Angie: método (RF-15)
-└── i18n/
+├── pages/                # de 001 (T022); 004 completa su contenido
+│   ├── AboutPage.tsx     # Acerca de (RF-24)
+│   └── MethodPage.tsx    # Angie: método (RF-15)
+└── i18n/                 # de 001 (T015); 004 añade sus claves
     ├── es.json           # se carga en el bundle inicial
     └── en.json           # se carga bajo demanda (R1)
 ```
 
-**Structure Decision**: todo vive en `features/interface/` y en las páginas que ya define 001. `estados/` no
-importa nada del mapa ni del globo, para que los dos puedan reutilizarlo sin dependencias circulares.
+**Structure Decision**: lo nuevo de 004 vive en `features/interface/`. Los estados, el selector de idioma, las
+páginas, i18n, la región de anuncios, el foco, el movimiento reducido y los datos de prueba **son de 001 y se
+extienden** (001 T015, T016, T022, T024, T029, T032, T037 y T039), así no hay dos piezas para lo mismo. El
+presentador de estados de 001 no importa el mapa ni el globo, de modo que los dos lo reutilizan.
 
 ## Architecture and Data Flow
 
 1. La capa de datos de 001 entrega un `ViewState<PublishedStationBundle>`.
-2. `VistaConEstado` decide qué pintar según `kind`. Con `available` o `limited`, pasa el bundle a
-   `PanelEstacion`.
+2. El `ViewStatePresenter` de 001, extendido por 004, decide qué pintar según `kind`. Con `available` o
+   `limited`, pasa el bundle a `PanelEstacion`.
 3. Un adaptador puro (`aPanelEstacion`) convierte el bundle y sus extensiones en `PanelEstacion` y
    `DisplayedFigure[]`. Aplica las marcas a partir del `status` y de los controles publicados y **nunca calcula un
    umbral**.
 4. Los formatos (`formato/`) dependen solo del idioma activo y de la zona `America/La_Paz`.
-5. El cambio de idioma lo emite `SelectorIdioma`, actualiza `RouteState.lang` y `document.documentElement.lang`, y
+5. El cambio de idioma lo emite el `LanguageSwitcher` de 001, extendido, y actualiza `RouteState.lang` y `document.documentElement.lang`, y
    carga `en.json` la primera vez.
 6. Las descargas (Angie) leen el mismo bundle y la imagen del mapa de M-MAPA. No modifican los archivos
    publicados.
@@ -129,7 +132,7 @@ importa nada del mapa ni del globo, para que los dos puedan reutilizarlo sin dep
 
 | Con | Qué | Estado |
 |---|---|---|
-| 001-base-web (Joaco) | Capa de datos, `ViewState`, rutas, i18n, tokens | Plan listo (P-PROY-03); implementación pendiente (P-PROY-06) |
+| 001-base-web (Joaco) | Capa de datos, `ViewState`, rutas, i18n, tokens | Plan y tareas listos (P-PROY-03 y P-PROY-04); 004 se implementa cuando 001 esté verificada (P-PROY-07) |
 | M-PUBLICACIÓN (Mimi) | Campos propuestos en `interface-extensions.ts` | **Por acordar** |
 | M-MAPA (Joaco) | Imagen del mapa para el PNG (R7) | **Por acordar**; tarea de Angie |
 | M-VALIDACIÓN (Tabata) | `quality.json` y `validation.json` con CQ-05, VC-02 y VC-05 | Se consume tal cual; DP-03 pendiente |
@@ -141,8 +144,9 @@ Ver `pruebas/casos-de-prueba.md`. Se escribe la prueba antes del código (TDD).
 
 1. **Unidad:** `formatearFecha`, `formatearHectareas`, `aPanelEstacion` (marcas, rango, hipótesis) y la paridad de
    claves es/en.
-2. **Componentes:** `VistaConEstado` (6 estados, anuncios y foco), glosario (ratón, tacto, teclado y WCAG 1.4.13),
-   selector de idioma.
+2. **Componentes:** lo que 004 añade al `ViewStatePresenter` (mensajes, marcas y foco de FR-008a), glosario
+   (ratón, tacto, teclado y WCAG 1.4.13) y lo que 004 añade al `LanguageSwitcher` (`lang` e inglés diferido).
+   Las pruebas generales de teclado, anuncios y reintento son de 001 (T035) y no se repiten.
 3. **E2E:** recorrido es → en, 320 px y 200 %, movimiento reducido y revisión automática de accesibilidad en cada
    estado.
 
