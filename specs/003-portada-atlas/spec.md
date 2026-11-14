@@ -6,12 +6,38 @@
 **Status**: Draft
 **Módulo (§19)**: M-ATLAS, con Angie y Marian como responsables (según el reparto de #46, lo ejecuta Angie) y
 Joaco como revisor
-**Issue**: #52 · **Prompt SDD**: P-ATLAS-01
-**Input**: prompt P-ATLAS-01 de `sdd/m-atlas.md`, con los ajustes que pidió `guardian-alcance`.
+**Issue**: #52 (P-ATLAS-01) y #55 (P-ATLAS-02, aclaraciones) · **Prompt SDD**: P-ATLAS-01, P-ATLAS-02
+**Input**: prompt P-ATLAS-01 de `sdd/m-atlas.md`, con los ajustes que pidió `guardian-alcance`; aclarado con
+P-ATLAS-02.
 
 > Fuente de verdad: `docs/UraqiVisionDocumentoMaestrov1.0.pdf`. Cada requisito conserva su identificador
 > del documento. Lo que el documento no fija se marca como **propuesta**; lo que falta verificar, como
 > **pendiente**; y lo que depende de §29, como **pendiente (DP-xx)**. Ninguna fuente se inventa (§28).
+
+## Clarifications
+
+### Session 2026-11-14
+
+Aclaraciones de P-ATLAS-02 (issue #55), respondidas por Angie.
+
+- Q: ¿Qué imagen usará la portada para comparar radar y óptica con humo (FR-005)? → A: Las imágenes las
+  aporta el equipo, con su fuente y licencia; el asistente no las busca ni las genera. Hasta recibirlas, el
+  espacio de la imagen muestra «imagen pendiente». La imagen se integra solo si trae fuente, licencia y texto
+  alternativo en ambos idiomas; si alguna se generara con IA, se aplica RN-12, y ninguna imagen de ejemplo se
+  presenta como dato NISAR (RN-04).
+- Q: ¿Adónde lleva el botón «Explorar Bolivia» de la portada (RF-01)? → A: Al explorador, que muestra el
+  globo (M-GLOBO, Joaco) junto con la lista textual de departamentos y estaciones siempre disponible. Si el
+  globo no está disponible o no carga, se ve la lista sola y las fichas se siguen abriendo en un clic.
+- Q: ¿Qué ve la persona en la ficha de un departamento sin fuente verificada (Pando, La Paz, Tarija,
+  Chuquisaca), y quién consigue esa fuente (FR-009)? → A: La ficha sigue visible con su fenómeno y escenas, y
+  en Fuentes muestra el aviso «Fuente en verificación». Angie y Marian (responsables de M-ATLAS) verifican la
+  fuente, que el equipo registra en §31 antes de mostrarla.
+- Q: ¿Qué pasa con Insight en las fichas de los departamentos sin estación (FR-023)? → A: Queda pendiente.
+  La contradicción entre CU-02 (ficha → Insight) y §8.1/RF-16 (Insight acotado a la estación abierta) se
+  consulta al equipo con Mimi (M-INSIGHT); la spec no define Insight en las fichas hasta entonces.
+- Q: ¿Cómo distingue la persona, a simple vista, un departamento con estación de uno que solo tiene ficha? →
+  A: Con una etiqueta de texto «Estación» o «Ficha» (en inglés, «Station» o «Profile») más un icono, en la
+  lista y en la ficha; el color solo acompaña y nunca es la única señal (RNF-04).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -109,8 +135,9 @@ afirmación visible tiene fuente con fecha, o está marcada como pendiente.
 1. **Given** una afirmación de una ficha, **When** se muestra, **Then** enlaza a su fuente con la fecha de
    consulta (RN-03).
 2. **Given** un departamento cuya fuente todavía no está verificada en §31 (ver la tabla de fichas),
-   **When** se prepara su ficha, **Then** no se publica una fuente inventada: la ficha indica que la fuente
-   está pendiente de verificación y no se da por cumplido el criterio de RF-03 para ese departamento.
+   **When** se abre su ficha, **Then** se ven el fenómeno y las escenas, y en Fuentes el aviso «Fuente en
+   verificación»; no se publica una fuente inventada y no se da por cumplido el criterio de RF-03 para ese
+   departamento.
 3. **Given** una mención a datos NISAR, **When** se cita, **Then** sigue la guía de uso y citación de datos de
    la NASA (RN-11).
 
@@ -135,8 +162,8 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
 ### Edge Cases
 
 - **Fuente pendiente**: un departamento sin fuente verificada en §31 (hoy Pando, La Paz, Tarija y Chuquisaca)
-  se muestra con su fenómeno y escenas, y con la fuente marcada como «pendiente de verificación»; nunca con una
-  fuente inventada.
+  se muestra con su fenómeno y escenas, y en Fuentes con el aviso «Fuente en verificación»; nunca con una
+  fuente inventada ni oculto.
 - **Rango de escenas**: Santa Cruz tiene «54–55» escenas en §10.4; se muestra el rango tal cual, sin
   redondear ni elegir un valor.
 - **Sin dato**: si un campo de una ficha no tiene valor publicado, se muestra «no reportado» con el motivo,
@@ -145,6 +172,8 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
   como pronóstico del sitio (RN-10).
 - **Imagen generada con IA**: si la imagen de la portada se genera con IA, lleva marca de agua y ningún logo
   ni marca de la NASA (RN-12).
+- **Globo no disponible**: si el globo no carga o aún no existe, «Explorar Bolivia» lleva igual al explorador
+  y se ve la lista textual sola; ninguna ficha queda inaccesible (FR-003, FR-018).
 - **Movimiento reducido**: si la portada o el atlas tienen animaciones, respetan la preferencia del sistema
   de reducir movimiento (RNF-12).
 - **Pantalla pequeña**: en el celular, la portada y las fichas se leen sin desplazamiento horizontal
@@ -162,12 +191,15 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
   menos de un minuto (RF-01).
 - **FR-002**: La portada DEBE mostrar una frase del problema, una imagen radar frente a una óptica con humo y
   el botón «Explorar Bolivia» (§20.1).
-- **FR-003**: El botón «Explorar Bolivia» DEBE llevar al atlas en un solo clic (criterio de RF-01).
+- **FR-003**: El botón «Explorar Bolivia» DEBE llevar al atlas en un solo clic (criterio de RF-01): al
+  explorador con el globo (M-GLOBO) y la lista textual de FR-018 siempre disponible. Si el globo no está
+  disponible o no carga, el destino muestra la lista sola, desde la que se abre cualquier ficha.
 - **FR-004**: Cada cifra de la portada DEBE mostrar su fuente y su fecha (RN-03), y DEBE salir de §4.2 del
   documento o de otra fuente verificada.
 - **FR-005**: La imagen radar frente a óptica DEBE tener fuente, licencia y texto alternativo en ambos
-  idiomas. **Pendiente**: el documento no fija qué imagen ni su fuente o licencia; se decide en las
-  aclaraciones (P-ATLAS-02). Si se genera con IA, se aplica RN-12.
+  idiomas. Las imágenes las aporta el equipo (aclaración del 2026-11-14); mientras no lleguen, el espacio
+  muestra «imagen pendiente». Una imagen sin fuente o licencia NO DEBE publicarse. Si se genera con IA, se
+  aplica RN-12, y ninguna imagen de ejemplo se presenta como dato NISAR (RN-04).
 - **FR-006**: La portada DEBE cargar en menos de 3 s en una conexión de 10 Mbps sin cargar el globo 3D, que
   se carga solo al entrar al explorador (RNF-01).
 
@@ -177,8 +209,12 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
 - **FR-008**: Cada ficha DEBE mostrar fenómeno, escenas NISAR, fuentes y estado (estación o ficha), con los
   valores de §10.4 copiados literalmente (ver la tabla de fichas) (RF-03).
 - **FR-009**: Cada ficha DEBE tener al menos una fuente verificada para cumplir RF-03. Una ficha sin fuente
-  verificada DEBE marcarla como «pendiente de verificación» y NO DEBE publicar una fuente inventada (§28).
+  verificada DEBE seguir visible, con su fenómeno y escenas, y mostrar en Fuentes el aviso «Fuente en
+  verificación» (en inglés, «Source being verified»); NO DEBE publicar una fuente inventada (§28). Angie y
+  Marian (responsables de M-ATLAS) verifican la fuente, que se registra en §31 antes de mostrarla.
 - **FR-010**: Los departamentos sin estación DEBEN decir «sin estación disponible» (RF-03).
+- **FR-010a**: En la lista y en cada ficha, el estado DEBE mostrarse con una etiqueta de texto «Estación» o
+  «Ficha» (en inglés, «Station» o «Profile») y un icono; el color NO DEBE ser la única señal (RNF-04).
 - **FR-011**: La ficha de Santa Cruz DEBE indicar que tiene estación (San Ignacio de Velasco) y llevar a ella.
 - **FR-012**: La ficha de Cochabamba DEBE presentar el Parque Nacional Tunari como ficha, con sus escenas y
   fuentes, y no como estación (§11.3, §8.2).
@@ -210,8 +246,10 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
 **Dependencias externas (no se especifican aquí)**
 
 - **FR-023**: Desde una ficha, CU-02 continúa con «pregunta a Insight» (RF-16). Insight es de M-INSIGHT
-  (repositorio `UraqiVisionBack`) y su interfaz se especifica fuera de esta feature; esta spec solo deja el
-  punto de entrada.
+  (repositorio `UraqiVisionBack`) y su interfaz se especifica fuera de esta feature. **Pendiente (consulta al
+  equipo)**: CU-02 pide Insight desde cualquier ficha, pero §8.1 y RF-16 lo acotan a la estación abierta, y
+  solo Santa Cruz tiene estación. Hasta que el equipo lo resuelva con Mimi (M-INSIGHT), esta spec no define
+  Insight en las fichas.
 - **FR-024**: Abrir una ficha al elegir un departamento en el globo (§20.1, RF-02) es de M-GLOBO (Joaco); esta
   spec define el contenido de la ficha, no el globo.
 
@@ -230,8 +268,8 @@ Si sobra tiempo, el atlas muestra un calendario de la superficie: qué cambia en
 | Chuquisaca | Contexto general | 27 | Fuentes nacionales | **Pendiente**: «Fuentes nacionales» no es una fuente concreta | Ficha |
 
 Hoy cumplen el criterio «al menos una fuente» de RF-03 cinco de nueve fichas (Santa Cruz, Cochabamba, Beni,
-Oruro y Potosí). Las otras cuatro necesitan que el equipo verifique una fuente y la registre en §31 antes de
-darse por cumplidas.
+Oruro y Potosí). Las otras cuatro se muestran con el aviso «Fuente en verificación» hasta que Angie y Marian
+verifiquen una fuente y el equipo la registre en §31.
 
 ### Key Entities *(include if feature involves data)*
 

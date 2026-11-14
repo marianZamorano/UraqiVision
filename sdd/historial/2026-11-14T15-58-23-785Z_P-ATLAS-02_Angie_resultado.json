@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-ATLAS-02",
+  "resultado": "hecho",
+  "colaborador": "Angie",
+  "nota": "5 aclaraciones: imagen de portada la aporta el equipo; Explorar Bolivia al globo con lista; fichas sin fuente con aviso «Fuente en verificación»; Insight en fichas pendiente de consulta con Mimi; etiqueta + icono ficha/estación (#55)",
+  "hash": "0afb42a40b",
+  "rama": "feat/55-aclarar-portada-atlas",
+  "fecha": "2026-11-14T15:58:23.785Z"
+}
