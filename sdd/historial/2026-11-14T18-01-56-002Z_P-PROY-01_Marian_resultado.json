@@ -1,0 +1,11 @@
+{
+  "tipo": "resultado",
+  "id": "P-PROY-01",
+  "resultado": "hecho",
+  "vigente": true,
+  "colaborador": "Marian",
+  "nota": "Sigue vigente: el prompt cambió en la PR #62 (documento v1.1, Cesium ion) y la constitución ya se actualizó a v1.1.0 con esos mismos cambios en esa PR",
+  "hash": "4b73f93c37",
+  "rama": "feat/67-p-proy-01-vigente",
+  "fecha": "2026-11-14T18:01:56.002Z"
+}
