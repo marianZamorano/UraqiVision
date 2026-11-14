@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-PROY-02",
+  "decision": "ejecutar",
+  "colaborador": "Joaco",
+  "nota": "Joaco eligió ejecutar tal cual en Codex el 2026-11-14",
+  "hash": "38dfacdc06",
+  "rama": "dev",
+  "fecha": "2026-11-14T15:29:30.326Z"
+}
