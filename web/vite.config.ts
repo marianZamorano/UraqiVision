@@ -61,6 +61,8 @@ function cesiumAssetsPlugin(): Plugin {
 }
 
 export default defineConfig({
+  // Un solo .env local en la raíz del repositorio (AGENTS.md §6, issue #82): de ahí sale VITE_CESIUM_ION_TOKEN.
+  envDir: "..",
   plugins: [react(), cesiumAssetsPlugin()],
   define: {
     CESIUM_BASE_URL: JSON.stringify(CESIUM_BASE_URL),

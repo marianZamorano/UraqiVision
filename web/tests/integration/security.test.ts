@@ -14,16 +14,25 @@ const textExtensions = /\.(?:css|html|js|json|md|ts|tsx)$/
 const distDir = join(process.cwd(), 'dist')
 
 describe('secret and bundle hygiene', () => {
-  it('keeps the local env file untracked and the example value empty', () => {
-    const tracked = execFileSync('git', ['ls-files', 'web/.env'], {
-      cwd: join(process.cwd(), '..'),
+  // AGENTS.md §6 e issue #82: un solo .env local en la raíz; su plantilla declara la clave sin valor.
+  it('keeps a single untracked env file at the repository root with an empty public token template', () => {
+    const repoRoot = join(process.cwd(), '..')
+    const tracked = execFileSync('git', ['ls-files', '.env', 'web/.env', 'web/.env.example'], {
+      cwd: repoRoot,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     }).trim()
-    const example = readFileSync(join(process.cwd(), '.env.example'), 'utf8').trim()
+    const example = readFileSync(join(repoRoot, '.env.example'), 'utf8')
 
     expect(tracked).toBe('')
-    expect(example).toBe('VITE_CESIUM_ION_TOKEN=')
+    expect(existsSync(join(process.cwd(), '.env.example'))).toBe(false)
+    expect(example).toMatch(/^VITE_CESIUM_ION_TOKEN=$/m)
+  })
+
+  it('makes Vite read the env file from the repository root', () => {
+    const configText = readFileSync(join(process.cwd(), 'vite.config.ts'), 'utf8')
+
+    expect(configText).toMatch(/envDir:\s*"\.\."/)
   })
 
   it('keeps the fake token marker inside tests and never logs the public token', () => {

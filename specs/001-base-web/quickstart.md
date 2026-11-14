@@ -11,13 +11,14 @@ compuertas del plan.
 
 ## 2. Entorno local
 
-`web/.env.example` podrá declarar sin valor:
+El `.env.example` de la **raíz** del repositorio declara sin valor (AGENTS.md §6, decisión del issue #82):
 
 ```dotenv
 VITE_CESIUM_ION_TOKEN=
 ```
 
-Copiar a `web/.env` y completar localmente. No pegar el valor en terminal compartida, issue, PR, prompt, captura
+Crear el `.env` de la raíz con `npm run env:sync` y completar el valor localmente; Vite lo lee de la raíz con
+`envDir`. No existe `web/.env`. No pegar el valor en terminal compartida, issue, PR, prompt, captura
 o documentación. Vite lo hará visible: solo sirve el token público restringido, nunca una clave privada.
 
 ## 3. Orden de construcción
