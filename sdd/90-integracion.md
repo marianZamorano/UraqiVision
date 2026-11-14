@@ -158,7 +158,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 43
 - **Fase:** 8 · Verificación
 - **Comando:** speckit-converge
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Marian
 - **Revisa:** Equipo
 - **Depende de:** P-INT-04, P-MAPA-08, P-ATLAS-07, P-INTERFAZ-08, P-GLOBO-08
 - **Momento:** Dom 14:00–19:00
@@ -174,7 +174,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 44
 - **Fase:** Entrega
 - **Comando:** entrega-hackathon
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Equipo
 - **Depende de:** P-INT-05
 - **Momento:** Dom 19:00–23:00

@@ -17,6 +17,7 @@ departamentos de Bolivia, incluida la de Tunari (§11.3), con sus fuentes.
 |---|---|
 | Módulo (§19) | M-ATLAS · «Portada, fichas de departamento y calendario» |
 | Responsables | Angie y Marian |
+| Reparto acordado (#42, #46) | Organización interna del equipo; §19 no cambia. **Angie** ejecuta M-ATLAS: portada (RF-01), fichas (RF-03), Plus RF-04, y además DP-01. Marian revisa sus PR junto con Joaco |
 | Revisor | Joaco |
 | Repositorio | `UraqiVision` (frontend) |
 | Spec | `specs/003-portada-atlas` |
@@ -126,7 +127,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 9
 - **Fase:** 2 · Especificación
 - **Comando:** speckit-specify
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-PROY-01
 - **Momento:** Antes del sábado 14 (textos de fichas)
@@ -142,7 +143,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 17
 - **Fase:** 3 · Aclaraciones
 - **Comando:** speckit-clarify
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-ATLAS-01
 - **Momento:** Antes del sábado 14
@@ -158,7 +159,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 18
 - **Fase:** 4 · Plan
 - **Comando:** speckit-plan
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-ATLAS-02
 - **Momento:** Antes del sábado 14
@@ -174,7 +175,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 19
 - **Fase:** 5 · Tareas
 - **Comando:** speckit-tasks
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-ATLAS-03
 - **Momento:** Antes del sábado 14
@@ -190,7 +191,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 20
 - **Fase:** 6 · Análisis
 - **Comando:** speckit-analyze
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-ATLAS-04
 - **Momento:** Antes del sábado 14
@@ -206,7 +207,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 26
 - **Fase:** 7 · Implementación
 - **Comando:** speckit-implement
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-ATLAS-05, P-PROY-07
 - **Momento:** Sáb 9:00–13:00 portada · Sáb 14:00–20:00 fichas
@@ -222,7 +223,7 @@ y `npm run referencias:revisar`.
 - **Orden:** 40
 - **Fase:** 8 · Verificación
 - **Comando:** speckit-converge
-- **Ejecuta:** Angie, Marian
+- **Ejecuta:** Angie
 - **Revisa:** Joaco
 - **Depende de:** P-ATLAS-06
 - **Momento:** Dom 14:00–19:00
