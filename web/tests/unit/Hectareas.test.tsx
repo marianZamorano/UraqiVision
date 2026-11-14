@@ -1,7 +1,7 @@
 // 004 T014: gráfico y tabla de hectáreas con rango (RN-06), hueco y nunca 0 sin dato (RN-13), tabla
 // alternativa (RNF-04). Casos CP-02 y CP-03 de pruebas/casos-de-prueba.md. PS-04.
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   GraficoHectareas,
   TablaHectareas,
@@ -9,6 +9,9 @@ import {
   type EtiquetasHectareas,
   type PuntoHectareas,
 } from "../../src/features/interface/hectareas/Hectareas";
+
+// Limpieza explícita: funciona con o sin `globals: true` en la configuración de Vitest.
+afterEach(cleanup);
 
 const etiquetas: EtiquetasHectareas = {
   titulo: "Superficie con cambio",
