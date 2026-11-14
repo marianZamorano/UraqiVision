@@ -26,7 +26,7 @@ MapLibre en jsdom
 **Target Platform**: sitio web estático, dos últimas versiones de Chrome, Firefox, Edge y Safari; escritorio y
 móvil desde 320 px
 
-**Project Type**: SPA estática con rutas recargables y función Insight externa
+**Project Type**: SPA estática con rutas recargables y contrato de Insight externo (cliente en M-INTERFAZ)
 
 **Performance Goals**: contenido útil de portada < 3 s a 10 Mbps; ningún recurso del globo antes de entrar al
 explorador; cada vista publicada < 40 MB; abortar solicitudes obsoletas
@@ -45,7 +45,7 @@ idiomas y un contrato externo `POST /api/insight`
 |---|---|---|
 | I. Documento maestro primero | PASS | DP-07 está cerrada en v1.1; DP-06 permanece pendiente y no se configura hospedaje. |
 | II. Mostrar con honestidad | PASS | Contratos conservan procedencia, fechas, método, ausencia y marca REAL/DEMO; la vista no recalcula. |
-| III. Arquitectura estática primero | PASS | Solo lectura de §17.3 y llamada a Insight; los campos exactos de contratos se marcan como propuesta. |
+| III. Arquitectura estática primero | PASS | Solo lectura de §17.3 y contrato de Insight; los campos exactos de contratos se marcan como propuesta. |
 | IV. Bilingüe y accesible | PASS | Diccionarios es/en, estados anunciables, teclado, foco y alternativa textual. |
 | V. Rendimiento | PASS | división por ruta, importación dinámica de Cesium y presupuesto verificable. |
 | VI. Seguridad y costo | PASS | No hay claves privadas. El token público ion será solo lectura, limitado por activos y URL y nunca se versionará. |
@@ -128,8 +128,8 @@ el proveedor visual, probar sin WebGL y conservar un recorrido 2D/textual.
    cambios accesibles y conserva ausencia como ausencia.
 7. Al entrar al explorador se importa el módulo del globo. El selector de proveedor intenta solo rutas
    autorizadas: ion preferido; sin ion o 2D/textual si falla.
-8. Insight se llama por HTTPS desde un cliente separado; sus respuestas se validan y no se mezclan con datos
-   científicos publicados.
+8. El cliente de Insight y su interfaz pertenecen a M-INTERFAZ; esta base solo conserva el contrato de tipos de
+   §21.1 y no implementa llamadas ni mezcla respuestas con datos científicos publicados.
 
 ## Routing, Loading and Performance
 

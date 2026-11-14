@@ -1,7 +1,7 @@
 # Data model: base web
 
-Los tipos exactos adicionales a §17.3 son **propuestas de diseño** hasta acordarlos con M-PUBLICACIÓN. `null` o
-ausencia nunca se normalizan a `0` (RN-13).
+Los tipos exactos adicionales a §17.3 son **propuestas de diseño** hasta acordarlos con M-PUBLICACIÓN; el
+contenido mínimo de cada archivo es el de §17.3. `null` o ausencia nunca se normalizan a `0` (RN-13).
 
 ## Entidades y relaciones
 
@@ -17,12 +17,15 @@ ausencia nunca se normalizan a `0` (RN-13).
 
 ### PublishedStation
 
-- identidad, departamento, fechas y `evidenceMode: REAL | DEMO`
-- referencias a los artefactos de §17.3
+- `stationId`, `departmentId`, `label.es/en`, `evidenceMode: REAL | DEMO`
+- `area` como `ReportableValue<number>`, `orbit` usada y `periods[].before/after`
+- `hypotheses[].text` con `source`, `localStory.es/en` y `suggestedQuestions[].es/en`
+- `provenance` y referencias a los artefactos de §17.3
 
 ### PublicationManifest
 
-- `schemaVersion`, `pipelineVersion`, `publishedAt`, gránulos/CRID, órbita, track, polarizaciones y checksum
+- `schemaVersion`, `pipelineVersion`, `publishedAt`, `track?`, `polarizations[]` y `files[].sha256`
+- `granules[]` con `name`, `acquiredAt`, `orbit`, `crid` y `checksum` (§17.3)
 - Todos los archivos deben referir la misma estación, publicación y periodo.
 
 ### ReportableValue<T>
@@ -30,6 +33,20 @@ ausencia nunca se normalizan a `0` (RN-13).
 - presente: valor, unidad, fuente, fecha y método
 - ausente: estado `not-reported` y motivo; nunca cero sustituto
 - limitado: valor, rango/sensibilidad y motivo
+
+### HectaresValue
+
+- `reported`: valor, unidad `ha` y `sensitivityRange` obligatorio (RN-06)
+- `not-reported`: motivo; la fila no se sustituye por cero
+
+### ValidationDocument
+
+- `dice`, `controls[]` y `hotspotsContext?` con fuente, fecha y resumen (propuesta de §17.3)
+
+### ScarsGeoJson / FootprintsGeoJson
+
+- cicatrices: `acquiredAt`, `class` (una de las cuatro clases de RN-05) y hectáreas reportables
+- huellas: `orbit`, `direction`, `acquiredAt` y `polarizations`
 
 ### ViewState<T>
 
@@ -45,7 +62,8 @@ ausencia nunca se normalizan a `0` (RN-13).
 ### InsightRequest / InsightResponse
 
 - Solicitud §21.1: `station_id`, `question`, `lang`.
-- Respuesta propuesta: explicación, evidencia citada, limitaciones y causalidad no afirmada o hipótesis con fuente.
+- Respuesta §21.1: `answer`, `citations` (lista de secciones) y `source` (`ia | plantilla`).
+- Propuestas: `limitations` y `causal_claim`; causalidad no afirmada o hipótesis con fuente (RN-05).
 
 ## Reglas de validación
 
