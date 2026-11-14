@@ -12,9 +12,9 @@ Si una tarea es del backend, dilo y no la implementes aquí.
 
 ## 1. Fuente de verdad
 
-- **`docs/UraqiVisionDocumentoMaestrov1.0.pdf`** es la fuente de verdad (§1 y §28 del documento). Si algo
+- **`docs/UraqiVisionDocumentoMaestrov1.1.pdf`** es la fuente de verdad (§1 y §28 del documento). Si algo
   contradice el documento, prevalece el documento. Si algo no está en él, **no está decidido**.
-- Para buscar, usa la copia en texto `docs/UraqiVisionDocumentoMaestrov1.0.txt` (las tablas salen una celda
+- Para buscar, usa la copia en texto `docs/UraqiVisionDocumentoMaestrov1.1.txt` (las tablas salen una celda
   por línea). Busca por identificador: `RF-16`, `RNF-06`, `MC-03`, `RN-13`, `CQ-04`, `VC-01`, `PS-05`, `DP-03`.
 - La skill `documento-maestro` explica cómo navegarlo y cómo comprobar si algo está en el alcance.
 - La constitución de Spec Kit (`.specify/memory/constitution.md`) y las specs en `specs/` derivan del
@@ -40,8 +40,9 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
    **pendiente**. Los pendientes (DP-01 a DP-08, §29) no se implementan hasta resolverse.
 5. Referencia los identificadores (RF, RNF, MC, RN, CQ, VC, PS) en el código, los commits y las tareas.
 6. Todo texto de interfaz va en **español e inglés** (RNF-03).
-7. **Nunca** incluyas claves, tokens ni credenciales en código, commits, prompts o argumentos de
-   herramientas (RNF-06). La clave del proveedor de IA vive solo en el servidor.
+7. **Nunca** incluyas claves privadas, tokens con escritura ni credenciales en código, commits, prompts o
+   argumentos de herramientas (RNF-06). La clave de IA vive solo en servidor. El token público de Cesium ion
+   se admite únicamente con `assets:read`, restringido a assets 1 y 2 y URLs, y su valor vive solo en el entorno.
 8. Declara en la entrega dónde y cómo se usó IA.
 
 ## 4. Reglas de datos que la web debe respetar al mostrar (§16)
@@ -57,7 +58,8 @@ protegidas y territorios indígenas. Reto: NASA Space Apps 2026, *Dancing with t
 
 ## 5. Stack y módulos (§18 y §19)
 
-- Web: React + TypeScript + Vite, CesiumJS (sin token de Cesium ion), MapLibre GL JS, Recharts,
+- Web: React + TypeScript + Vite, CesiumJS con Cesium ion (World Terrain asset 1 y Bing Maps Aerial asset 2,
+  token público restringido, más respaldos sin ion y 2D), MapLibre GL JS, Recharts,
   react-i18next (`es.json` y `en.json`), pruebas con Vitest y Playwright.
 - Backend (en `UraqiVisionBack`): pipeline en Python e Insight (función serverless con adaptador de proveedor).
   La web solo conoce el contrato de Insight y los archivos publicados.
