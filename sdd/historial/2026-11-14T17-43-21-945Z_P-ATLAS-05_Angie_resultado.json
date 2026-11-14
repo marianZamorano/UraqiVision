@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-ATLAS-05",
+  "resultado": "en-espera",
+  "colaborador": "Angie",
+  "nota": "análisis en curso: cobertura cruzada hecha, esperando revisión de guardian-alcance y luego el «apruebo» de Angie (#63)",
+  "hash": "bf6da052d0",
+  "rama": "feat/63-plan-portada-atlas",
+  "fecha": "2026-11-14T17:43:21.945Z"
+}

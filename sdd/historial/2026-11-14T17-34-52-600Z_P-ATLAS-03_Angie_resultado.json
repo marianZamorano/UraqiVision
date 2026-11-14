@@ -1,0 +1,10 @@
+{
+  "tipo": "resultado",
+  "id": "P-ATLAS-03",
+  "resultado": "hecho",
+  "colaborador": "Angie",
+  "nota": "plan.md, research.md (R1-R8), data-model.md, contracts/atlas-content.ts (propuesta), quickstart.md; reutiliza 001 (836345a); señala diferencia de campos de departments.geojson en 001 (#63)",
+  "hash": "ca32eafab7",
+  "rama": "feat/63-plan-portada-atlas",
+  "fecha": "2026-11-14T17:34:52.600Z"
+}

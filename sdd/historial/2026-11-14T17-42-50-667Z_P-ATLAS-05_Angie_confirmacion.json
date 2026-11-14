@@ -1,0 +1,10 @@
+{
+  "tipo": "confirmacion",
+  "id": "P-ATLAS-05",
+  "decision": "ejecutar",
+  "colaborador": "Angie",
+  "nota": "Angie confirma ejecutar tal cual (#63)",
+  "hash": "bf6da052d0",
+  "rama": "feat/63-plan-portada-atlas",
+  "fecha": "2026-11-14T17:42:50.667Z"
+}
