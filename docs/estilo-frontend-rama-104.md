@@ -12,7 +12,9 @@ reducido), no los valores concretos. Pendiente de aprobación del equipo (DP por
 | `5320fa3` style(interfaz): tipografías Orbitron y Roboto y paleta NASA como propuesta (RNF-04) #104 | Orbitron en títulos, Roboto en texto, marca NASA azul/roja, foco azul; corrige la inconsistencia de nombres de tokens entre `tokens.css` y la skill `design-system-tokens` (ya no se documentan nombres `--uv-*` inexistentes). |
 | `c76a7d0` style(interfaz): paleta de 7 colores, contraste por rol y diseño responsive (RNF-04) #104 | Paleta de 7 colores, tokens semánticos por rol, tipografía fluida (`clamp`), parrillas responsive en 48rem/64rem, pruebas de contraste por rol. |
 | `d79a1a7` style(interfaz): tema oscuro de cielo estrellado, menú y texto blanco (RNF-04) #104 | Tema oscuro, texto blanco, fondo estrellado, menú en pastillas. |
-| (sin commit, esta revisión) | Paleta casi negra de azules y violetas sin tonos cálidos, fondo negro puro, vidrio/holografía, estrellas que parpadean, logo SVG de órbita, menú centrado en Space Grotesk separado por barras, animaciones sutiles, documentación. |
+| `94638ab` style(interfaz): menú grotesk, estrellas que parpadean y animaciones sutiles (RNF-04, RNF-12) #104 | Paleta casi negra de azules y violetas sin tonos cálidos, fondo negro puro, vidrio/holografía, estrellas que parpadean (sin desplazamiento), logo SVG de órbita, menú en Space Grotesk centrado separado por barras, animaciones sutiles, `test.css.include` para `shell.css`. |
+| `1c5ee9b` docs(specs): documento del estilo visual de la rama (RNF-04) #104 | Este documento (el alcance `frente` no existe en commitlint; quedó como aviso y se corrigió aquí). |
+| `9a276ba` Merge branch 'dev' into style/104-estilo-visual-nasa #104 | `dev` al día (react-i18next #105, estados RF-34 #106, navegación accesible #107, mapa beta #110). Conflictos resueltos en `AppShell.tsx` (se conserva el logo SVG sobre el shell traducido) y `shell.css` (se conservan los bloques propios y los nuevos de evidencia/skip-link). |
 
 Nada se fusionó a `dev` ni a ninguna otra rama protegida.
 
@@ -85,8 +87,8 @@ Reglas verificadas por pruebas (`web/tests/unit/estilos.test.ts`, WCAG 2.2):
 
 ## Verificación ejecutada (hechos)
 
-- `npx vitest run`: 96/96 pruebas pasan (15 archivos).
-- `npx vite build`: compilación correcta.
+- `npx vitest run`: 146/146 pruebas pasan (22 archivos), tras la fusión con `dev`.
+- `npx vite build`: compilación correcta (requiere `maplibre-gl`, declarado en `package.json`; `npm ci` en `web/`).
 - Capturas Playwright en 1280 px y 390 px: menú centrado a la derecha del logo con separadores `|`, logo de
   órbita, fondo negro estrellado, tarjetas de vidrio.
 - Conocido y previo a esta rama: `npm run build` (que corre `tsc --noEmit`) falla por faltar `@types/node` en
