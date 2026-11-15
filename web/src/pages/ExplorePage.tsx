@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from '../app/router'
+import { Link, navigate } from '../app/router'
 import { serializeRoute } from '../app/routeState'
 import { useReducedMotion } from '../app/useReducedMotion'
 import type { Language } from '../contracts/view-state'
-import { demoStations, listStations, usesPublishedApi, type StationSummary } from '../data/publicationRepository'
+import {
+  demoStations,
+  listStationLocations,
+  listStations,
+  usesPublishedApi,
+  type StationLocation,
+  type StationSummary,
+} from '../data/publicationRepository'
 import { useTranslation } from 'react-i18next'
 import { GlobeAttribution } from '../features/globe/GlobeAttribution'
 import { hasWebGLSupport, resolveGlobeProvider } from '../features/globe/GlobeProvider'
-import { GlobeView, type CesiumModule } from '../features/globe/GlobeView'
-import { TOUR_SECTIONS, type TourSection } from '../features/globe/cameraPath'
+import { GlobeView, type CesiumModule, type ZonePoint } from '../features/globe/GlobeView'
+import { NO_FRAMING, TOUR_SECTIONS, type GlobeFraming, type TourSection } from '../features/globe/cameraPath'
 import { resolveFallbackProvider } from '../features/globe/fallbackProvider'
 import { globeConfigFor } from '../features/globe/globeConfig'
 import { readPublicIonToken } from '../features/globe/ionProvider'
@@ -18,9 +25,6 @@ import { useTourProgress } from '../features/globe/scrollProgress'
 type ExplorePageProps = {
   lang: Language
 }
-
-/** Secciones con un dato y su fuente (§4.2 del documento maestro). */
-const SOURCED: ReadonlySet<TourSection> = new Set(['southAmerica', 'bolivia'])
 
 export function ExplorePage({ lang }: ExplorePageProps) {
   const { t } = useTranslation()
@@ -40,15 +44,42 @@ export function ExplorePage({ lang }: ExplorePageProps) {
   // #121 (RF-25, RNF-12): recorrido por secciones; el scroll mueve la cámara del globo.
   const reducedMotion = useReducedMotion()
   const sectionRefs = useRef<Array<HTMLElement | null>>([])
+  const panelRefs = useRef<Array<HTMLElement | null>>([])
   const { store: progress, active } = useTourProgress(sectionRefs)
+  // #123: la escena del globo se centra en la parte de la pantalla que no tapan la cabecera, la navegación del
+  // recorrido y el panel de la sección activa (a la izquierda en escritorio, abajo en celular y tableta).
+  const navRef = useRef<HTMLElement | null>(null)
+  const [framing, setFraming] = useState<GlobeFraming>(NO_FRAMING)
+  useEffect(() => {
+    const measure = () => {
+      const panel = panelRefs.current[active]
+      if (!panel) return
+      const rect = panel.getBoundingClientRect()
+      const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 769px)').matches
+      const header = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0
+      const nav = navRef.current?.querySelector('ol')?.getBoundingClientRect()
+      const next: GlobeFraming = {
+        left: desktop ? Math.round(rect.right) : 0,
+        right: nav && nav.width > 0 ? Math.round(window.innerWidth - nav.left) : 0,
+        top: Math.max(0, Math.round(header)),
+        bottom: desktop ? 0 : Math.round(rect.height),
+      }
+      setFraming((f) =>
+        f.left === next.left && f.right === next.right && f.top === next.top && f.bottom === next.bottom ? f : next,
+      )
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [active])
   const goTo = useCallback((section: TourSection) => {
     const element = sectionRefs.current[TOUR_SECTIONS.indexOf(section)]
     element?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
   }, [reducedMotion])
-  const markerLabels = useMemo(
-    () => ({ bolivia: t('pages.explore.boliviaMarker'), station: t('pages.explore.stationMarker') }),
-    [t],
-  )
+  // #123 (RF-29): el clic en el punto de una zona abre directamente su estación.
+  const openStation = useCallback((stationId: string) => {
+    navigate(serializeRoute({ route: 'station', stationId }))
+  }, [])
 
   // Versión beta (#110): estaciones publicadas por el backend; los ejemplos DEMO solo si no hay backend (RN-04).
   // Con backend, la lista empieza vacía para no mostrar un instante ejemplos que después desaparecen.
@@ -61,6 +92,20 @@ export function ExplorePage({ lang }: ExplorePageProps) {
     }, () => undefined)
     return () => controller.abort()
   }, [])
+
+  // #123: ubicación de cada zona publicada (centro de su caja en station.json); las DEMO no tienen punto.
+  const [locations, setLocations] = useState<StationLocation[]>([])
+  useEffect(() => {
+    const controller = new AbortController()
+    listStationLocations(stations, controller.signal).then((list) => {
+      if (!controller.signal.aborted) setLocations(list)
+    }, () => undefined)
+    return () => controller.abort()
+  }, [stations])
+  const zones = useMemo<ZonePoint[]>(
+    () => locations.map((l) => ({ id: l.stationId, label: l.label[lang], longitude: l.longitude, latitude: l.latitude })),
+    [locations, lang],
+  )
 
   // Agrupadas por departamento cuando el backend lo informa; los ejemplos DEMO van sin grupo.
   const grupos = stations.reduce<Array<{ departamento: string | null; items: StationSummary[] }>>((acc, st) => {
@@ -102,21 +147,29 @@ export function ExplorePage({ lang }: ExplorePageProps) {
           cesium={cesium}
           config={config}
           label={t('pages.explore.globeLabel')}
-          markerLabels={markerLabels}
+          boliviaLabel={t('pages.explore.boliviaMarker')}
+          zones={zones}
+          framing={framing}
           progress={progress}
           reducedMotion={reducedMotion}
           onSelectSection={goTo}
+          onSelectZone={openStation}
           onReady={onGlobeReady}
           onError={onGlobeError}
         />
       ) : null}
 
       <div className={showGlobe ? 'explore-tour explore-tour--globe' : 'explore-tour'}>
-        <nav className="tour-nav" aria-label={t('pages.explore.tour.nav')} data-globe-overlay="">
+        <nav className="tour-nav" aria-label={t('pages.explore.tour.nav')} data-globe-overlay="" ref={navRef}>
           <ol>
             {TOUR_SECTIONS.map((section, i) => (
               <li key={section}>
-                <button type="button" aria-current={active === i ? 'step' : undefined} onClick={() => goTo(section)}>
+                <button
+                  type="button"
+                  aria-current={active === i ? 'step' : undefined}
+                  title={t(`pages.explore.tour.${section}.nav`)}
+                  onClick={() => goTo(section)}
+                >
                   <span className="tour-nav__dot" aria-hidden="true" />
                   <span className="tour-nav__label">{t(`pages.explore.tour.${section}.nav`)}</span>
                 </button>
@@ -134,7 +187,13 @@ export function ExplorePage({ lang }: ExplorePageProps) {
             className={`tour-section tour-section--${section}`}
             aria-labelledby={`tour-${section}`}
           >
-            <div className="tour-panel" data-globe-overlay="">
+            <div
+              className="tour-panel"
+              data-globe-overlay=""
+              ref={(element) => {
+                panelRefs.current[i] = element
+              }}
+            >
               <p className="tour-eyebrow">{t(`pages.explore.tour.${section}.eyebrow`)}</p>
               {section === 'earth' ? (
                 <h1 id="tour-earth">{t('pages.explore.title')}</h1>
@@ -142,8 +201,12 @@ export function ExplorePage({ lang }: ExplorePageProps) {
                 <h2 id={`tour-${section}`}>{t(`pages.explore.tour.${section}.title`)}</h2>
               )}
               <p className="tour-lead">{t(`pages.explore.tour.${section}.body`)}</p>
-              {SOURCED.has(section) ? (
-                <p className="tour-source">{t(`pages.explore.tour.${section}.source`)}</p>
+              {section === 'southAmerica' ? (
+                <>
+                  <p className="tour-source">{t('pages.explore.tour.southAmerica.source')}</p>
+                  <p className="tour-lead tour-lead--second">{t('pages.explore.tour.southAmerica.fact2')}</p>
+                  <p className="tour-source">{t('pages.explore.tour.southAmerica.source2')}</p>
+                </>
               ) : null}
 
               {section === 'earth' ? (
@@ -158,13 +221,11 @@ export function ExplorePage({ lang }: ExplorePageProps) {
                 </>
               ) : null}
 
-              {section === 'station' ? (
+              {section === 'bolivia' ? (
                 <>
-                  <ul className="tour-questions">
-                    <li>{t('pages.explore.tour.station.q1')}</li>
-                    <li>{t('pages.explore.tour.station.q2')}</li>
-                  </ul>
-                  <p>{t('pages.explore.description')}</p>
+                  {showGlobe && zones.length === 0 ? (
+                    <p className="tour-hint">{t('pages.explore.tour.bolivia.noZones')}</p>
+                  ) : null}
                   {grupos.map((grupo) => (
                     <section key={grupo.departamento ?? 'sin-departamento'} aria-label={grupo.departamento ?? t('pages.explore.stationListLabel')}>
                       {grupo.departamento ? <h3 className="station-group">{grupo.departamento}</h3> : null}

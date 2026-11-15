@@ -106,11 +106,8 @@ html.globe-pointer body {
   font-size: 0.875rem;
 }
 
-.tour-questions {
-  margin: 0 0 var(--espacio-3);
-  padding-inline-start: var(--espacio-4);
-  font-family: var(--fuente-menu);
-  font-size: var(--texto-subtitulo);
+.tour-lead--second {
+  margin-top: var(--espacio-4);
 }
 
 /* Navegación del recorrido: puntos a la derecha, con su nombre visible en escritorio (operable con teclado).
@@ -127,6 +124,8 @@ html.globe-pointer body {
 
 .tour-nav ol {
   transform: translateY(-50%);
+  /* Al borde derecho de la ventana (la franja del recorrido está centrada en la página). */
+  margin-right: calc((100% - 100vw) / 2 + var(--espacio-4));
   display: grid;
   gap: var(--espacio-2);
   margin: 0;
@@ -179,7 +178,7 @@ html.globe-pointer body {
   border-radius: var(--radio);
 }
 
-/* Móvil (hasta 599 px): el globo arriba y el panel abajo en cada sección; la navegación queda en puntos. */
+/* La navegación muestra solo los puntos: el nombre de cada sección es su nombre accesible y su tooltip (title). */
 .explore-tour--globe .tour-section {
   align-items: end;
 }
@@ -193,6 +192,25 @@ html.globe-pointer body {
   white-space: nowrap;
 }
 
+/* Celular y tableta: el globo arriba y el panel abajo, como hoja inferior de media pantalla con desplazamiento
+   propio; las zonas como etiquetas en filas, para tapar lo menos posible del globo. */
+@media (max-width: 768px) {
+  .explore-tour--globe .tour-panel {
+    max-height: 50dvh;
+    overflow-y: auto;
+  }
+
+  .tour-panel .station-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacio-2);
+  }
+
+  .tour-panel .station-list a {
+    padding: var(--espacio-2) var(--espacio-3);
+  }
+}
+
 /* Tableta (600–768 px): el panel más ancho y centrado verticalmente en su sección. */
 @media (min-width: 600px) and (max-width: 768px) {
   .explore-tour--globe .tour-section {
@@ -204,8 +222,7 @@ html.globe-pointer body {
   }
 }
 
-/* Escritorio (más de 768 px): el globo nunca baja de media pantalla, el panel a la izquierda sin tapar el centro y
-   la navegación con su nombre visible. */
+/* Escritorio (más de 768 px): el globo nunca baja de media pantalla y el panel va a la izquierda sin tapar el centro. */
 @media (min-width: 769px) {
   #cesiumContainer.globe-view {
     min-height: 50vh;
@@ -215,11 +232,4 @@ html.globe-pointer body {
     align-items: center;
   }
 
-  .tour-nav__label {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip: auto;
-  }
 }

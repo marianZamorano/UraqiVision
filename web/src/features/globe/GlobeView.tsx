@@ -1,19 +1,22 @@
-// #115, #121 (RF-02, RF-25, RF-30, DP-07, RNF-06, RNF-11, RNF-12): globo 3D con CesiumJS como fondo fijo y
-// transparente del recorrido del explorador. Recibe el módulo ya cargado de forma diferida (la portada no lo
+// #115, #121, #123 (RF-02, RF-25, RF-29, RF-30, DP-07, RNF-06, RNF-11, RNF-12): globo 3D con CesiumJS como fondo
+// fijo y transparente del recorrido del explorador. Recibe el módulo ya cargado de forma diferida (la portada no lo
 // descarga, RNF-01). Con ion: World Terrain (asset 1) e imágenes Bing (asset 2); sin ion: NaturalEarthII.
 // - Visor limpio: sin widgets ni controles de ratón. La cámara la mueven solo el scroll (cameraPath.ts, con
 //   aceleración y amortiguación), la navegación por secciones y el clic en los marcadores. Con movimiento reducido
 //   salta a la vista de la sección activa, sin interpolación (RNF-12).
 // - Fondo: el contenedor no recibe eventos (no bloquea el desplazamiento); el clic en un marcador se detecta desde
 //   el documento, salvo sobre contenido interactivo o paneles ([data-globe-overlay]).
+// - Zonas con datos (#123): un punto por zona publicada al acercarse a Bolivia; el clic abre su estación (RF-29).
+//   Contorno de Bolivia sobre el relieve (boliviaOutline.ts).
 // - Amanecer sutil: luz solar real a una hora fija (globeConfig.ts), con el brillo cálido solo en el horizonte de la
 //   atmósfera; sin cielo, Sol ni Luna dibujados. Las imágenes de satélite no se recolorean: son datos.
 // - Modelos glTF locales opcionales (localModels.ts). Los créditos los muestra el visor y son clicables (RNF-11).
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { dampPose, poseAt, poseDistance, type CameraPose, type TourSection } from "./cameraPath";
-import { BOLIVIA_CENTER, SAN_IGNACIO_CENTER, SUNRISE_TIME_ISO, type GlobeConfig } from "./globeConfig";
+import { BOLIVIA_OUTLINE_CREDIT, loadBoliviaOutline } from "./boliviaOutline";
+import { dampPose, framingShift, poseAt, poseDistance, type CameraPose, type GlobeFraming, type TourSection } from "./cameraPath";
+import { BOLIVIA_CENTER, SUNRISE_TIME_ISO, type GlobeConfig } from "./globeConfig";
 import { addLocalModels, ORBITAL_MODELS } from "./localModels";
 import type { ProgressStore } from "./scrollProgress";
 import "./globe.css";
@@ -22,18 +25,25 @@ export type CesiumModule = typeof import("cesium");
 type Viewer = InstanceType<CesiumModule["Viewer"]>;
 type Entity = InstanceType<CesiumModule["Entity"]>;
 
-export type MarkerLabels = { bolivia: string; station: string };
+/** Zona con datos en el globo (#123), ya con su nombre en el idioma activo. */
+export type ZonePoint = { id: string; label: string; longitude: number; latitude: number };
 
 type GlobeViewProps = {
   cesium: CesiumModule;
   config: GlobeConfig;
   label: string;
-  /** Textos de los marcadores en el idioma activo (RNF-03). */
-  markerLabels: MarkerLabels;
+  /** Texto del marcador de Bolivia en el idioma activo (RNF-03). */
+  boliviaLabel: string;
+  /** Zonas publicadas con ubicación (#123). */
+  zones: readonly ZonePoint[];
+  /** Parte de la pantalla tapada por el panel: la escena se centra en el espacio libre. */
+  framing: GlobeFraming;
   /** Progreso del recorrido (scroll); el globo lo lee en cada fotograma. */
   progress: ProgressStore;
   reducedMotion: boolean;
   onSelectSection: (section: TourSection) => void;
+  /** Clic en el punto de una zona: abre su estación. */
+  onSelectZone: (stationId: string) => void;
   onReady: () => void;
   onError: () => void;
 };
@@ -41,8 +51,8 @@ type GlobeViewProps = {
 /** Contenido que tapa al globo: un clic ahí nunca se interpreta como clic en el globo. */
 const OVERLAY_SELECTOR = "a, button, input, select, textarea, label, summary, [role='button'], [data-globe-overlay], .topbar";
 
-/** Distancia de la cámara (m) a la que el marcador de Bolivia cede su lugar al de la estación. */
-const MARKER_SWAP_DISTANCE = 2_800_000;
+/** Distancia de la cámara (m) a la que el marcador de Bolivia cede su lugar a los puntos de las zonas. */
+const MARKER_SWAP_DISTANCE = 3_200_000;
 
 /** Cuándo la cámara ya llegó: por debajo de esto se deja de dibujar (requestRenderMode). */
 const ARRIVED = 1e-4;
@@ -64,7 +74,7 @@ function applySunrise(C: CesiumModule, viewer: Viewer, element: Element) {
   scene.globe.enableLighting = true;
   scene.globe.dynamicAtmosphereLighting = true;
   scene.globe.dynamicAtmosphereLightingFromSun = true;
-  // La sombra del día y la noche se ve a escala continental y se desvanece al acercarse a la estación.
+  // La sombra del día y la noche se ve a escala continental y se desvanece al acercarse a Bolivia.
   scene.globe.lightingFadeOutDistance = 4_000_000;
   scene.globe.lightingFadeInDistance = 12_000_000;
   scene.globe.baseColor = tokenColor(C, element, "--paleta-azul-electrico", C.Color.BLUE); // mientras llegan las imágenes
@@ -78,6 +88,8 @@ function marker(
   [longitude, latitude]: readonly [number, number],
   text: string,
   visibleBetween: [number, number],
+  /** Desplazamiento vertical de la etiqueta en píxeles (negativo: encima del punto). */
+  labelOffsetY = -26,
 ) {
   const visible = new C.DistanceDisplayCondition(visibleBetween[0], visibleBetween[1]);
   return {
@@ -94,12 +106,12 @@ function marker(
     },
     label: {
       text,
-      font: "600 18px system-ui, sans-serif",
+      font: "600 16px system-ui, sans-serif",
       fillColor: tokenColor(C, element, "--paleta-blanco", C.Color.WHITE),
       outlineColor: tokenColor(C, element, "--paleta-negro-azulado", C.Color.BLACK),
       outlineWidth: 4,
       style: C.LabelStyle.FILL_AND_OUTLINE,
-      pixelOffset: new C.Cartesian2(0, -26),
+      pixelOffset: new C.Cartesian2(0, labelOffsetY),
       heightReference: C.HeightReference.CLAMP_TO_GROUND,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
       distanceDisplayCondition: visible,
@@ -108,12 +120,15 @@ function marker(
 }
 
 export function GlobeView(props: GlobeViewProps) {
-  const { cesium, config, label, markerLabels, reducedMotion } = props;
+  const { cesium, config, label, boliviaLabel, zones, reducedMotion, framing } = props;
   const container = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | undefined>(undefined);
-  const markersRef = useRef<Partial<Record<TourSection, Entity>>>({});
+  const boliviaRef = useRef<Entity | undefined>(undefined);
+  /** Entidad de cada punto de zona → id de su estación, y la lista con la que se dibujaron. */
+  const zoneEntities = useRef(new Map<Entity, string>());
+  const zonesDrawn = useRef<readonly ZonePoint[] | null>(null);
   const wakeRef = useRef<() => void>(() => undefined);
-  // Lo que el visor necesita leer sin recrearse: callbacks, progreso, movimiento reducido y textos.
+  // Lo que el visor necesita leer sin recrearse: callbacks, progreso, movimiento reducido, textos y zonas.
   const latest = useRef(props);
   useEffect(() => {
     latest.current = props;
@@ -126,6 +141,27 @@ export function GlobeView(props: GlobeViewProps) {
     document.body.prepend(host);
     return () => host.remove();
   }, [host]);
+
+  /** Rehace los puntos de las zonas con las zonas vigentes (al crear el visor y cuando cambian). */
+  const syncZones = useRef((list: readonly ZonePoint[]) => {
+    const viewer = viewerRef.current;
+    const element = container.current;
+    if (!viewer || viewer.isDestroyed() || !element || zonesDrawn.current === list) return;
+    zonesDrawn.current = list;
+    for (const entity of zoneEntities.current.keys()) viewer.entities.remove(entity);
+    const next = new Map<Entity, string>();
+    // Etiquetas alternadas encima y debajo (por longitud) para que las zonas vecinas no se tapen.
+    [...list]
+      .sort((a, b) => a.longitude - b.longitude)
+      .forEach((zone, i) => {
+        const entity = viewer.entities.add(
+          marker(cesium, element, `zona-${zone.id}`, [zone.longitude, zone.latitude], zone.label, [0, MARKER_SWAP_DISTANCE], i % 2 === 0 ? -26 : 30),
+        );
+        next.set(entity, zone.id);
+      });
+    zoneEntities.current = next;
+    viewer.scene.requestRender();
+  });
 
   const mode = config.mode;
   const token = config.mode === "ion" ? config.publicToken : "";
@@ -175,13 +211,18 @@ export function GlobeView(props: GlobeViewProps) {
       const v = viewer;
       applySunrise(C, v, element);
 
-      // Cámara: mira a un punto del suelo con rumbo, inclinación y distancia, y luego se suelta del punto.
+      // Cámara: mira a un punto del suelo con rumbo, inclinación y distancia, se suelta del punto y se corre para que
+      // la escena quede en la parte de la pantalla que no tapa el panel.
       const applyPose = (pose: CameraPose) => {
         v.camera.lookAt(
           C.Cartesian3.fromDegrees(pose.longitude, pose.latitude),
           new C.HeadingPitchRange(C.Math.toRadians(pose.heading), C.Math.toRadians(pose.pitch), pose.range),
         );
         v.camera.lookAtTransform(C.Matrix4.IDENTITY);
+        const fov = (v.camera.frustum as { fov?: number }).fov ?? Math.PI / 3;
+        const shift = framingShift(pose.range, fov, v.canvas.clientWidth, v.canvas.clientHeight, latest.current.framing);
+        if (shift.left) v.camera.moveLeft(shift.left);
+        if (shift.down) v.camera.moveDown(shift.down);
       };
       const targetPose = () => {
         const p = latest.current.progress.get();
@@ -216,37 +257,50 @@ export function GlobeView(props: GlobeViewProps) {
         wakeRef.current = () => undefined;
       });
 
-      // Marcadores: Bolivia de lejos y San Ignacio de Velasco al acercarse; se relevan a la misma distancia para no
-      // superponerse (en la sección de Bolivia ya se ve la estación, que es su título).
-      markersRef.current = {
-        bolivia: v.entities.add(
-          marker(C, element, "bolivia", BOLIVIA_CENTER, latest.current.markerLabels.bolivia, [MARKER_SWAP_DISTANCE, Number.POSITIVE_INFINITY]),
-        ),
-        station: v.entities.add(
-          marker(C, element, "station", SAN_IGNACIO_CENTER, latest.current.markerLabels.station, [0, MARKER_SWAP_DISTANCE]),
-        ),
-      };
+      // Marcador de Bolivia de lejos; al acercarse cede su lugar a los puntos de las zonas (se relevan a la misma
+      // distancia para no superponerse).
+      boliviaRef.current = v.entities.add(
+        marker(C, element, "bolivia", BOLIVIA_CENTER, latest.current.boliviaLabel, [MARKER_SWAP_DISTANCE, Number.POSITIVE_INFINITY]),
+      );
+
+      // Contorno de Bolivia sobre el relieve (#123), con su crédito (RNF-11). Si no carga, el globo sigue sin él.
+      const outline = new AbortController();
+      cleanups.push(() => outline.abort());
+      loadBoliviaOutline(outline.signal).then((rings) => {
+        if (v.isDestroyed() || rings.length === 0) return;
+        const color = tokenColor(C, element, "--paleta-hielo", C.Color.WHITE);
+        for (const ring of rings) {
+          v.entities.add({
+            polyline: { positions: C.Cartesian3.fromDegreesArray(ring), width: 2, material: color, clampToGround: true },
+          });
+        }
+        v.creditDisplay.addStaticCredit(new C.Credit(BOLIVIA_OUTLINE_CREDIT));
+        v.scene.requestRender();
+      }, () => undefined);
 
       // El contenedor no recibe eventos (fondo): el clic y el puntero se leen del documento (RF-25).
-      const sectionAt = (event: MouseEvent): TourSection | null => {
+      type Hit = { kind: "bolivia" } | { kind: "zone"; stationId: string };
+      const hitAt = (event: MouseEvent): Hit | null => {
         const target = event.target;
         if (target instanceof Element && target.closest(OVERLAY_SELECTOR)) return null;
         const rect = v.canvas.getBoundingClientRect();
         const picked: unknown = v.scene.pick(new C.Cartesian2(event.clientX - rect.left, event.clientY - rect.top));
         const entity = typeof picked === "object" && picked !== null ? (picked as { id?: unknown }).id : undefined;
-        if (entity && entity === markersRef.current.bolivia) return "bolivia";
-        if (entity && entity === markersRef.current.station) return "station";
-        return null;
+        if (!entity) return null;
+        if (entity === boliviaRef.current) return { kind: "bolivia" };
+        const stationId = zoneEntities.current.get(entity as Entity);
+        return stationId ? { kind: "zone", stationId } : null;
       };
       const onClick = (event: MouseEvent) => {
-        const section = sectionAt(event);
-        if (section) latest.current.onSelectSection(section);
+        const hit = hitAt(event);
+        if (hit?.kind === "bolivia") latest.current.onSelectSection("bolivia");
+        else if (hit?.kind === "zone") latest.current.onSelectZone(hit.stationId);
       };
       let pointerFrame = 0;
       const onMove = (event: MouseEvent) => {
         cancelAnimationFrame(pointerFrame);
         pointerFrame = requestAnimationFrame(() => {
-          document.documentElement.classList.toggle("globe-pointer", sectionAt(event) !== null);
+          document.documentElement.classList.toggle("globe-pointer", hitAt(event) !== null);
         });
       };
       document.addEventListener("click", onClick);
@@ -275,6 +329,7 @@ export function GlobeView(props: GlobeViewProps) {
       void addLocalModels(C, v, ORBITAL_MODELS);
 
       viewerRef.current = v;
+      syncZones.current(latest.current.zones);
       latest.current.onReady();
     } catch {
       latest.current.onError();
@@ -283,25 +338,31 @@ export function GlobeView(props: GlobeViewProps) {
     return () => {
       for (const cleanup of cleanups) cleanup();
       viewerRef.current = undefined;
-      markersRef.current = {};
+      boliviaRef.current = undefined;
+      zoneEntities.current = new Map();
+      zonesDrawn.current = null;
       if (viewer && !viewer.isDestroyed()) viewer.destroy();
     };
     // El visor solo se recrea si cambia el módulo, el modo o el token (no en cada render). Los assets de ion son fijos
     // (1 y 2, DP-07), así que `config` no hace falta como dependencia.
   }, [cesium, mode, token]);
 
-  // Si el movimiento reducido cambia a mitad del recorrido, la cámara se recoloca (RNF-12).
+  // Si cambia el movimiento reducido o el espacio libre de la pantalla, la cámara se recoloca (RNF-12).
   useEffect(() => {
     wakeRef.current();
-  }, [reducedMotion]);
+  }, [reducedMotion, framing.left, framing.right, framing.top, framing.bottom]);
 
-  // Los marcadores cambian de idioma con la interfaz (RNF-03).
+  // El marcador de Bolivia cambia de idioma con la interfaz (RNF-03).
   useEffect(() => {
-    const { bolivia, station } = markersRef.current;
-    if (bolivia?.label) bolivia.label.text = new cesium.ConstantProperty(markerLabels.bolivia);
-    if (station?.label) station.label.text = new cesium.ConstantProperty(markerLabels.station);
+    const bolivia = boliviaRef.current;
+    if (bolivia?.label) bolivia.label.text = new cesium.ConstantProperty(boliviaLabel);
     viewerRef.current?.scene.requestRender();
-  }, [cesium, markerLabels.bolivia, markerLabels.station]);
+  }, [cesium, boliviaLabel]);
+
+  // Las zonas llegan después que el visor (vienen del backend) y cambian de idioma con la interfaz.
+  useEffect(() => {
+    syncZones.current(zones);
+  }, [zones]);
 
   return createPortal(
     <div ref={container} id="cesiumContainer" className="globe-view" role="region" aria-label={label} />,

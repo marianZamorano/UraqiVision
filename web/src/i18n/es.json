@@ -35,10 +35,9 @@
       "globeLoading": "Preparando el globo 3D… Mientras tanto, puedes usar la lista de estaciones.",
       "globeLabel": "Globo 3D de Bolivia",
       "boliviaMarker": "Bolivia",
-      "stationMarker": "San Ignacio de Velasco",
       "tour": {
         "nav": "Secciones del recorrido",
-        "hint": "Desplázate para viajar hasta la estación. También puedes hacer clic en los marcadores del globo.",
+        "hint": "Desplázate para viajar hasta Bolivia. También puedes hacer clic en los puntos del globo.",
         "earth": {
           "nav": "La Tierra",
           "eyebrow": "NISAR · radar en banda L",
@@ -49,22 +48,16 @@
           "eyebrow": "Temporada de incendios 2026",
           "title": "Los incendios de 2026",
           "body": "En Bolivia, los incendios de 2026 afectaron 1,25 millones de hectáreas hasta el 11 de octubre; en 2024 superaron los 10 millones.",
-          "source": "Fuente: Viceministerio de Defensa Civil, vía Correo del Sur (27 oct 2026)."
+          "source": "Fuente: Viceministerio de Defensa Civil, vía Correo del Sur (27 oct 2026).",
+          "fact2": "El 21 de julio de 2026, San Ignacio de Velasco fue el municipio con más focos de calor del país: 735 de 2.835.",
+          "source2": "Fuente: SIMB, vía eju.tv (21 jul 2026)."
         },
         "bolivia": {
           "nav": "Bolivia",
-          "eyebrow": "Bolivia · Santa Cruz",
-          "title": "San Ignacio de Velasco",
-          "body": "El 21 de julio de 2026, San Ignacio de Velasco fue el municipio con más focos de calor del país: 735 de 2.835.",
-          "source": "Fuente: SIMB, vía eju.tv (21 jul 2026)."
-        },
-        "station": {
-          "nav": "Chiquitanía",
-          "eyebrow": "Estación · Chiquitanía",
-          "title": "Dos preguntas",
-          "body": "La estación San Ignacio de Velasco responde dos preguntas:",
-          "q1": "¿Dónde y cuándo quemó el fuego?",
-          "q2": "¿Quema o desmonte?"
+          "eyebrow": "Bolivia · zonas de análisis",
+          "title": "Elige una zona",
+          "body": "Cada punto del globo es una zona que analizamos con el radar NISAR. Haz clic en uno, o elígelo en la lista, para abrir su análisis.",
+          "noZones": "Las zonas aparecen como puntos en el globo cuando el backend publica su ubicación. Mientras tanto, elígelas en la lista."
         }
       }
     },

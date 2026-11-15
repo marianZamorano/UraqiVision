@@ -35,10 +35,9 @@
       "globeLoading": "Preparing the 3D globe… Meanwhile, you can use the station list.",
       "globeLabel": "3D globe of Bolivia",
       "boliviaMarker": "Bolivia",
-      "stationMarker": "San Ignacio de Velasco",
       "tour": {
         "nav": "Tour sections",
-        "hint": "Scroll to travel to the station. You can also click the markers on the globe.",
+        "hint": "Scroll to travel to Bolivia. You can also click the points on the globe.",
         "earth": {
           "nav": "Earth",
           "eyebrow": "NISAR · L-band radar",
@@ -49,22 +48,16 @@
           "eyebrow": "2026 fire season",
           "title": "The 2026 fires",
           "body": "In Bolivia, the 2026 fires affected 1.25 million hectares up to 11 October; in 2024 they exceeded 10 million.",
-          "source": "Source: Vice Ministry of Civil Defence, via Correo del Sur (27 Oct 2026)."
+          "source": "Source: Vice Ministry of Civil Defence, via Correo del Sur (27 Oct 2026).",
+          "fact2": "On 21 July 2026, San Ignacio de Velasco was the municipality with the most heat spots in the country: 735 of 2,835.",
+          "source2": "Source: SIMB, via eju.tv (21 Jul 2026)."
         },
         "bolivia": {
           "nav": "Bolivia",
-          "eyebrow": "Bolivia · Santa Cruz",
-          "title": "San Ignacio de Velasco",
-          "body": "On 21 July 2026, San Ignacio de Velasco was the municipality with the most heat spots in the country: 735 of 2,835.",
-          "source": "Source: SIMB, via eju.tv (21 Jul 2026)."
-        },
-        "station": {
-          "nav": "Chiquitania",
-          "eyebrow": "Station · Chiquitania",
-          "title": "Two questions",
-          "body": "The San Ignacio de Velasco station answers two questions:",
-          "q1": "Where and when did the fire burn?",
-          "q2": "Burning or clearing?"
+          "eyebrow": "Bolivia · analysis areas",
+          "title": "Choose an area",
+          "body": "Each point on the globe is an area we analyse with the NISAR radar. Click one, or pick it from the list, to open its analysis.",
+          "noZones": "Areas appear as points on the globe when the backend publishes their location. Meanwhile, pick them from the list."
         }
       }
     },

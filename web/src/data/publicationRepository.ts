@@ -131,3 +131,43 @@ export async function fetchStation(stationId: string, signal?: AbortSignal): Pro
 
   return station
 }
+
+/** Zona con datos ubicada en el globo (#123): el centro de la caja publicada en su station.json. */
+export interface StationLocation {
+  stationId: string
+  label: { es: string; en: string }
+  longitude: number
+  latitude: number
+}
+
+/** Centro de una caja [oeste, sur, este, norte] en grados, o null si la caja no es válida. */
+export function centerOfBbox(bbox: unknown): [number, number] | null {
+  if (!Array.isArray(bbox) || bbox.length !== 4 || !bbox.every((n) => typeof n === 'number' && Number.isFinite(n))) {
+    return null
+  }
+  const [west, south, east, north] = bbox as [number, number, number, number]
+  const valid = west >= -180 && east <= 180 && west < east && south >= -90 && north <= 90 && south < north
+  return valid ? [(west + east) / 2, (south + north) / 2] : null
+}
+
+/**
+ * Ubicación de cada estación publicada, leída de `area.bbox_lonlat` de su station.json (la web no inventa
+ * coordenadas). Las DEMO, las que no tienen caja válida y las que fallan se omiten: siguen en la lista textual.
+ */
+export async function listStationLocations(stations: StationSummary[], signal?: AbortSignal): Promise<StationLocation[]> {
+  const locations = await Promise.all(stations.map(async (station) => {
+    const base = stationFilesBase(station.stationId)
+    if (!base) return null
+    try {
+      const response = await fetch(`${base}/station.json`, { signal })
+      if (!response.ok) return null
+      const raw = (await response.json()) as { area?: { bbox_lonlat?: unknown } }
+      const center = centerOfBbox(raw.area?.bbox_lonlat)
+      return center ? { stationId: station.stationId, label: station.label, longitude: center[0], latitude: center[1] } : null
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error
+      return null
+    }
+  }))
+  return locations.filter((location): location is StationLocation => location !== null)
+}
