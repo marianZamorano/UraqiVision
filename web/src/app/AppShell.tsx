@@ -29,7 +29,20 @@ export function AppShell({ children, announcement = "" }: AppShellProps) {
 
       <header className="topbar">
         <div className="brand-block">
-          <span className="brand-mark" aria-hidden="true">U</span>
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <defs>
+                <linearGradient id="uv-orbita" x1="0" y1="0" x2="24" y2="24">
+                  <stop offset="0" stopColor="var(--paleta-hielo)" />
+                  <stop offset="0.5" stopColor="var(--paleta-violeta)" />
+                  <stop offset="1" stopColor="var(--paleta-azul-electrico)" />
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="6.5" stroke="url(#uv-orbita)" strokeWidth="1.6" />
+              <ellipse cx="12" cy="12" rx="11" ry="4" transform="rotate(-28 12 12)" stroke="url(#uv-orbita)" strokeWidth="1.1" opacity="0.8" />
+              <circle cx="20.2" cy="7.4" r="1.4" fill="var(--paleta-hielo)" />
+            </svg>
+          </span>
           <div>
             <strong>{t("app.title")}</strong>
             <small>{t("app.subtitle")}</small>

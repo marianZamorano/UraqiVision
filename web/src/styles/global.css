@@ -9,11 +9,69 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
   font-family: var(--fuente-base);
   font-size: var(--texto-base);
   line-height: var(--interlineado);
   color: var(--color-texto);
-  background: var(--color-fondo);
+  background:
+    radial-gradient(ellipse at 50% -10%, color-mix(in srgb, var(--paleta-violeta) 22%, transparent), transparent 60%),
+    radial-gradient(ellipse at 90% 110%, color-mix(in srgb, var(--paleta-azul-electrico) 18%, transparent), transparent 55%),
+    var(--color-fondo);
+  background-attachment: fixed;
+  isolation: isolate;
+}
+
+/* Cielo estrellado: dos capas con velocidades distintas simulan profundidad (efecto 3D). Decorativo: sin contenido. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+
+@keyframes estrellas-parpadeo {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+body::before {
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, var(--color-estrella), transparent),
+    radial-gradient(1px 1px at 120px 80px, var(--color-estrella-tenue), transparent),
+    radial-gradient(1px 1px at 200px 160px, var(--color-estrella), transparent),
+    radial-gradient(1px 1px at 260px 40px, var(--color-estrella-tenue), transparent);
+  background-size: 300px 300px;
+  animation: estrellas-parpadeo 5s ease-in-out infinite;
+}
+
+body::after {
+  background-image:
+    radial-gradient(1.5px 1.5px at 60px 120px, var(--color-estrella), transparent),
+    radial-gradient(2px 2px at 310px 260px, var(--paleta-hielo), transparent),
+    radial-gradient(1.5px 1.5px at 180px 330px, var(--color-estrella), transparent),
+    radial-gradient(2px 2px at 420px 90px, var(--color-estrella-tenue), transparent);
+  background-size: 480px 480px;
+  animation: estrellas-parpadeo 7s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulo);
+  color: var(--color-titulo);
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: var(--espaciado-letras-titulo);
 }
 
 /* Foco visible solo con teclado; nunca se quita sin reemplazo (RNF-04, WCAG 2.4.7) */
@@ -32,4 +90,20 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+h1 {
+  font-size: var(--texto-titulo);
+}
+
+h2,
+h3 {
+  font-size: var(--texto-subtitulo);
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
 }

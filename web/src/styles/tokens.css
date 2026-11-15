@@ -3,29 +3,57 @@
  * PROPUESTA: el documento fija las reglas (paleta de un solo tono, más oscuro = más cambio, trama gris sin dato,
  * contraste para celular al aire libre), no los valores concretos. tests/unit/estilos.test.ts comprueba:
  *   - texto/fondo ≥ 7:1 (AAA, propuesta para el aire libre); el mínimo exigible es AA;
- *   - foco/fondo ≥ 3:1 (WCAG 1.4.11);
- *   - la escala de cambio baja de luminancia en cada paso.
+ *   - foco/fondo ≥ 3:1 (WCAG 1.4.11) y texto sobre botón ≥ 4.5:1;
+ *   - la escala de cambio baja de luminancia en cada paso (§20.2: más oscuro = más cambio);
+ *   - cero tonos cálidos fuera de la escala de cambio; los pasos 4 y 5 son referencia gráfica sobre fondo
+ *     casi negro, no zonas de texto (la cifra va además en texto blanco, RF-33).
  * Nunca escribas colores, espaciados ni tipografías a mano en los componentes: usa estos tokens.
  */
 :root {
-  /* Superficie y texto */
-  --color-fondo: #ffffff;
-  --color-superficie: #f4f4f2;
-  --color-texto: #1b1b1b;
-  --color-texto-secundario: #4a4a4a;
-  --color-borde: #8a8a8a;
+  /* Paleta casi negra de azules y violetas (propuesta, pendiente de aprobación del equipo): sin tonos cálidos */
+  --paleta-negro-azulado: #000000;
+  --paleta-azul-abismal: #0a1020;
+  --paleta-azul-noche: #101a33;
+  --paleta-azul-electrico: #255fe0;
+  --paleta-violeta: #6a57e8;
+  --paleta-hielo: #7de3ff;
+  --paleta-blanco: #ffffff;
+
+  /* Superficie y texto: fondo negro puro, paneles azul-negro translúcidos, texto siempre blanco o plata */
+  --color-fondo: var(--paleta-negro-azulado);
+  --color-superficie: var(--paleta-azul-abismal);
+  --color-texto: var(--paleta-blanco);
+  --color-texto-secundario: #c3ccdd;
+  --color-texto-inverso: var(--paleta-blanco);
+  --color-borde: color-mix(in srgb, var(--paleta-hielo) 40%, transparent);
+  --color-titulo: var(--paleta-blanco);
+  --color-marca: var(--paleta-azul-electrico);
+  --color-enlace: var(--paleta-hielo);
+  --color-acento: var(--paleta-hielo);
+
+  /* Vidrio (glassmorphism) y capas holográficas: muy transparentes, el cielo se ve a través */
+  --vidrio-tenue: 10%;
+  --vidrio-suave: 26%;
+  --vidrio-fuerte: 55%;
+  --desenfoque-vidrio: 14px;
+  --holo: linear-gradient(115deg, var(--paleta-hielo), var(--paleta-violeta), var(--paleta-azul-electrico));
+  --resplandor: 0 0 18px color-mix(in srgb, var(--paleta-hielo) 28%, transparent);
+
+  /* Estrellas del fondo decorativo */
+  --color-estrella: var(--paleta-blanco);
+  --color-estrella-tenue: #c3ccdd;
 
   /* Foco visible (RNF-04) */
-  --color-foco: #005a9e;
+  --color-foco: var(--paleta-hielo);
   --foco-grosor: 3px;
   --foco-separacion: 2px;
 
-  /* Paleta de cambio: un solo tono, más oscuro = más cambio (§20.2) */
-  --cambio-1: #fde4cf;
-  --cambio-2: #f9b98a;
-  --cambio-3: #ef8a4c;
-  --cambio-4: #c9561f;
-  --cambio-5: #8a3210;
+  /* Paleta de cambio: un solo tono violeta-azulado, más oscuro = más cambio (§20.2) */
+  --cambio-1: #b7c8ff;
+  --cambio-2: #7d6bff;
+  --cambio-3: #5a3fd6;
+  --cambio-4: #2f1c8f;
+  --cambio-5: #140b3d;
 
   /* Zonas sin dato válido: trama gris, explicada en la leyenda (§20.2, RN-13) */
   --color-sin-dato: #9a9a9a;
@@ -35,13 +63,23 @@
     transparent 2px 6px
   );
 
-  /* Tipografía y espaciado */
-  --fuente-base: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Tipografía, movimiento y espaciado */
+  --fuente-titulo: "Orbitron", system-ui, sans-serif;
+  --fuente-menu: "Space Grotesk", "Roboto", system-ui, sans-serif;
+  --fuente-base: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
   --texto-base: 1rem;
+  --texto-titulo: clamp(1.5rem, 1.1rem + 2vw, 2.5rem);
+  --espaciado-letras-titulo: 0.06em;
+  --espaciado-letras-menu: 0.12em;
+  --texto-subtitulo: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
   --interlineado: 1.5;
+  --duracion-corta: 0.2s;
+  --duracion-aparicion: 0.45s;
   --espacio-1: 0.25rem;
   --espacio-2: 0.5rem;
   --espacio-3: 1rem;
   --espacio-4: 1.5rem;
+  --ancho-pagina: 70rem;
+  --radio: 0.75rem;
   --objetivo-tactil-min: 24px; /* WCAG 2.5.8 */
 }

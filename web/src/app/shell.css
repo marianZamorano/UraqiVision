@@ -14,7 +14,11 @@
   gap: var(--espacio-3);
   padding: var(--espacio-3) var(--espacio-4);
   border-bottom: 1px solid var(--color-borde);
-  background: var(--color-superficie);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+  backdrop-filter: blur(var(--desenfoque-vidrio));
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .brand-block {
@@ -28,40 +32,65 @@
   display: block;
 }
 
+.brand-block strong {
+  text-transform: uppercase;
+  letter-spacing: var(--espaciado-letras-menu);
+}
+
 .brand-block small {
   color: var(--color-texto-secundario);
 }
 
+/* Logo: órbita holográfica (SVG en AppShell.tsx), decorativo */
 .brand-mark {
   display: inline-grid;
   place-items: center;
   min-width: var(--objetivo-tactil-min);
   min-height: var(--objetivo-tactil-min);
-  padding: var(--espacio-1);
-  border-radius: 50%;
-  background: var(--color-foco);
-  color: var(--color-fondo);
-  font-weight: 700;
+  color: var(--color-texto);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--paleta-hielo) 45%, transparent));
 }
 
+.brand-mark svg {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* Menú: sin botones ni pastillas, solo enlaces separados por una barra fina */
 .main-nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--espacio-3);
+  justify-content: center;
+  gap: var(--espacio-1);
+  margin-inline: auto;
 }
 
 .main-nav a {
   display: inline-flex;
   align-items: center;
   min-height: var(--objetivo-tactil-min);
-  color: var(--color-texto-secundario);
+  padding: var(--espacio-1) var(--espacio-3) var(--espacio-1) var(--espacio-2);
+  border-inline-start: 1px solid var(--color-borde);
+  color: var(--color-texto);
+  font-family: var(--fuente-menu);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: var(--espaciado-letras-menu);
+  transition: color var(--duracion-corta) ease;
+}
+
+.main-nav a:first-child {
+  border-inline-start: 0;
+}
+
+.main-nav a:hover {
+  color: var(--color-enlace);
 }
 
 .main-nav a.active {
-  color: var(--color-texto);
   font-weight: 700;
-  text-decoration: underline;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--paleta-violeta) 60%, transparent);
 }
 
 .language-switcher,
@@ -72,7 +101,7 @@
   min-height: var(--objetivo-tactil-min);
   padding: var(--espacio-2) var(--espacio-3);
   border: 1px solid var(--color-borde);
-  border-radius: var(--espacio-2);
+  border-radius: var(--radio);
   background: var(--color-fondo);
   color: var(--color-texto);
   font: inherit;
@@ -81,14 +110,53 @@
 }
 
 .button-primary {
-  border-color: var(--color-foco);
-  background: var(--color-foco);
-  color: var(--color-fondo);
+  border-color: var(--color-borde);
+  background: var(--holo);
+  color: var(--color-texto);
   font-weight: 700;
+  box-shadow: var(--resplandor);
+}
+
+/* Botón holográfico: barrido de luz en el degradado */
+.button-primary:hover {
+  filter: brightness(1.15) saturate(1.2);
+}
+
+.language-switcher,
+.button-secondary {
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+}
+
+.language-switcher {
+  font-family: var(--fuente-menu);
+  text-transform: uppercase;
+  letter-spacing: var(--espaciado-letras-menu);
+}
+
+/* Animaciones sutiles: las pantallas y tarjetas aparecen con un fundido breve (RNF-12 las anula) */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .page-shell {
-  width: min(70rem, 100% - 2 * var(--espacio-3));
+  animation: aparecer var(--duracion-aparicion) ease both;
+}
+
+.panel,
+.view-state,
+.station-list a {
+  animation: aparecer var(--duracion-aparicion) ease both;
+}
+
+.page-shell {
+  width: min(var(--ancho-pagina), 100% - 2 * var(--espacio-3));
   margin: var(--espacio-4) auto;
 }
 
@@ -101,8 +169,11 @@
 .view-state {
   padding: var(--espacio-4);
   border: 1px solid var(--color-borde);
-  border-radius: var(--espacio-2);
-  background: var(--color-superficie);
+  border-radius: var(--radio);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+  backdrop-filter: blur(var(--desenfoque-vidrio));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--paleta-blanco) 12%, transparent),
+    var(--resplandor);
 }
 
 .eyebrow,
@@ -111,6 +182,16 @@
   color: var(--color-texto-secundario);
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: var(--espaciado-letras-menu);
+}
+
+/* Menú siempre indexado a la derecha, también en celular; la marca queda a la izquierda */
+.topbar {
+  justify-content: flex-end;
+}
+
+.brand-block {
+  margin-inline-end: auto;
 }
 
 .cta-row {
@@ -134,9 +215,20 @@
   min-height: var(--objetivo-tactil-min);
   padding: var(--espacio-3);
   border: 1px solid var(--color-borde);
-  border-radius: var(--espacio-2);
-  background: var(--color-fondo);
+  border-radius: var(--radio);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+  backdrop-filter: blur(var(--desenfoque-vidrio));
   color: var(--color-texto);
+  text-decoration: none;
+  transition: transform var(--duracion-corta) ease, box-shadow var(--duracion-corta) ease;
+}
+
+/* Tarjetas que flotan sobre el cielo: elevación al pasar el cursor o enfocar */
+.station-list a:hover,
+.station-list a:focus-visible,
+.meta-grid div:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--resplandor);
 }
 
 .meta-grid {
@@ -149,8 +241,9 @@
 .meta-grid div {
   padding: var(--espacio-3);
   border: 1px solid var(--color-borde);
-  border-radius: var(--espacio-2);
-  background: var(--color-fondo);
+  border-radius: var(--radio);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+  backdrop-filter: blur(var(--desenfoque-vidrio));
 }
 
 .meta-grid dt {
@@ -166,6 +259,23 @@
   margin-top: var(--espacio-4);
 }
 
+/* Responsive, mobile-first: los puntos de corte van en rem para respetar el zoom del navegador (RNF-04, RNF-05). */
+@media (min-width: 48rem) {
+  .station-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .station-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .meta-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* Modo de evidencia (RN-04): DEMO destacado para que nunca parezca un resultado. */
 .evidence-badge {
   display: inline-flex;
@@ -175,7 +285,7 @@
   padding: var(--espacio-1) var(--espacio-2);
   border: 1px solid var(--color-borde);
   border-radius: var(--espacio-2);
-  background: var(--color-fondo);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
 }
 
 .evidence-badge--demo {
@@ -198,7 +308,7 @@
   padding: var(--espacio-2) var(--espacio-3);
   border: var(--foco-grosor) solid var(--color-foco);
   border-radius: var(--espacio-2);
-  background: var(--color-fondo);
+  background: var(--color-superficie);
   color: var(--color-texto);
   transform: translateY(-200%);
 }
