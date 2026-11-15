@@ -1,7 +1,7 @@
 // #121 (RF-02, RF-25, RNF-12): trayectoria de la cámara del recorrido del explorador. Funciones puras: la pose de la
 // cámara para un progreso de scroll continuo (0 = primera sección, n-1 = última), con aceleración suave entre
 // secciones, y la amortiguación que la hace llegar sin saltos. GlobeView solo aplica el resultado.
-import { BOLIVIA_CENTER, SAN_IGNACIO_CENTER } from "./globeConfig";
+import { BOLIVIA_CENTER } from "./globeConfig";
 
 /** Cámara mirando a un punto del suelo: grados, metros de distancia, rumbo e inclinación en grados. */
 export type CameraPose = {
@@ -13,18 +13,17 @@ export type CameraPose = {
 };
 
 /** Secciones del recorrido, en orden de scroll. */
-export const TOUR_SECTIONS = ["earth", "southAmerica", "bolivia", "station"] as const;
+export const TOUR_SECTIONS = ["earth", "southAmerica", "bolivia"] as const;
 export type TourSection = (typeof TOUR_SECTIONS)[number];
 
 /**
- * Vista de cada sección (propuesta de diseño). La Tierra entera con Bolivia al frente → Sudamérica → Bolivia →
- * el recorte de San Ignacio, inclinado para dar profundidad.
+ * Vista de cada sección (propuesta de diseño): la Tierra entera con Bolivia al frente → Sudamérica → Bolivia, donde
+ * aparecen las zonas con datos (#123). Bolivia va un poco inclinada para dar profundidad.
  */
 export const KEYFRAMES: Record<TourSection, CameraPose> = {
   earth: { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], range: 20_000_000, heading: 0, pitch: -90 },
   southAmerica: { longitude: -61, latitude: -19, range: 8_000_000, heading: 0, pitch: -88 },
-  bolivia: { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], range: 2_400_000, heading: 0, pitch: -82 },
-  station: { longitude: SAN_IGNACIO_CENTER[0], latitude: SAN_IGNACIO_CENTER[1], range: 170_000, heading: 12, pitch: -52 },
+  bolivia: { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], range: 2_900_000, heading: 0, pitch: -75 },
 };
 
 const POSES = TOUR_SECTIONS.map((section) => KEYFRAMES[section]);
@@ -85,4 +84,36 @@ export function poseDistance(a: CameraPose, b: CameraPose): number {
     Math.abs(lerpAngle(a.heading, b.heading, 1) - a.heading) / 10,
     Math.abs(a.pitch - b.pitch) / 10,
   );
+}
+
+/**
+ * Parte de la pantalla tapada por el contenido en cada borde, en píxeles: la cabecera arriba, la navegación del
+ * recorrido a la derecha y el panel a la izquierda (escritorio) o abajo (celular).
+ */
+export type GlobeFraming = { left: number; right: number; top: number; bottom: number };
+
+export const NO_FRAMING: GlobeFraming = { left: 0, right: 0, top: 0, bottom: 0 };
+
+/**
+ * Cuánto mover la cámara (en metros) para que lo que mira quede centrado en la parte libre de la pantalla (#123): en
+ * horizontal, la mitad de la diferencia entre lo tapado a la izquierda y a la derecha (positivo: la cámara va a la
+ * izquierda y la escena se ve más a la derecha); en vertical, la mitad de la diferencia entre lo tapado abajo y
+ * arriba (positivo: la cámara baja y la escena sube). `fov` es el de CesiumJS: horizontal si la pantalla es más
+ * ancha que alta y vertical si no.
+ */
+export function framingShift(
+  range: number,
+  fov: number,
+  width: number,
+  height: number,
+  framing: GlobeFraming,
+): { left: number; down: number } {
+  if (!(width > 0) || !(height > 0) || !(range > 0) || !(fov > 0)) return { left: 0, down: 0 };
+  const fovX = width >= height ? fov : 2 * Math.atan(Math.tan(fov / 2) * (width / height));
+  const metersPerPixel = (2 * range * Math.tan(fovX / 2)) / width;
+  const side = (value: number) => Math.max(0, value);
+  return {
+    left: ((side(framing.left) - side(framing.right)) / 2) * metersPerPixel,
+    down: ((side(framing.bottom) - side(framing.top)) / 2) * metersPerPixel,
+  };
 }
