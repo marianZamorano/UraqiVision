@@ -1,6 +1,6 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { useEffect } from 'react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { changeLanguage } from '../../src/i18n'
 import { ExplorePage } from '../../src/pages/ExplorePage'
 
@@ -12,11 +12,10 @@ const globe = vi.hoisted(() => ({
 
 // jsdom no tiene WebGL: el visor real se prueba en tests/unit/GlobeView.test.tsx y en el navegador (E2E).
 vi.mock('../../src/features/globe/GlobeView', () => ({
-  GlobeView: ({ label, flight, reducedMotion, onSelectBolivia, onReady, onError }: {
+  GlobeView: ({ label, reducedMotion, onSelectSection, onReady, onError }: {
     label: string
-    flight: { target: string; seq: number }
     reducedMotion: boolean
-    onSelectBolivia: () => void
+    onSelectSection: (section: string) => void
     onReady: () => void
     onError: () => void
   }) => {
@@ -24,10 +23,11 @@ vi.mock('../../src/features/globe/GlobeView', () => ({
       if (globe.viewerFails) onError()
       else onReady()
     }, [onReady, onError])
-    // El doble expone el destino pedido y un «clic en el marcador de Bolivia».
+    // El doble expone un «clic en el marcador» de Bolivia y de la estación.
     return (
-      <div role="region" aria-label={label} data-target={flight.target} data-seq={flight.seq} data-reduced={String(reducedMotion)}>
-        <button type="button" onClick={onSelectBolivia}>marcador</button>
+      <div role="region" aria-label={label} data-reduced={String(reducedMotion)}>
+        <button type="button" onClick={() => onSelectSection('bolivia')}>marcador Bolivia</button>
+        <button type="button" onClick={() => onSelectSection('station')}>marcador estación</button>
       </div>
     )
   },
@@ -81,49 +81,81 @@ describe('ExplorePage globe (#115)', () => {
   })
 })
 
-// #115 (RF-25, RF-28, RNF-03, RNF-12): se entra viendo la Tierra; el clic en Bolivia o los botones piden el vuelo.
-describe('ExplorePage entry from the whole Earth (#115)', () => {
+// #121 (RF-25, RNF-03, RNF-04, RNF-12): recorrido por secciones; el scroll, la navegación y los marcadores lo guían.
+describe('ExplorePage tour (#121)', () => {
+  const scrollIntoView = vi.fn()
+  beforeEach(() => {
+    scrollIntoView.mockReset()
+    Element.prototype.scrollIntoView = scrollIntoView
+  })
+
   async function renderReadyGlobe(lang: 'es' | 'en' = 'es') {
     globe.webgl = true
     globe.loadCesium.mockResolvedValue({})
     await renderExplore(lang)
-    // Los controles aparecen cuando el visor avisa que está listo.
-    await screen.findByRole('button', { name: lang === 'es' ? 'Ir a Bolivia' : 'Go to Bolivia' })
-    return screen.getByRole('region', { name: lang === 'es' ? 'Globo 3D de Bolivia' : '3D globe of Bolivia' })
+    await screen.findByRole('region', { name: lang === 'es' ? 'Globo 3D de Bolivia' : '3D globe of Bolivia' })
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
   }
 
-  it('starts on the whole Earth with a hint and a keyboard-operable «Ir a Bolivia» button', async () => {
-    const region = await renderReadyGlobe('es')
+  it('shows four sections in order, from the whole Earth to the station', async () => {
+    await renderReadyGlobe('es')
 
-    expect(region).toHaveAttribute('data-target', 'earth')
-    expect(region).toHaveAttribute('data-seq', '0')
-    expect(screen.getByText(/haz clic en bolivia/i)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Ir a Bolivia' }))
-
-    expect(region).toHaveAttribute('data-target', 'bolivia')
-    expect(region).toHaveAttribute('data-seq', '1')
-    expect(screen.getByText('Vista del globo: Bolivia encuadrada')).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByRole('heading', { level: 1, name: 'Explorador' })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
+      'Los incendios de 2026', 'San Ignacio de Velasco', 'Dos preguntas',
+    ])
+    expect(screen.getByText(/desplázate para viajar/i)).toBeInTheDocument()
   })
 
-  it('clicking Bolivia on the globe flies there; then offers «Volver a Bolivia» and «Ver la Tierra entera»', async () => {
-    const region = await renderReadyGlobe('es')
-
-    fireEvent.click(screen.getByRole('button', { name: 'marcador' }))
-    expect(region).toHaveAttribute('data-target', 'bolivia')
-    expect(screen.queryByText(/haz clic en bolivia/i)).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Volver a Bolivia' }))
-    expect(region).toHaveAttribute('data-seq', '2')
-
-    fireEvent.click(screen.getByRole('button', { name: 'Ver la Tierra entera' }))
-    expect(region).toHaveAttribute('data-target', 'earth')
-    expect(screen.getByRole('button', { name: 'Ir a Bolivia' })).toBeInTheDocument()
+  it('every figure comes with its source (§4.2)', async () => {
+    await renderReadyGlobe('es')
+    expect(screen.getByText(/1,25 millones de hectáreas/)).toBeInTheDocument()
+    expect(screen.getByText('Fuente: Viceministerio de Defensa Civil, vía Correo del Sur (27 oct 2026).')).toBeInTheDocument()
+    expect(screen.getByText(/735 de 2\.835/)).toBeInTheDocument()
+    expect(screen.getByText('Fuente: SIMB, vía eju.tv (21 jul 2026).')).toBeInTheDocument()
   })
 
-  it('offers the controls in English too', async () => {
+  it('the keyboard-operable section nav marks the active step and scrolls smoothly to a section', async () => {
+    await renderReadyGlobe('es')
+    const nav = screen.getByRole('navigation', { name: 'Secciones del recorrido' })
+    const buttons = within(nav).getAllByRole('button')
+
+    expect(buttons.map((b) => b.textContent)).toEqual(['La Tierra', 'Sudamérica', 'Bolivia', 'Chiquitanía'])
+    // jsdom no maqueta (todas las secciones miden 0): solo se comprueba que haya exactamente un paso activo.
+    expect(buttons.filter((b) => b.getAttribute('aria-current') === 'step')).toHaveLength(1)
+
+    fireEvent.click(within(nav).getByRole('button', { name: 'Bolivia' }))
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
+    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole('heading', { name: 'San Ignacio de Velasco' }).closest('section'))
+  })
+
+  it('clicking a marker on the globe goes to its section', async () => {
+    await renderReadyGlobe('es')
+
+    fireEvent.click(screen.getByRole('button', { name: 'marcador estación' }))
+    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole('heading', { name: 'Dos preguntas' }).closest('section'))
+  })
+
+  it('with reduced motion the jump to a section is instant (RNF-12)', async () => {
+    const matchMedia = window.matchMedia
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('reduce'), media: query, addEventListener: () => {}, removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia
+    try {
+      await renderReadyGlobe('es')
+      expect(screen.getByRole('region', { name: 'Globo 3D de Bolivia' })).toHaveAttribute('data-reduced', 'true')
+      fireEvent.click(screen.getByRole('button', { name: 'marcador Bolivia' }))
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'center' })
+    } finally {
+      window.matchMedia = matchMedia
+    }
+  })
+
+  it('is bilingual, sources included', async () => {
     await renderReadyGlobe('en')
-    expect(screen.getByRole('button', { name: 'Go to Bolivia' })).toBeInTheDocument()
-    expect(screen.getByText(/click bolivia on the globe/i)).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Tour sections' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Two questions' })).toBeInTheDocument()
+    expect(screen.getByText('Source: SIMB, via eju.tv (21 Jul 2026).')).toBeInTheDocument()
   })
 })
 

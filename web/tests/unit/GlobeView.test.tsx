@@ -1,51 +1,92 @@
-// #115 (RF-02, RF-25, RF-30, DP-07, RNF-06, RNF-12): el visor del globo con un doble de CesiumJS (jsdom no tiene WebGL).
+// #115, #121 (RF-02, RF-25, RF-30, DP-07, RNF-06, RNF-11, RNF-12): el visor del globo con un doble de CesiumJS
+// (jsdom no tiene WebGL) y fotogramas controlados a mano.
 import { fireEvent, render } from "@testing-library/react";
 import type { ComponentProps } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GlobeView, type CesiumModule } from "../../src/features/globe/GlobeView";
-import { EARTH_VIEW, FLIGHT_SECONDS, type GlobeFlight } from "../../src/features/globe/globeConfig";
+import { KEYFRAMES } from "../../src/features/globe/cameraPath";
+import { SUNRISE_TIME_ISO } from "../../src/features/globe/globeConfig";
+import { createProgressStore } from "../../src/features/globe/scrollProgress";
 
-type Handler = (event: Record<string, unknown>) => void;
+type Pose = { point: number[]; hpr: { heading: number; pitch: number; range: number } };
+type FakeViewer = {
+  clock: { currentTime: unknown; shouldAnimate: boolean };
+  scene: {
+    backgroundColor?: unknown;
+    sun: { show: boolean };
+    moon: { show: boolean };
+    globe: Record<string, unknown>;
+    screenSpaceCameraController: { enableInputs: boolean };
+  };
+};
+
+// Fotogramas manuales: cada flush ejecuta los callbacks pendientes con 16 ms más.
+let frames = new Map<number, (now: number) => void>();
+let nextId = 1;
+let now = 0;
+function flush(count = 1) {
+  for (let i = 0; i < count; i += 1) {
+    const pending = [...frames.values()];
+    frames = new Map();
+    now += 16;
+    for (const cb of pending) cb(now);
+  }
+}
+
+beforeEach(() => {
+  frames = new Map();
+  nextId = 1;
+  now = 0;
+  vi.stubGlobal("requestAnimationFrame", (cb: (now: number) => void) => {
+    const id = nextId++;
+    frames.set(id, cb);
+    return id;
+  });
+  vi.stubGlobal("cancelAnimationFrame", (id: number) => frames.delete(id));
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 function fakeCesium(options: { failViewer?: boolean } = {}) {
   const destroy = vi.fn();
-  const setView = vi.fn();
-  const flyTo = vi.fn();
-  const cancelFlight = vi.fn();
+  const poses: Pose[] = [];
+  const lookAt = vi.fn((point: { point: number[] }, hpr: Pose["hpr"]) => {
+    poses.push({ point: point.point, hpr: { heading: hpr.heading, pitch: hpr.pitch, range: hpr.range } });
+  });
   const requestRender = vi.fn();
   const resize = vi.fn();
-  const scenes: Array<Record<string, unknown>> = [];
   const pick = vi.fn<(position: unknown) => unknown>(() => undefined);
-  const actions = new Map<string, Handler>();
   const entities: Array<Record<string, unknown>> = [];
   const viewerOptions: unknown[] = [];
+  const viewers: FakeViewer[] = [];
   const cesium = {
     Ion: { defaultAccessToken: "sin-cambiar" },
     Viewer: vi.fn(function (this: Record<string, unknown>, _el: Element, opts: unknown) {
       if (options.failViewer) throw new Error("WebGL no disponible");
       viewerOptions.push(opts);
-      this.camera = { setView, flyTo, cancelFlight };
+      this.camera = { lookAt, lookAtTransform: vi.fn() };
+      this.clock = { currentTime: null, shouldAnimate: true };
       this.scene = {
-        pick, requestRender,
-        sun: { show: true }, moon: { show: true },
-        skyAtmosphere: { hueShift: 0, saturationShift: 0, brightnessShift: 0 },
-        globe: { enableLighting: true, dynamicAtmosphereLighting: true, baseColor: "azul" },
+        pick,
+        requestRender,
+        sun: { show: true },
+        moon: { show: true },
+        globe: { enableLighting: false, dynamicAtmosphereLighting: false, dynamicAtmosphereLightingFromSun: false },
+        screenSpaceCameraController: { enableInputs: true },
+        primitives: { add: vi.fn() },
       };
-      scenes.push(this.scene as Record<string, unknown>);
-      this.resize = resize;
-      this.canvas = { getBoundingClientRect: () => ({ left: 10, top: 20 }) };
       this.entities = {
-        add: vi.fn((entity: Record<string, unknown>) => {
-          entities.push(entity);
-          return entity;
+        add: vi.fn((e: Record<string, unknown>) => {
+          entities.push(e);
+          return e;
         }),
       };
-      this.screenSpaceEventHandler = {
-        setInputAction: vi.fn((fn: Handler, type: string) => actions.set(type, fn)),
-        removeInputAction: vi.fn((type: string) => actions.delete(type)),
-      };
+      this.resize = resize;
+      this.canvas = { getBoundingClientRect: () => ({ left: 10, top: 20 }) };
       this.destroy = destroy;
       this.isDestroyed = () => false;
+      viewers.push(this as unknown as FakeViewer);
     }),
     ImageryLayer: { fromProviderAsync: vi.fn((provider: unknown) => ({ provider })) },
     IonImageryProvider: { fromAssetId: vi.fn(async (id: number) => ({ ionImagery: id })) },
@@ -55,44 +96,48 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
     Terrain: vi.fn(function (this: Record<string, unknown>, promise: unknown) {
       this.promise = promise;
     }),
-    Rectangle: { fromDegrees: vi.fn((...degrees: number[]) => ({ rectangle: degrees })) },
     Cartesian3: { fromDegrees: vi.fn((...degrees: number[]) => ({ point: degrees })) },
     Cartesian2: vi.fn(function (this: Record<string, unknown>, x: number, y: number) {
       this.x = x;
       this.y = y;
     }),
+    HeadingPitchRange: vi.fn(function (this: Record<string, unknown>, heading: number, pitch: number, range: number) {
+      Object.assign(this, { heading, pitch, range });
+    }),
+    DistanceDisplayCondition: vi.fn(function (this: Record<string, unknown>, near: number, far: number) {
+      Object.assign(this, { near, far });
+    }),
+    Math: { toRadians: (d: number) => d },
+    Matrix4: { IDENTITY: "identidad" },
+    JulianDate: { fromIso8601: vi.fn((iso: string) => ({ iso })) },
     Color: { WHITE: "blanco", BLACK: "negro", BLUE: "azul", TRANSPARENT: "transparente", fromCssColorString: vi.fn((css: string) => css) },
     ConstantProperty: vi.fn(function (this: Record<string, unknown>, value: unknown) {
       this.value = value;
     }),
     LabelStyle: { FILL_AND_OUTLINE: "relleno-y-borde" },
     HeightReference: { CLAMP_TO_GROUND: "pegado-al-suelo" },
-    ScreenSpaceEventType: { LEFT_CLICK: "clic", LEFT_DOUBLE_CLICK: "doble-clic", MOUSE_MOVE: "mover" },
   };
-  return {
-    cesium: cesium as unknown as CesiumModule,
-    raw: cesium,
-    destroy, setView, flyTo, cancelFlight, pick, actions, entities, viewerOptions, resize, scenes,
-  };
+  return { cesium: cesium as unknown as CesiumModule, raw: cesium, destroy, poses, pick, entities, viewerOptions, viewers, resize };
 }
 
 type Fake = ReturnType<typeof fakeCesium>;
-const earth: GlobeFlight = { target: "earth", seq: 0 };
 
 function props(f: Fake, overrides: Partial<ComponentProps<typeof GlobeView>> = {}): ComponentProps<typeof GlobeView> {
   return {
     cesium: f.cesium,
     config: { mode: "no-ion" },
     label: "Globo",
-    boliviaLabel: "Bolivia",
-    flight: earth,
+    markerLabels: { bolivia: "Bolivia", station: "San Ignacio de Velasco" },
+    progress: createProgressStore(),
     reducedMotion: false,
-    onSelectBolivia: vi.fn(),
+    onSelectSection: vi.fn(),
     onReady: vi.fn(),
     onError: vi.fn(),
     ...overrides,
   };
 }
+
+const lastPose = (f: Fake) => f.poses[f.poses.length - 1] as Pose;
 
 describe("GlobeView", () => {
   it("con ion usa el token público y los assets 1 y 2", () => {
@@ -113,89 +158,124 @@ describe("GlobeView", () => {
 
     expect(f.raw.Ion.defaultAccessToken).toBe("sin-cambiar");
     expect(f.raw.IonImageryProvider.fromAssetId).not.toHaveBeenCalled();
-    expect(f.raw.CesiumTerrainProvider.fromIonAssetId).not.toHaveBeenCalled();
     expect(f.raw.TileMapServiceImageryProvider.fromUrl).toHaveBeenCalledWith("/cesium/Assets/Textures/NaturalEarthII");
   });
 
-  it("crea un visor sencillo y entra viendo la Tierra entera, sin animación", () => {
+  it("visor limpio: sin widgets, sin cielo, fondo transparente y sin controles de ratón", () => {
     const f = fakeCesium();
     render(<GlobeView {...props(f)} />);
 
     expect(f.viewerOptions[0]).toMatchObject({
-      geocoder: false, baseLayerPicker: false, timeline: false, animation: false,
-      sceneModePicker: false, navigationHelpButton: false, infoBox: false, selectionIndicator: false,
-      requestRenderMode: true,
+      geocoder: false, baseLayerPicker: false, timeline: false, animation: false, sceneModePicker: false,
+      navigationHelpButton: false, homeButton: false, fullscreenButton: false, vrButton: false, infoBox: false,
+      selectionIndicator: false, projectionPicker: false, skyBox: false,
+      contextOptions: { webgl: { alpha: true } }, requestRenderMode: true,
     });
-    expect(f.setView).toHaveBeenCalledTimes(1);
-    expect(f.setView.mock.calls[0]?.[0]).toEqual({ destination: { point: [EARTH_VIEW.longitude, EARTH_VIEW.latitude, EARTH_VIEW.height] } });
-    expect(f.flyTo).not.toHaveBeenCalled();
+    const scene = f.viewers[0]?.scene;
+    expect(scene?.backgroundColor).toBe("transparente");
+    expect(scene?.screenSpaceCameraController.enableInputs).toBe(false);
   });
 
-  it("pone un marcador «Bolivia» en el globo y lo traduce con la interfaz (RNF-03)", () => {
+  it("amanecer sutil: luz solar a una hora fija, atmósfera iluminada por el Sol y sin Sol ni Luna dibujados", () => {
+    const f = fakeCesium();
+    render(<GlobeView {...props(f)} />);
+    const viewer = f.viewers[0];
+
+    expect(viewer?.clock.currentTime).toEqual({ iso: SUNRISE_TIME_ISO });
+    expect(viewer?.clock.shouldAnimate).toBe(false);
+    expect(viewer?.scene.globe).toMatchObject({ enableLighting: true, dynamicAtmosphereLighting: true, dynamicAtmosphereLightingFromSun: true });
+    expect(viewer?.scene.sun.show).toBe(false);
+    expect(viewer?.scene.moon.show).toBe(false);
+  });
+
+  it("entra viendo la Tierra entera con Bolivia al frente", () => {
+    const f = fakeCesium();
+    render(<GlobeView {...props(f)} />);
+    expect(lastPose(f)).toEqual({
+      point: [KEYFRAMES.earth.longitude, KEYFRAMES.earth.latitude],
+      hpr: { heading: KEYFRAMES.earth.heading, pitch: KEYFRAMES.earth.pitch, range: KEYFRAMES.earth.range },
+    });
+  });
+
+  it("el scroll mueve la cámara con suavidad hasta la vista de la sección y luego deja de dibujar (RF-25)", () => {
+    const f = fakeCesium();
+    const progress = createProgressStore();
+    render(<GlobeView {...props(f, { progress })} />);
+
+    progress.set(2);
+    flush();
+    const first = lastPose(f).hpr.range;
+    expect(first).toBeLessThan(KEYFRAMES.earth.range);
+    expect(first).toBeGreaterThan(KEYFRAMES.bolivia.range); // no salta: se acerca poco a poco
+
+    flush(400);
+    expect(lastPose(f).hpr.range).toBe(KEYFRAMES.bolivia.range);
+    expect(frames.size).toBe(0); // llegó: el bucle se detuvo
+  });
+
+  it("con movimiento reducido salta a la vista de la sección activa, sin interpolar (RNF-12)", () => {
+    const f = fakeCesium();
+    const progress = createProgressStore();
+    render(<GlobeView {...props(f, { progress, reducedMotion: true })} />);
+
+    progress.set(1.4);
+    flush();
+    expect(lastPose(f).hpr.range).toBe(KEYFRAMES.southAmerica.range);
+    expect(frames.size).toBe(0);
+  });
+
+  it("pone los marcadores de Bolivia y de la estación y los traduce con la interfaz (RNF-03)", () => {
     const f = fakeCesium();
     const { rerender } = render(<GlobeView {...props(f)} />);
+    const [bolivia, station] = f.entities as Array<{ id: string; label: { text: unknown } }>;
+    expect(bolivia?.id).toBe("bolivia");
+    expect(station?.id).toBe("station");
 
-    const marker = f.entities[0] as { id: string; label: { text: unknown } };
-    expect(marker.id).toBe("bolivia");
-    expect(marker.label.text).toMatchObject({ value: "Bolivia" });
-
-    rerender(<GlobeView {...props(f, { boliviaLabel: "Bolivia (en)" })} />);
-    expect(marker.label.text).toMatchObject({ value: "Bolivia (en)" });
+    rerender(<GlobeView {...props(f, { markerLabels: { bolivia: "Bolivia (en)", station: "Station (en)" } })} />);
+    expect(bolivia?.label.text).toMatchObject({ value: "Bolivia (en)" });
+    expect(station?.label.text).toMatchObject({ value: "Station (en)" });
   });
 
-  it("un clic en la página sobre el marcador pide ir a Bolivia; en otro lugar o sobre el panel, no (RF-25)", () => {
+  it("un clic en un marcador lleva a su sección; en otro lugar o sobre un panel, no", () => {
     const f = fakeCesium();
-    const onSelectBolivia = vi.fn();
+    const onSelectSection = vi.fn();
     const { getByRole } = render(
       <>
-        <div data-globe-overlay=""><button type="button">Ir a Bolivia</button></div>
-        <GlobeView {...props(f, { onSelectBolivia })} />
+        <div data-globe-overlay=""><button type="button">Bolivia</button></div>
+        <GlobeView {...props(f, { onSelectSection })} />
       </>,
     );
 
-    f.pick.mockReturnValue(undefined);
     fireEvent.click(document.body, { clientX: 50, clientY: 60 });
-    expect(onSelectBolivia).not.toHaveBeenCalled();
+    expect(onSelectSection).not.toHaveBeenCalled();
 
     f.pick.mockReturnValue({ id: f.entities[0] });
-    fireEvent.click(getByRole("button", { name: "Ir a Bolivia" }));
-    expect(onSelectBolivia).not.toHaveBeenCalled();
+    fireEvent.click(getByRole("button", { name: "Bolivia" }));
+    expect(onSelectSection).not.toHaveBeenCalled();
 
     fireEvent.click(document.body, { clientX: 50, clientY: 60 });
-    expect(onSelectBolivia).toHaveBeenCalledTimes(1);
-    // Coordenadas del documento convertidas a las del lienzo.
+    expect(onSelectSection).toHaveBeenLastCalledWith("bolivia");
     expect(f.pick).toHaveBeenLastCalledWith({ x: 40, y: 40 });
+
+    f.pick.mockReturnValue({ id: f.entities[1] });
+    fireEvent.click(document.body, { clientX: 50, clientY: 60 });
+    expect(onSelectSection).toHaveBeenLastCalledWith("station");
   });
 
-  it("deja de escuchar los clics al salir del explorador", () => {
+  it("al salir del explorador destruye el visor y deja de escuchar el scroll y los clics", () => {
     const f = fakeCesium();
-    const onSelectBolivia = vi.fn();
-    const { unmount } = render(<GlobeView {...props(f, { onSelectBolivia })} />);
+    const progress = createProgressStore();
+    const onSelectSection = vi.fn();
+    const { unmount } = render(<GlobeView {...props(f, { progress, onSelectSection })} />);
     unmount();
+
+    expect(f.destroy).toHaveBeenCalledTimes(1);
+    progress.set(3);
+    expect(frames.size).toBe(0);
     f.pick.mockReturnValue({ id: f.entities[0] });
     fireEvent.click(document.body);
-    expect(onSelectBolivia).not.toHaveBeenCalled();
-  });
-
-  it("fondo transparente, sin cielo, Sol ni Luna, atmósfera fría y sin iluminación solar", () => {
-    const f = fakeCesium();
-    render(<GlobeView {...props(f)} />);
-
-    expect(f.viewerOptions[0]).toMatchObject({
-      skyBox: false, homeButton: false, fullscreenButton: false, contextOptions: { webgl: { alpha: true } },
-    });
-    const scene = f.scenes[0] as {
-      backgroundColor: unknown; sun: { show: boolean }; moon: { show: boolean };
-      globe: { enableLighting: boolean; dynamicAtmosphereLighting: boolean };
-      skyAtmosphere: { saturationShift: number; brightnessShift: number };
-    };
-    expect(scene.backgroundColor).toBe("transparente");
-    expect(scene.sun.show).toBe(false);
-    expect(scene.moon.show).toBe(false);
-    expect(scene.globe.enableLighting).toBe(false);
-    expect(scene.globe.dynamicAtmosphereLighting).toBe(false);
-    expect(scene.skyAtmosphere.saturationShift).toBeLessThan(0);
-    expect(scene.skyAtmosphere.brightnessShift).toBeGreaterThan(0);
+    expect(onSelectSection).not.toHaveBeenCalled();
+    expect(document.getElementById("cesiumContainer")).toBeNull();
   });
 
   it("recalcula el tamaño del lienzo al montar y al cambiar la ventana", () => {
@@ -206,45 +286,11 @@ describe("GlobeView", () => {
     expect(f.resize).toHaveBeenCalledTimes(2);
   });
 
-  it("el globo es un fondo montado al principio de <body>, antes que la aplicación, y se retira al salir", () => {
+  it("es un fondo montado al principio de <body>, antes que la aplicación, con nombre accesible", () => {
     const f = fakeCesium();
-    const { unmount } = render(<GlobeView {...props(f)} />);
-    const globe = document.getElementById("cesiumContainer");
-    expect(globe?.parentElement?.parentElement).toBe(document.body);
-    expect(document.body.firstElementChild).toBe(globe?.parentElement);
-    unmount();
-    expect(document.getElementById("cesiumContainer")).toBeNull();
-  });
-
-  it("cada pedido de vuelo lleva la cámara a Bolivia con animación", () => {
-    const f = fakeCesium();
-    const { rerender } = render(<GlobeView {...props(f)} />);
-
-    rerender(<GlobeView {...props(f, { flight: { target: "bolivia", seq: 1 } })} />);
-    expect(f.flyTo).toHaveBeenCalledWith({ destination: { rectangle: [-69.7, -22.95, -57.4, -9.6] }, duration: FLIGHT_SECONDS });
-
-    // «Volver a Bolivia»: mismo destino, pedido nuevo.
-    rerender(<GlobeView {...props(f, { flight: { target: "bolivia", seq: 2 } })} />);
-    expect(f.flyTo).toHaveBeenCalledTimes(2);
-    // Un render sin pedido nuevo no vuelve a volar.
-    rerender(<GlobeView {...props(f, { flight: { target: "bolivia", seq: 2 }, label: "Otro" })} />);
-    expect(f.flyTo).toHaveBeenCalledTimes(2);
-  });
-
-  it("con movimiento reducido el cambio es instantáneo (RNF-12)", () => {
-    const f = fakeCesium();
-    const { rerender } = render(<GlobeView {...props(f, { reducedMotion: true })} />);
-
-    rerender(<GlobeView {...props(f, { reducedMotion: true, flight: { target: "bolivia", seq: 1 } })} />);
-    expect(f.flyTo).not.toHaveBeenCalled();
-    expect(f.setView).toHaveBeenLastCalledWith({ destination: { rectangle: [-69.7, -22.95, -57.4, -9.6] } });
-  });
-
-  it("destruye el visor al salir del explorador", () => {
-    const f = fakeCesium();
-    const { unmount } = render(<GlobeView {...props(f)} />);
-    unmount();
-    expect(f.destroy).toHaveBeenCalledTimes(1);
+    const { getByRole } = render(<GlobeView {...props(f, { label: "Globo 3D de Bolivia" })} />);
+    const globe = getByRole("region", { name: "Globo 3D de Bolivia" });
+    expect(document.body.firstElementChild).toBe(globe.parentElement);
   });
 
   it("si el visor no se puede crear avisa para usar el respaldo textual (RF-30)", () => {
@@ -252,11 +298,5 @@ describe("GlobeView", () => {
     const onError = vi.fn();
     render(<GlobeView {...props(f, { onError })} />);
     expect(onError).toHaveBeenCalledTimes(1);
-  });
-
-  it("el contenedor del globo tiene un nombre accesible", () => {
-    const f = fakeCesium();
-    const { getByRole } = render(<GlobeView {...props(f, { label: "Globo 3D de Bolivia" })} />);
-    expect(getByRole("region", { name: "Globo 3D de Bolivia" })).toBeInTheDocument();
   });
 });
