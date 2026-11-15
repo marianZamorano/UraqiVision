@@ -74,7 +74,7 @@ describe("paleta y contraste por rol (RNF-04, WCAG 1.4.3 y 1.4.11)", () => {
   it("fuera de la escala de cambio no hay tonos cálidos: rojo, naranja ni amarillo", () => {
     const fueraDeCambio = tokens.split("\n").filter((l) => !/--cambio-\d/.test(l)).join("\n");
     for (const hex of fueraDeCambio.match(/#[0-9a-fA-F]{6}/g) ?? []) {
-      const [r, , b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+      const [r = 0, , b = 0] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
       expect(r > b && r > 90, `${hex} es un tono cálido`).toBe(false);
     }
   });

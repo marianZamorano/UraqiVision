@@ -32,7 +32,15 @@
       "stationListLabel": "Estaciones disponibles",
       "fallbackWebglUnavailable": "Este navegador no puede mostrar el globo 3D (WebGL no disponible). Usa la lista de estaciones para explorar.",
       "fallbackLoadFailed": "No se pudo cargar el globo 3D. Usa la lista de estaciones para explorar.",
-      "globeLoading": "Preparando el globo 3D… Mientras tanto, puedes usar la lista de estaciones."
+      "globeLoading": "Preparando el globo 3D… Mientras tanto, puedes usar la lista de estaciones.",
+      "globeLabel": "Globo 3D de Bolivia",
+      "boliviaMarker": "Bolivia",
+      "globeHint": "Haz clic en Bolivia en el globo o usa el botón.",
+      "goToBolivia": "Ir a Bolivia",
+      "backToBolivia": "Volver a Bolivia",
+      "viewEarth": "Ver la Tierra entera",
+      "announceBolivia": "Vista del globo: Bolivia encuadrada",
+      "announceEarth": "Vista del globo: la Tierra entera"
     },
     "method": {
       "title": "Método",
