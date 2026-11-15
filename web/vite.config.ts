@@ -72,7 +72,7 @@ export default defineConfig({
     // Matchers de jest-dom, limpieza entre pruebas y doble de canvas sin WebGL (PS-08).
     setupFiles: ["./src/test/setup.ts"],
     // Las pruebas de T004 leen los tokens y estilos globales; sin esto Vitest entrega el CSS vacío.
-    css: { include: [/src\/styles\/.+\.css/] },
+    css: { include: [/src\/styles\/.+\.css/, /src\/app\/shell\.css/] },
     include: ["tests/unit/**/*.test.{ts,tsx}", "tests/integration/**/*.test.{ts,tsx}"],
   },
 });
