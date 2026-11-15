@@ -201,6 +201,15 @@
   margin-top: var(--espacio-4);
 }
 
+/* Versión beta (#110): título de cada departamento en el explorador cuando el backend publica estaciones. */
+.station-group {
+  margin: var(--espacio-4) 0 0;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-texto-secundario);
+}
+
 .station-list,
 .info-list {
   display: grid;
