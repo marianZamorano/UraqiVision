@@ -142,8 +142,8 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Purpose**: Verificar el incremento completo antes de pasar a P-PROY-07.
 
-- [ ] T048 [P] Medir portada a 10 Mbps, 320 px y movimiento reducido, y documentar evidencia en `web/tests/e2e/` (RNF-01, RNF-05, RNF-12).
-- [ ] T049 Ejecutar `npm test`, `npm run build` y `npm run preview` desde `web/` cuando el proyecto exista y registrar la evidencia de arranque (PS-04, PS-09).
+- [X] T048 [P] Medir portada a 10 Mbps, 320 px y movimiento reducido, y documentar evidencia en `web/tests/e2e/` (RNF-01, RNF-05, RNF-12).
+- [X] T049 Ejecutar `npm test`, `npm run build` y `npm run preview` desde `web/` cuando el proyecto exista y registrar la evidencia de arranque (PS-04, PS-09).
 - [X] T050 Ejecutar `npm run env:check`, `npm run ai:check`, `npm run sdd:validar`, `npm run test:guardas` y `git diff --check` antes de commit (RNF-06, trazabilidad).
 
 ---
