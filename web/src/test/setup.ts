@@ -3,6 +3,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
+import "../i18n";
 
 afterEach(() => {
   cleanup();
@@ -12,3 +13,6 @@ Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
   configurable: true,
   value: () => null,
 });
+
+// jsdom no implementa el desplazamiento de la ventana; el cambio de página lo usa (useRouteFocus).
+window.scrollTo = () => {};

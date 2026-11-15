@@ -27,7 +27,7 @@ description: "Tareas de implementación de la base web navegable y confiable"
 - [X] T002 Configurar scripts de desarrollo, build, preview, Vitest y Playwright y declarar `react-i18next` e `i18next` en `web/package.json` (PS-04, PS-07, PS-09, RNF-03).
 - [X] T003 [P] Configurar la estructura inicial de `web/src/app/`, `web/src/pages/`, `web/src/data/`, `web/src/contracts/`, `web/src/i18n/`, `web/src/styles/` y `web/src/test/` según `plan.md`.
 - [X] T004 [P] Configurar tokens CSS, foco visible y la regla global de movimiento reducido en `web/src/styles/tokens.css` y `web/src/styles/global.css` (RNF-04, RNF-12).
-- [ ] T005 [P] Declarar solo `VITE_CESIUM_ION_TOKEN=` en el `.env.example` de la raíz (Vite con `envDir: ".."`, issue #82); ejecutar `npm run env:sync` y pedir a la persona que introduzca el valor localmente, sin leer ni modificar el `.env` (RNF-06, DP-07).
+- [X] T005 [P] Declarar solo `VITE_CESIUM_ION_TOKEN=` en el `.env.example` de la raíz (Vite con `envDir: ".."`, issue #82); ejecutar `npm run env:sync` y pedir a la persona que introduzca el valor localmente, sin leer ni modificar el `.env` (RNF-06, DP-07).
 
 ---
 
@@ -35,19 +35,19 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Purpose**: Ejecutar las compuertas de análisis y contratos, y establecer los contratos, la navegación y las garantías transversales que bloquean todas las historias.
 
-- [ ] T051 Confirmar que P-PROY-05 está aprobado y que sus hallazgos altos se corrigieron o aceptaron por escrito antes de implementar contratos (SDD fase 6, FR-006).
+- [X] T051 Confirmar que P-PROY-05 está aprobado y que sus hallazgos altos se corrigieron o aceptaron por escrito antes de implementar contratos (SDD fase 6, FR-006).
 - [ ] T047 Acordar con M-PUBLICACIÓN los campos de `contracts/published-data.ts` e `insight.ts` que exceden §17.3 y §21.1; registrar qué queda como propuesta y qué se estabiliza (FR-006, §17.3, §21.1).
 - [ ] T006 [P] Copiar y adaptar los contratos propuestos de publicación en `web/src/contracts/published-data.ts`, conservando `REAL | DEMO`, procedencia, UTC y ausencia distinta de cero (RN-03, RN-04, RN-07, RN-13).
 - [ ] T007 [P] Copiar y adaptar los contratos de Insight y de estado de vista en `web/src/contracts/insight.ts` y `web/src/contracts/view-state.ts`, sin cambiar `POST /api/insight` ni implementar backend (RF-34, §21.1).
 - [ ] T008 [P] Escribir pruebas de validación para IDs, UTC, campos obligatorios, coherencia de publicación y ausencia frente a cero en `web/tests/unit/contracts.test.ts` (RN-13, PS-04).
 - [ ] T009 Implementar validadores puros desde `unknown` en `web/src/data/validatePublishedData.ts` para que datos inválidos produzcan un estado controlado y no resultados parciales (FR-004 a FR-006, FR-010).
-- [ ] T010 [P] Escribir pruebas de la máquina de estados, reintento, cancelación y respuestas tardías en `web/tests/unit/viewState.test.ts` (RF-34, RN-13, PS-04).
-- [ ] T011 Implementar la máquina de los seis estados RF-34 y el control de solicitudes vigentes en `web/src/data/viewState.ts` (RF-34, FR-007 a FR-010, FR-022).
+- [X] T010 [P] Escribir pruebas de la máquina de estados, reintento, cancelación y respuestas tardías en `web/tests/unit/viewState.test.ts` (RF-34, RN-13, PS-04).
+- [X] T011 Implementar la máquina de los seis estados RF-34 y el control de solicitudes vigentes en `web/src/data/viewState.ts` (RF-34, FR-007 a FR-010, FR-022).
 - [X] T012 [P] Escribir pruebas del analizador y serializador de rutas recargables en `web/tests/unit/routes.test.ts` (§20.1, RF-29).
 - [X] T013 Implementar el adaptador History API y el estado territorial de URL en `web/src/app/router.tsx` (exporta `Link` y `NavLink`; pruebas en `web/tests/unit/router.test.tsx`) y `web/src/app/routeState.ts` (FR-001, FR-002, RF-29).
-- [ ] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
-- [ ] T015 Implementar i18n español/inglés con `react-i18next`, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
-- [ ] T016 Configurar el shell de la aplicación, navegación semántica y región de anuncios de estados en `web/src/app/App.tsx` y `web/src/app/AppShell.tsx` (RNF-04, RF-34).
+- [X] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
+- [X] T015 Implementar i18n español/inglés con `react-i18next`, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
+- [X] T016 Configurar el shell de la aplicación, navegación semántica y región de anuncios de estados en `web/src/app/App.tsx` y `web/src/app/AppShell.tsx` (RNF-04, RF-34).
 
 **Checkpoint**: Las compuertas T051 y T047 están cerradas y la base de contratos, rutas, idiomas y estados está lista antes de implementar una historia.
 
@@ -59,13 +59,13 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Independent Test**: Desde la portada se alcanzan todos los destinos, se conserva una estación en la URL y ningún destino muestra una pantalla vacía.
 
-- [ ] T017 [P] [US1] Escribir pruebas de componentes para navegación, recarga de ruta y estados de destinos aún no implementados en `web/tests/integration/navigation.test.tsx` (FR-001 a FR-003, PS-04).
-- [ ] T018 [P] [US1] Escribir recorrido Playwright de portada, explorador, estación, Método y Acerca de en `web/tests/e2e/navigation.spec.ts` (§20.1, PS-09).
-- [ ] T019 [US1] Implementar la página de portada y el enlace «Explorar Bolivia» en `web/src/pages/HomePage.tsx` (RF-01, FR-001).
-- [ ] T020 [US1] Implementar el destino diferido del explorador y su estado explícito en `web/src/pages/ExplorePage.tsx` (FR-003, RNF-01).
-- [ ] T021 [US1] Implementar la ruta y destino de estación que conserva `stationId` en `web/src/pages/StationPage.tsx` (FR-002, RF-29).
-- [ ] T022 [P] [US1] Implementar las páginas reales y accesibles de Método y Acerca de en `web/src/pages/MethodPage.tsx` y `web/src/pages/AboutPage.tsx` (FR-001, RNF-04).
-- [ ] T023 [US1] Conectar los destinos con el router en `web/src/app/AppRoutes.tsx` y verificar atrás/adelante (FR-001, FR-002).
+- [X] T017 [P] [US1] Escribir pruebas de componentes para navegación, recarga de ruta y estados de destinos aún no implementados en `web/tests/integration/navigation.test.tsx` (FR-001 a FR-003, PS-04).
+- [X] T018 [P] [US1] Escribir recorrido Playwright de portada, explorador, estación, Método y Acerca de en `web/tests/e2e/navigation.spec.ts` (§20.1, PS-09).
+- [X] T019 [US1] Implementar la página de portada y el enlace «Explorar Bolivia» en `web/src/pages/HomePage.tsx` (RF-01, FR-001).
+- [X] T020 [US1] Implementar el destino diferido del explorador y su estado explícito en `web/src/pages/ExplorePage.tsx` (FR-003, RNF-01).
+- [X] T021 [US1] Implementar la ruta y destino de estación que conserva `stationId` en `web/src/pages/StationPage.tsx` (FR-002, RF-29).
+- [X] T022 [P] [US1] Implementar las páginas reales y accesibles de Método y Acerca de en `web/src/pages/MethodPage.tsx` y `web/src/pages/AboutPage.tsx` (FR-001, RNF-04).
+- [X] T023 [US1] Conectar los destinos con el router en `web/src/app/AppRoutes.tsx` y verificar atrás/adelante (FR-001, FR-002).
 
 **Checkpoint**: El recorrido base es navegable sin depender aún de CesiumJS, MapLibre ni datos publicados.
 
@@ -79,11 +79,11 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 - [ ] T024 [P] [US2] Crear fixtures completos, limitados, ausentes, incompatibles, inválidos y DEMO en `web/tests/fixtures/published-data/` (RN-04, RN-13, PS-04).
 - [ ] T025 [P] [US2] Escribir pruebas de carga, caché, `AbortController`, reintento y validación de todos los artefactos en `web/tests/integration/publicationRepository.test.ts` (RF-34, FR-004 a FR-012, FR-022).
-- [ ] T026 [P] [US2] Escribir pruebas del etiquetado visible REAL/DEMO, ausencias y estados anunciables en `web/tests/integration/viewStatePresenter.test.tsx` (RN-04, RN-13, PS-04).
+- [X] T026 [P] [US2] Escribir pruebas del etiquetado visible REAL/DEMO, ausencias y estados anunciables en `web/tests/integration/viewStatePresenter.test.tsx` (RN-04, RN-13, PS-04).
 - [ ] T027 [US2] Implementar lectura estática, caché por URL y cancelación de cargas en `web/src/data/publicationRepository.ts` (FR-004 a FR-006, FR-022).
 - [ ] T028 [US2] Implementar validación y lectura de `atlas/departments.geojson` en `web/src/data/departmentsRepository.ts` (FR-005, RN-03).
-- [ ] T029 [US2] Implementar el presentador bilingüe de estados, ausencias y modo de evidencia en `web/src/app/ViewStatePresenter.tsx` (RF-34, RN-04, RN-13).
-- [ ] T030 [US2] Conectar la carga de una estación seleccionada a `StationPage` sin recalcular ni completar datos científicos en `web/src/pages/StationPage.tsx` (FR-021, RF-34).
+- [X] T029 [US2] Implementar el presentador bilingüe de estados, ausencias y modo de evidencia en `web/src/app/ViewStatePresenter.tsx` (RF-34, RN-04, RN-13).
+- [X] T030 [US2] Conectar la carga de una estación seleccionada a `StationPage` sin recalcular ni completar datos científicos en `web/src/pages/StationPage.tsx` (FR-021, RF-34).
 
 **Checkpoint**: La aplicación puede consumir publicaciones controladamente y no presenta resultados engañosos.
 
@@ -95,10 +95,10 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Independent Test**: Al alternar idioma en cada ruta y estado, la ubicación, selección y mensajes permanecen coherentes y sin claves faltantes.
 
-- [ ] T031 [P] [US3] Escribir pruebas de cambio de idioma en rutas y estados de carga/error en `web/tests/integration/languageSwitch.test.tsx` (RF-20, RNF-03, PS-04).
-- [ ] T032 [US3] Implementar el selector de idioma accesible con `react-i18next` y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
-- [ ] T033 [US3] Completar las claves de navegación, páginas, estados, errores y acciones en `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
-- [ ] T034 [US3] Verificar que los mensajes producidos por `ViewStatePresenter` se traduzcan sin alterar estado o selección en `web/src/app/ViewStatePresenter.tsx` (FR-013, FR-014).
+- [X] T031 [P] [US3] Escribir pruebas de cambio de idioma en rutas y estados de carga/error en `web/tests/integration/languageSwitch.test.tsx` (RF-20, RNF-03, PS-04).
+- [X] T032 [US3] Implementar el selector de idioma accesible con `react-i18next` y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
+- [X] T033 [US3] Completar las claves de navegación, páginas, estados, errores y acciones en `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
+- [X] T034 [US3] Verificar que los mensajes producidos por `ViewStatePresenter` se traduzcan sin alterar estado o selección en `web/src/app/ViewStatePresenter.tsx` (FR-013, FR-014).
 
 **Checkpoint**: La base se puede recorrer completamente en ambos idiomas.
 
@@ -110,11 +110,11 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Independent Test**: Sin mouse se navegan acciones y reintento; los estados se anuncian sin mover foco y la alternativa textual permanece utilizable a 320 px con movimiento reducido.
 
-- [ ] T035 [P] [US4] Escribir pruebas de teclado, foco, anuncios ARIA y reintento en `web/tests/integration/accessibility.test.tsx` (RNF-04, RF-34, PS-07).
-- [ ] T036 [P] [US4] Escribir pruebas de preferencia reducida y alternativa textual responsive en `web/tests/integration/reducedMotion.test.tsx` (RNF-04, RNF-12, PS-07).
-- [ ] T037 [US4] Implementar el hook de preferencia de movimiento reducido en `web/src/app/useReducedMotion.ts` (RNF-12).
+- [X] T035 [P] [US4] Escribir pruebas de teclado, foco, anuncios ARIA y reintento en `web/tests/integration/accessibility.test.tsx` (RNF-04, RF-34, PS-07).
+- [X] T036 [P] [US4] Escribir pruebas de preferencia reducida y alternativa textual responsive en `web/tests/integration/reducedMotion.test.tsx` (RNF-04, RNF-12, PS-07).
+- [X] T037 [US4] Implementar el hook de preferencia de movimiento reducido en `web/src/app/useReducedMotion.ts` (RNF-12).
 - [ ] T038 [US4] Implementar la lista textual navegable de departamentos y estaciones en `web/src/features/globe/TextualExplorerFallback.tsx` (RNF-04, RF-30).
-- [ ] T039 [US4] Aplicar foco visible, orden de tabulación, anuncios ARIA y estilos sin animación no esencial en `web/src/app/AppShell.tsx`, `web/src/app/ViewStatePresenter.tsx` y `web/src/styles/global.css` (RNF-04, RNF-12).
+- [X] T039 [US4] Aplicar foco visible, orden de tabulación, anuncios ARIA y estilos sin animación no esencial en `web/src/app/AppShell.tsx`, `web/src/app/ViewStatePresenter.tsx` y `web/src/styles/global.css` (RNF-04, RNF-12).
 
 **Checkpoint**: La base conserva el recorrido esencial para teclado, lector de pantalla y usuarios con movimiento reducido.
 
@@ -144,7 +144,7 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 - [ ] T048 [P] Medir portada a 10 Mbps, 320 px y movimiento reducido, y documentar evidencia en `web/tests/e2e/` (RNF-01, RNF-05, RNF-12).
 - [ ] T049 Ejecutar `npm test`, `npm run build` y `npm run preview` desde `web/` cuando el proyecto exista y registrar la evidencia de arranque (PS-04, PS-09).
-- [ ] T050 Ejecutar `npm run env:check`, `npm run ai:check`, `npm run sdd:validar`, `npm run test:guardas` y `git diff --check` antes de commit (RNF-06, trazabilidad).
+- [X] T050 Ejecutar `npm run env:check`, `npm run ai:check`, `npm run sdd:validar`, `npm run test:guardas` y `git diff --check` antes de commit (RNF-06, trazabilidad).
 
 ---
 

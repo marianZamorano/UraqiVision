@@ -1,102 +1,66 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from '../app/router'
-import type { Language, PublishedStation, ViewState } from '../contracts/view-state'
-import { createLoadingState, createPublishedStationState, createErrorState } from '../data/viewState'
-import { fetchStation } from '../data/publicationRepository'
-import { ViewStatePresenter } from '../app/ViewStatePresenter'
-import { getDictionary } from '../i18n'
+// Página de estación (001 T021, T030): conserva el stationId de la ruta y carga su publicación sin recalcular ni
+// completar datos (FR-021, RF-34). La carga cancela solicitudes viejas y no depende del idioma (useStationView).
+import { Suspense, lazy } from "react";
+import { useTranslation } from "react-i18next";
+import { EvidenceBadge, ReportableValueText, ViewStatePresenter } from "../app/ViewStatePresenter";
+import { Link } from "../app/router";
+import type { Language } from "../contracts/view-state";
+import { stationFilesBase } from "../data/publicationRepository";
+import { useStationView } from "../data/useStationView";
+
+// Versión beta (#110): el mapa (MapLibre) se carga solo en la página de estación y solo para estaciones del
+// endpoint del backend (RNF-01). Los ejemplos DEMO no tienen archivos publicados.
+const StationMap = lazy(() => import("../features/map/StationMap"));
 
 type StationPageProps = {
-  stationId?: string
-  lang: Language
-}
+  stationId?: string;
+  lang: Language;
+};
 
 export function StationPage({ lang, stationId }: StationPageProps) {
-  const dict = getDictionary(lang)
-  const [state, setState] = useState<ViewState<PublishedStation>>(createLoadingState(lang))
+  const { t } = useTranslation();
+  const { view } = useStationView(stationId);
 
-  const loadStation = useCallback(
-    async (nextStationId: string) => {
-      const controller = new AbortController()
-      setState(createLoadingState(lang))
+  if (view.kind !== "available") return <ViewStatePresenter state={view} />;
 
-      try {
-        const station = await fetchStation(nextStationId, controller.signal)
-        setState(createPublishedStationState(station, lang))
-      } catch (error) {
-        const message =
-          error instanceof Error && error.name === 'AbortError'
-            ? lang === 'es'
-              ? 'Solicitud cancelada'
-              : 'Request cancelled'
-            : 'No se pudo cargar la estación.'
+  const station = view.data;
+  const filesBase = stationFilesBase(station.stationId);
+  return (
+    <section className="page">
+      <div className="panel">
+        <p className="eyebrow">{t("pages.station.title")}</p>
+        <h1>{station.label[lang]}</h1>
+        <EvidenceBadge mode={view.evidenceMode} />
+        <p>{station.summary[lang]}</p>
 
-        setState(createErrorState(lang, message, () => {
-          if (nextStationId) {
-            void loadStation(nextStationId)
-          }
-        }))
-      }
-    },
-    [lang],
-  )
-
-  const retry = useCallback(() => {
-    if (!stationId) {
-      return
-    }
-
-    void loadStation(stationId)
-  }, [loadStation, stationId])
-
-  useEffect(() => {
-    if (!stationId) {
-      setState({
-        status: 'no-data',
-        language: lang,
-        message: lang === 'es' ? 'Sin estación' : 'No station',
-        reason: 'No station id.',
-      })
-      return
-    }
-
-    void loadStation(stationId)
-  }, [lang, loadStation, stationId])
-
-  if (state.status === 'available' && state.data) {
-    const station = state.data
-
-    return (
-      <section className="page">
-        <div className="panel">
-          <p className="eyebrow">{dict.pages.station.title}</p>
-          <h1>{station.label[lang]}</h1>
-          <p>{station.summary[lang]}</p>
-
-          <dl className="meta-grid">
-            <div>
-              <dt>Evidence</dt>
-              <dd>{station.evidenceMode}</dd>
-            </div>
-            <div>
-              <dt>Orbit</dt>
-              <dd>{station.orbit}</dd>
-            </div>
-            <div>
-              <dt>Source</dt>
-              <dd>{station.provenance.source}</dd>
-            </div>
-          </dl>
-
-          <div className="station-actions">
-            <Link className="button-primary" to="/explore">
-              {lang === 'es' ? 'Volver al explorador' : 'Back to explorer'}
-            </Link>
+        <dl className="meta-grid">
+          <div>
+            <dt>{t("pages.station.area")}</dt>
+            <dd>
+              <ReportableValueText value={station.area} />
+            </dd>
           </div>
-        </div>
-      </section>
-    )
-  }
+          <div>
+            <dt>{t("pages.station.orbit")}</dt>
+            <dd>{station.orbit}</dd>
+          </div>
+          <div>
+            <dt>{t("pages.station.source")}</dt>
+            <dd>{station.provenance.source}</dd>
+          </div>
+        </dl>
 
-  return <ViewStatePresenter state={state} onRetry={retry} />
+        <div className="station-actions">
+          <Link className="button-primary" to="/explore">
+            {t("pages.station.back")}
+          </Link>
+        </div>
+      </div>
+      {filesBase ? (
+        <Suspense fallback={<p role="status">{t("states.message.loading")}</p>}>
+          <StationMap base={filesBase} lang={lang} />
+        </Suspense>
+      ) : null}
+    </section>
+  );
 }

@@ -1,98 +1,30 @@
-import type { Language, PublishedStation, ViewState } from '../contracts/view-state'
+// T011 (001-base-web): transiciones puras de la máquina de los seis estados de RF-34 (FR-007 a FR-010).
+// Los motivos son claves de traducción (`states.reason.*`); el presentador los traduce al pintar.
+import type { EvidenceMode, ViewState } from "../contracts/view-state";
+import { StationNotFoundError } from "./publicationRepository";
 
-export function createLoadingState(language: Language): ViewState<never> {
-  return {
-    status: 'loading',
-    language,
-    message: language === 'es' ? 'Cargando publicación…' : 'Loading publication…',
-  }
+export function loadingState(requestId: string): ViewState<never> {
+  return { kind: "loading", requestId };
 }
 
-export function buildViewStateFromResult<T>(
-  result: {
-    status: 'available' | 'limited' | 'no-data' | 'incompatible-date' | 'error'
-    message: string
-    reason?: string
-    data?: T
-    retry?: () => void
-  },
-  language: Language,
-): ViewState<T> {
-  if (result.status === 'available') {
-    return {
-      status: 'available',
-      language,
-      message: result.message,
-      data: result.data as T,
-    }
-  }
-
-  if (result.status === 'limited') {
-    return {
-      status: 'limited',
-      language,
-      message: result.message,
-      reason: result.reason ?? 'Limitado por procedencia.',
-      data: result.data,
-    }
-  }
-
-  if (result.status === 'no-data') {
-    return {
-      status: 'no-data',
-      language,
-      message: result.message,
-      reason: result.reason ?? 'Sin datos publicados.',
-    }
-  }
-
-  if (result.status === 'incompatible-date') {
-    return {
-      status: 'incompatible-date',
-      language,
-      message: result.message,
-      reason: result.reason ?? 'La fecha no es compatible.',
-    }
-  }
-
-  return {
-    status: 'error',
-    language,
-    message: result.message,
-    reason: result.reason ?? 'No se pudo leer la publicación.',
-    retry: result.retry,
-  }
+export function availableState<T>(data: T, evidenceMode: EvidenceMode): ViewState<T> {
+  return { kind: "available", data, evidenceMode };
 }
 
-export function createPublishedStationState(
-  station: PublishedStation,
-  language: Language,
-  retry?: () => void,
-): ViewState<PublishedStation> {
-  return {
-    status: 'available',
-    language,
-    message: language === 'es' ? 'Resultado disponible' : 'Result available',
-    data: station,
-    ...(retry ? { retry } : {}),
-  }
+export function noDataState(reason: string): ViewState<never> {
+  return { kind: "no-data", reason };
 }
 
-export function createNoDataState(language: Language, reason: string): ViewState<never> {
-  return {
-    status: 'no-data',
-    language,
-    message: language === 'es' ? 'Sin datos' : 'No data',
-    reason,
-  }
+function isAbort(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
-export function createErrorState(language: Language, reason: string, retry?: () => void): ViewState<never> {
-  return {
-    status: 'error',
-    language,
-    message: language === 'es' ? 'Error en la publicación' : 'Publication error',
-    reason,
-    retry,
-  }
+/**
+ * Convierte un fallo de carga en estado. Una cancelación devuelve `null`: esa respuesta ya no es la vigente y
+ * se descarta. Una estación sin publicación es «sin datos», nunca un cero (RN-13).
+ */
+export function viewStateFromError(error: unknown, retry: () => void): ViewState<never> | null {
+  if (isAbort(error)) return null;
+  if (error instanceof StationNotFoundError) return noDataState("states.reason.station-not-found");
+  return { kind: "error", message: "states.reason.load-failed", retry };
 }

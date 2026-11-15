@@ -1,0 +1,89 @@
+{
+  "app": {
+    "title": "UraqiVision",
+    "subtitle": "Web base for station observation and validation.",
+    "home": "Home",
+    "exploreNav": "Explorer",
+    "method": "Method",
+    "about": "About",
+    "mainNavigation": "Main navigation",
+    "loadingPage": "Loading the page…",
+    "skipToContent": "Skip to content",
+    "navigatedTo": "Page: {{page}}"
+  },
+  "language": {
+    "switchTo": "Switch language to",
+    "names": {
+      "es": "Español",
+      "en": "English"
+    }
+  },
+  "pages": {
+    "home": {
+      "headline": "UraqiVision web base",
+      "description": "Main route, honest states and real paths for static publication validation.",
+      "cta": "Explore Bolivia"
+    },
+    "explore": {
+      "title": "Explorer",
+      "description": "Select a public station to open its analysis or detail view.",
+      "globeAttribution": "The 3D experience keeps a textual alternative and credits its visual provider.",
+      "globeAttributionLink": "Cesium attribution",
+      "stationListLabel": "Available stations",
+      "fallbackWebglUnavailable": "This browser cannot display the 3D globe (WebGL unavailable). Use the station list to explore.",
+      "fallbackLoadFailed": "The 3D globe could not be loaded. Use the station list to explore.",
+      "globeLoading": "Preparing the 3D globe… Meanwhile, you can use the station list."
+    },
+    "method": {
+      "title": "Method",
+      "description": "The web only reads published files and presents their provenance, method and range.",
+      "provenance": "Provenance: origin of the publication and granules.",
+      "date": "Date: UTC preserved for comparison in local time.",
+      "absence": "Absence: never normalized to zero."
+    },
+    "about": {
+      "title": "About",
+      "description": "UraqiVision is a static web base built on traceability, accessibility and scientific rigor.",
+      "scope": "The web base meets traceability, accessibility, performance and data honesty for the main UraqiVision route."
+    },
+    "station": {
+      "title": "Station",
+      "area": "Area",
+      "orbit": "Orbit",
+      "source": "Source",
+      "back": "Back to explorer"
+    }
+  },
+  "states": {
+    "label": {
+      "loading": "Loading",
+      "available": "Result",
+      "limited": "Limited",
+      "no-data": "No data",
+      "incompatible-date": "Incompatible date",
+      "error": "Error"
+    },
+    "message": {
+      "loading": "Loading the publication…",
+      "available": "Result available",
+      "limited": "Limited data",
+      "no-data": "No published data",
+      "incompatible-date": "Date without compatible data",
+      "error": "The publication could not be read"
+    },
+    "reason": {
+      "station-not-found": "There is no publication for this station.",
+      "no-station-id": "The station identifier is missing.",
+      "load-failed": "The publication could not be loaded. Check your connection and try again.",
+      "no-compatible-date": "There is no compatible data for the chosen date."
+    },
+    "retry": "Retry"
+  },
+  "evidence": {
+    "label": "Evidence mode",
+    "demoNotice": "Example data: not a result."
+  },
+  "values": {
+    "notReported": "Not reported"
+  }
+}
