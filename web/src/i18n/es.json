@@ -225,24 +225,24 @@
     "s1": {
       "title": "Primero, lo normal de este lugar",
       "body": "Mediana de HV de {{dates}}, antes del cambio. Claro es bosque con estructura; oscuro, desmonte, pasto o suelo.",
-      "short": "Así es sin cambio. Claro: bosque. Oscuro: pasto o suelo."
+      "short": "Radar NISAR · antes del cambio. Claro = bosque · Oscuro = pasto, suelo o desmonte."
     },
     "s2": {
       "title": "Después, cómo cambió al {{date}}",
       "body": "Esa fecha menos lo normal. Marrón: la señal bajó; azul: subió; blanco: casi no se movió. En la mayor parte del paisaje el cambio queda entre {{lo}} y {{hi}} dB.",
-      "short": "Marrón: la señal bajó. Azul: subió."
+      "short": "Después − antes. Marrón = perdió vegetación · Azul = ganó · Blanco = sin cambio."
     },
     "s3": {
-      "title": "Las zonas que cruzaron la regla",
+      "title": "Solo los cambios fuertes",
       "body": "{{n}} parches de al menos 1 ha donde HV cayó más de {{thr}} dB y siguió baja en la fecha siguiente: {{ha}} ha (rango {{min}}–{{max}}). Son señales de radar, no perímetros de incendio.",
-      "short": "{{n}} parches · {{ha}} ha ({{min}}–{{max}}). Señales de radar, no perímetros de incendio."
+      "short": "Caída fuerte · ≥ 1 ha · se mantiene. {{n}} zonas · {{ha}} ha ({{min}}–{{max}}). Color = posible causa, no confirmada."
     },
     "s4": {
-      "title": "Un segundo testigo",
+      "title": "Otro satélite para comparar",
       "body": "Sentinel-2 entre el {{from}} y el {{to}}. Marrón: perdió vegetación; verde: reverdeció.",
       "brackets": "Sus fechas encierran el periodo del radar.",
       "notBrackets": "Sus fechas no coinciden del todo con las del radar.",
-      "short": "Sentinel-2, del {{from}} al {{to}}. Marrón: perdió vegetación. Verde: reverdeció."
+      "short": "Fotos Sentinel-2 · {{from}} → {{to}}. Revisa al radar. Marrón = perdió vegetación · Verde = reverdeció."
     },
     "s5": {
       "title": "Acuerdo, y dónde se rompe",

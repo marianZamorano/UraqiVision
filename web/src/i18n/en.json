@@ -225,24 +225,24 @@
     "s1": {
       "title": "First, this place's normal",
       "body": "Median HV of {{dates}}, before the change. Light is forest with structure; dark is clearing, pasture or soil.",
-      "short": "What it looks like with no change. Bright: forest. Dark: pasture or soil."
+      "short": "NISAR radar · before the change. Bright = forest · Dark = pasture, soil or cleared land."
     },
     "s2": {
       "title": "Then, how it changed by {{date}}",
       "body": "That date minus the normal. Brown: the signal dropped; blue: it rose; white: it barely moved. Across most of the landscape the change stays between {{lo}} and {{hi}} dB.",
-      "short": "Brown: the signal dropped. Blue: it rose."
+      "short": "After − before. Brown = lost vegetation · Blue = gained · White = no change."
     },
     "s3": {
-      "title": "The areas that crossed the rule",
+      "title": "Only the strong changes",
       "body": "{{n}} patches of at least 1 ha where HV fell more than {{thr}} dB and stayed low on the next date: {{ha}} ha (range {{min}}–{{max}}). These are radar signals, not fire perimeters.",
-      "short": "{{n}} patches · {{ha}} ha ({{min}}–{{max}}). Radar signals, not fire perimeters."
+      "short": "Strong drop · ≥ 1 ha · it stays. {{n}} areas · {{ha}} ha ({{min}}–{{max}}). Color = possible cause, not confirmed."
     },
     "s4": {
-      "title": "A second witness",
+      "title": "A second satellite to cross-check",
       "body": "Sentinel-2 between {{from}} and {{to}}. Brown: vegetation lost; green: greener.",
       "brackets": "Its dates bracket the radar period.",
       "notBrackets": "Its dates do not fully match the radar's.",
-      "short": "Sentinel-2, {{from}} to {{to}}. Brown: lost vegetation. Green: regrew."
+      "short": "Sentinel-2 images · {{from}} → {{to}}. Checks the radar. Brown = lost vegetation · Green = regrew."
     },
     "s5": {
       "title": "Agreement, and where it breaks",
