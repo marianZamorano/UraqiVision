@@ -74,5 +74,7 @@ export default defineConfig({
     // Las pruebas de T004 leen los tokens y estilos globales; sin esto Vitest entrega el CSS vacío.
     css: { include: [/src\/styles\/.+\.css/, /src\/app\/shell\.css/] },
     include: ["tests/unit/**/*.test.{ts,tsx}", "tests/integration/**/*.test.{ts,tsx}"],
+    // Las pruebas no dependen del .env de cada persona: sin backend local, la web usa los ejemplos DEMO (#110).
+    env: { VITE_PUBLISHED_API: "" },
   },
 });
