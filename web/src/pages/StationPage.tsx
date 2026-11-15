@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Link } from '../app/router'
 import type { Language, PublishedStation, ViewState } from '../contracts/view-state'
 import { createLoadingState, createPublishedStationState, createErrorState } from '../data/viewState'
-import { fetchStation } from '../data/publicationRepository'
+import { fetchStation, stationFilesBase } from '../data/publicationRepository'
+
+// PROTOTIPO LOCAL: el mapa (MapLibre) se carga solo en la página de estación (RNF-01).
+const StationMap = lazy(() => import('../features/map/StationMap'))
 import { ViewStatePresenter } from '../app/ViewStatePresenter'
 import { getDictionary } from '../i18n'
 
@@ -65,6 +68,7 @@ export function StationPage({ lang, stationId }: StationPageProps) {
 
   if (state.status === 'available' && state.data) {
     const station = state.data
+    const filesBase = stationFilesBase(station.stationId)
 
     return (
       <section className="page">
@@ -94,6 +98,11 @@ export function StationPage({ lang, stationId }: StationPageProps) {
             </Link>
           </div>
         </div>
+        {filesBase ? (
+          <Suspense fallback={<p role="status">{lang === 'es' ? 'Cargando mapa…' : 'Loading map…'}</p>}>
+            <StationMap base={filesBase} lang={lang} />
+          </Suspense>
+        ) : null}
       </section>
     )
   }

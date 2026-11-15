@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from '../app/router'
 import { serializeRoute } from '../app/routeState'
 import type { Language } from '../contracts/view-state'
-import { demoStations } from '../data/publicationRepository'
+import { demoStations, listStations, type StationSummary } from '../data/publicationRepository'
 import { getDictionary } from '../i18n'
 import { GlobeAttribution } from '../features/globe/GlobeAttribution'
 import { hasWebGLSupport, resolveGlobeProvider } from '../features/globe/GlobeProvider'
@@ -24,6 +24,13 @@ export function ExplorePage({ lang }: ExplorePageProps) {
     webglAvailable: hasWebGLSupport(),
   }))
   const [loadFailed, setLoadFailed] = useState(false)
+  const [stations, setStations] = useState<StationSummary[]>(() => Object.values(demoStations))
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void listStations(controller.signal).then(setStations)
+    return () => controller.abort()
+  }, [])
 
   useEffect(() => {
     if (decision.mode === 'textual') {
@@ -56,7 +63,7 @@ export function ExplorePage({ lang }: ExplorePageProps) {
         {fallback.active ? <p role="status">{fallbackMessage}</p> : null}
 
         <ul className="station-list" aria-label={dict.pages.explore.stationListLabel}>
-          {Object.values(demoStations).map((station) => (
+          {stations.map((station) => (
             <li key={station.stationId}>
               <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
                 {station.label[lang]}
