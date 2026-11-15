@@ -41,8 +41,8 @@ description: "Tareas de implementación de la base web navegable y confiable"
 - [ ] T007 [P] Copiar y adaptar los contratos de Insight y de estado de vista en `web/src/contracts/insight.ts` y `web/src/contracts/view-state.ts`, sin cambiar `POST /api/insight` ni implementar backend (RF-34, §21.1).
 - [ ] T008 [P] Escribir pruebas de validación para IDs, UTC, campos obligatorios, coherencia de publicación y ausencia frente a cero en `web/tests/unit/contracts.test.ts` (RN-13, PS-04).
 - [ ] T009 Implementar validadores puros desde `unknown` en `web/src/data/validatePublishedData.ts` para que datos inválidos produzcan un estado controlado y no resultados parciales (FR-004 a FR-006, FR-010).
-- [ ] T010 [P] Escribir pruebas de la máquina de estados, reintento, cancelación y respuestas tardías en `web/tests/unit/viewState.test.ts` (RF-34, RN-13, PS-04).
-- [ ] T011 Implementar la máquina de los seis estados RF-34 y el control de solicitudes vigentes en `web/src/data/viewState.ts` (RF-34, FR-007 a FR-010, FR-022).
+- [X] T010 [P] Escribir pruebas de la máquina de estados, reintento, cancelación y respuestas tardías en `web/tests/unit/viewState.test.ts` (RF-34, RN-13, PS-04).
+- [X] T011 Implementar la máquina de los seis estados RF-34 y el control de solicitudes vigentes en `web/src/data/viewState.ts` (RF-34, FR-007 a FR-010, FR-022).
 - [X] T012 [P] Escribir pruebas del analizador y serializador de rutas recargables en `web/tests/unit/routes.test.ts` (§20.1, RF-29).
 - [X] T013 Implementar el adaptador History API y el estado territorial de URL en `web/src/app/router.tsx` (exporta `Link` y `NavLink`; pruebas en `web/tests/unit/router.test.tsx`) y `web/src/app/routeState.ts` (FR-001, FR-002, RF-29).
 - [X] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
@@ -79,11 +79,11 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 - [ ] T024 [P] [US2] Crear fixtures completos, limitados, ausentes, incompatibles, inválidos y DEMO en `web/tests/fixtures/published-data/` (RN-04, RN-13, PS-04).
 - [ ] T025 [P] [US2] Escribir pruebas de carga, caché, `AbortController`, reintento y validación de todos los artefactos en `web/tests/integration/publicationRepository.test.ts` (RF-34, FR-004 a FR-012, FR-022).
-- [ ] T026 [P] [US2] Escribir pruebas del etiquetado visible REAL/DEMO, ausencias y estados anunciables en `web/tests/integration/viewStatePresenter.test.tsx` (RN-04, RN-13, PS-04).
+- [X] T026 [P] [US2] Escribir pruebas del etiquetado visible REAL/DEMO, ausencias y estados anunciables en `web/tests/integration/viewStatePresenter.test.tsx` (RN-04, RN-13, PS-04).
 - [ ] T027 [US2] Implementar lectura estática, caché por URL y cancelación de cargas en `web/src/data/publicationRepository.ts` (FR-004 a FR-006, FR-022).
 - [ ] T028 [US2] Implementar validación y lectura de `atlas/departments.geojson` en `web/src/data/departmentsRepository.ts` (FR-005, RN-03).
-- [ ] T029 [US2] Implementar el presentador bilingüe de estados, ausencias y modo de evidencia en `web/src/app/ViewStatePresenter.tsx` (RF-34, RN-04, RN-13).
-- [ ] T030 [US2] Conectar la carga de una estación seleccionada a `StationPage` sin recalcular ni completar datos científicos en `web/src/pages/StationPage.tsx` (FR-021, RF-34).
+- [X] T029 [US2] Implementar el presentador bilingüe de estados, ausencias y modo de evidencia en `web/src/app/ViewStatePresenter.tsx` (RF-34, RN-04, RN-13).
+- [X] T030 [US2] Conectar la carga de una estación seleccionada a `StationPage` sin recalcular ni completar datos científicos en `web/src/pages/StationPage.tsx` (FR-021, RF-34).
 
 **Checkpoint**: La aplicación puede consumir publicaciones controladamente y no presenta resultados engañosos.
 
@@ -97,8 +97,8 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 - [X] T031 [P] [US3] Escribir pruebas de cambio de idioma en rutas y estados de carga/error en `web/tests/integration/languageSwitch.test.tsx` (RF-20, RNF-03, PS-04).
 - [X] T032 [US3] Implementar el selector de idioma accesible con `react-i18next` y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
-- [ ] T033 [US3] Completar las claves de navegación, páginas, estados, errores y acciones en `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
-- [ ] T034 [US3] Verificar que los mensajes producidos por `ViewStatePresenter` se traduzcan sin alterar estado o selección en `web/src/app/ViewStatePresenter.tsx` (FR-013, FR-014).
+- [X] T033 [US3] Completar las claves de navegación, páginas, estados, errores y acciones en `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
+- [X] T034 [US3] Verificar que los mensajes producidos por `ViewStatePresenter` se traduzcan sin alterar estado o selección en `web/src/app/ViewStatePresenter.tsx` (FR-013, FR-014).
 
 **Checkpoint**: La base se puede recorrer completamente en ambos idiomas.
 

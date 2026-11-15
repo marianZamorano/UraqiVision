@@ -43,12 +43,12 @@ describe("cambio de idioma", () => {
   it("traduce la estación sin volver a cargarla ni perder la selección (FR-013, FR-014)", async () => {
     renderAt("/station/tarija");
     expect(await screen.findByRole("heading", { level: 1, name: "Tarija" })).toBeInTheDocument();
-    expect(screen.getByText("Evidencia")).toBeInTheDocument();
+    expect(screen.getByText("Órbita")).toBeInTheDocument();
     const calls = vi.mocked(fetchStation).mock.calls.length;
 
     fireEvent.click(screen.getByRole("button", { name: /cambiar el idioma a english/i }));
 
-    expect(await screen.findByText("Evidence")).toBeInTheDocument();
+    expect(await screen.findByText("Orbit")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "Tarija" })).toBeInTheDocument();
     expect(window.location.pathname).toBe("/station/tarija");
     expect(vi.mocked(fetchStation).mock.calls.length).toBe(calls);
