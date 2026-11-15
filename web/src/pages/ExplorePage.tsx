@@ -23,7 +23,9 @@ export function ExplorePage({ lang }: ExplorePageProps) {
     token: readPublicIonToken(),
     webglAvailable: hasWebGLSupport(),
   }))
-  const [loadFailed, setLoadFailed] = useState(false)
+  // T020: estado explícito del globo; «loading» solo existe si hay WebGL y CesiumJS aún se descarga.
+  const [globeLoad, setGlobeLoad] = useState<'loading' | 'ready' | 'failed'>('loading')
+  const loadFailed = globeLoad === 'failed'
   // Versión beta (#110): estaciones del endpoint del backend, si está configurado, más los ejemplos DEMO.
   const [stations, setStations] = useState<StationSummary[]>(() => Object.values(demoStations))
 
@@ -42,8 +44,8 @@ export function ExplorePage({ lang }: ExplorePageProps) {
 
     let active = true
     void loadGlobeModule<CesiumModule | null>(loadCesiumModule, null).then((module) => {
-      if (active && module === null) {
-        setLoadFailed(true)
+      if (active) {
+        setGlobeLoad(module === null ? 'failed' : 'ready')
       }
     })
 
@@ -63,7 +65,11 @@ export function ExplorePage({ lang }: ExplorePageProps) {
         <h1>{t('pages.explore.title')}</h1>
         <p>{t('pages.explore.description')}</p>
 
-        {fallback.active ? <p role="status">{fallbackMessage}</p> : null}
+        {fallback.active ? (
+          <p role="status">{fallbackMessage}</p>
+        ) : globeLoad === 'loading' ? (
+          <p role="status">{t('pages.explore.globeLoading')}</p>
+        ) : null}
 
         <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
           {stations.map((station) => (

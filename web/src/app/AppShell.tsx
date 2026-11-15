@@ -1,15 +1,32 @@
-// Shell de la aplicación (001 T016): marca, navegación principal y selector de idioma, todo traducido (RNF-03).
-import type { ReactNode } from "react";
+// Shell de la aplicación (001 T016, T039): enlace para saltar al contenido, marca, navegación principal, selector
+// de idioma y región de anuncios del cambio de página. Todo traducido (RNF-03) y operable con teclado (RNF-04).
+import type { MouseEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NavLink } from "./router";
+import { MAIN_CONTENT_ID } from "./useRouteFocus";
 import "./shell.css";
 
-export function AppShell({ children }: { children: ReactNode }) {
+type AppShellProps = {
+  children: ReactNode;
+  announcement?: string;
+};
+
+function skipToContent(event: MouseEvent<HTMLAnchorElement>) {
+  // Sin cambiar la URL (el hash no es una ruta): el foco pasa al <main>.
+  event.preventDefault();
+  document.getElementById(MAIN_CONTENT_ID)?.focus();
+}
+
+export function AppShell({ children, announcement = "" }: AppShellProps) {
   const { t } = useTranslation();
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href={`#${MAIN_CONTENT_ID}`} onClick={skipToContent}>
+        {t("app.skipToContent")}
+      </a>
+
       <header className="topbar">
         <div className="brand-block">
           <span className="brand-mark" aria-hidden="true">U</span>
@@ -29,7 +46,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         <LanguageSwitcher />
       </header>
 
-      <main id="contenido" className="page-shell">{children}</main>
+      <main id={MAIN_CONTENT_ID} className="page-shell" tabIndex={-1}>
+        {children}
+      </main>
+
+      <p className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
     </div>
   );
 }
