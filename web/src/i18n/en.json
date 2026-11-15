@@ -45,7 +45,7 @@
     },
     "station": {
       "title": "Station",
-      "evidence": "Evidence",
+      "area": "Area",
       "orbit": "Orbit",
       "source": "Source",
       "back": "Back to explorer"
@@ -60,6 +60,27 @@
       "incompatible-date": "Incompatible date",
       "error": "Error"
     },
+    "message": {
+      "loading": "Loading the publication…",
+      "available": "Result available",
+      "limited": "Limited data",
+      "no-data": "No published data",
+      "incompatible-date": "Date without compatible data",
+      "error": "The publication could not be read"
+    },
+    "reason": {
+      "station-not-found": "There is no publication for this station.",
+      "no-station-id": "The station identifier is missing.",
+      "load-failed": "The publication could not be loaded. Check your connection and try again.",
+      "no-compatible-date": "There is no compatible data for the chosen date."
+    },
     "retry": "Retry"
+  },
+  "evidence": {
+    "label": "Evidence mode",
+    "demoNotice": "Example data: not a result."
+  },
+  "values": {
+    "notReported": "Not reported"
   }
 }

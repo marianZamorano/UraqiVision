@@ -45,7 +45,7 @@
     },
     "station": {
       "title": "Estación",
-      "evidence": "Evidencia",
+      "area": "Superficie",
       "orbit": "Órbita",
       "source": "Fuente",
       "back": "Volver al explorador"
@@ -60,6 +60,27 @@
       "incompatible-date": "Fecha incompatible",
       "error": "Error"
     },
+    "message": {
+      "loading": "Cargando la publicación…",
+      "available": "Resultado disponible",
+      "limited": "Datos limitados",
+      "no-data": "Sin datos publicados",
+      "incompatible-date": "Fecha sin datos compatibles",
+      "error": "No se pudo leer la publicación"
+    },
+    "reason": {
+      "station-not-found": "No hay una publicación para esta estación.",
+      "no-station-id": "Falta el identificador de la estación.",
+      "load-failed": "La publicación no se pudo cargar. Comprueba tu conexión e inténtalo de nuevo.",
+      "no-compatible-date": "No hay datos compatibles para la fecha elegida."
+    },
     "retry": "Reintentar"
+  },
+  "evidence": {
+    "label": "Modo de evidencia",
+    "demoNotice": "Datos de ejemplo: no es un resultado."
+  },
+  "values": {
+    "notReported": "No reportada"
   }
 }

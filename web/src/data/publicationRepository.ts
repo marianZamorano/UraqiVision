@@ -55,18 +55,31 @@ export const demoStations: Record<string, PublishedStation> = {
   },
 }
 
-export async function fetchStation(stationId: string, signal?: AbortSignal): Promise<PublishedStation> {
-  await new Promise((resolve) => setTimeout(resolve, 200))
-
-  if (signal?.aborted) {
-    throw new DOMException('La solicitud fue cancelada.', 'AbortError')
+/** No existe una publicación para la estación pedida: es «sin datos» (RN-13), no un fallo de red. */
+export class StationNotFoundError extends Error {
+  constructor(readonly stationId: string) {
+    super(`No hay publicación para la estación ${stationId}`)
+    this.name = 'StationNotFoundError'
   }
+}
+
+const abortError = () => new DOMException('La solicitud fue cancelada.', 'AbortError')
+
+// Ejemplos en memoria con una espera breve hasta que T027 lea los archivos publicados (§17.3).
+// La cancelación corta la espera de inmediato (FR-022).
+export async function fetchStation(stationId: string, signal?: AbortSignal): Promise<PublishedStation> {
+  if (signal?.aborted) throw abortError()
+
+  await new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(resolve, 200)
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer)
+      reject(abortError())
+    }, { once: true })
+  })
 
   const station = demoStations[stationId]
-
-  if (!station) {
-    throw new Error(`Station ${stationId} not found`)
-  }
+  if (!station) throw new StationNotFoundError(stationId)
 
   return station
 }

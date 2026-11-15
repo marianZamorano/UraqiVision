@@ -1,7 +1,7 @@
 export type Language = 'es' | 'en'
 export type RouteName = 'home' | 'explore' | 'station' | 'method' | 'about'
 export type EvidenceMode = 'REAL' | 'DEMO'
-export type ViewStatus = 'loading' | 'available' | 'limited' | 'no-data' | 'incompatible-date' | 'error'
+export type ViewKind = 'loading' | 'available' | 'limited' | 'no-data' | 'incompatible-date' | 'error'
 
 export interface RouteState {
   route: RouteName
@@ -47,10 +47,15 @@ export interface PublishedStation {
   }
 }
 
+/**
+ * Los seis estados de RF-34, como en specs/001-base-web/contracts/view-state.ts (001 T007, T011).
+ * `reason` y `message` son claves de traducción (`states.reason.*`): el estado no guarda textos en un idioma, así
+ * que cambiar de idioma traduce sin alterarlo (FR-013, FR-014). 004 extiende la presentación, no este tipo.
+ */
 export type ViewState<T> =
-  | { status: 'loading'; language: Language; message: string }
-  | { status: 'available'; language: Language; message: string; data: T }
-  | { status: 'limited'; language: Language; message: string; reason: string; data?: T }
-  | { status: 'no-data'; language: Language; message: string; reason: string }
-  | { status: 'incompatible-date'; language: Language; message: string; reason: string }
-  | { status: 'error'; language: Language; message: string; reason: string; retry?: () => void }
+  | { kind: 'loading'; requestId: string }
+  | { kind: 'available'; data: T; evidenceMode: EvidenceMode }
+  | { kind: 'limited'; data: T; evidenceMode: EvidenceMode; reason: string }
+  | { kind: 'no-data'; reason: string }
+  | { kind: 'incompatible-date'; reason: string; availablePeriods: string[] }
+  | { kind: 'error'; message: string; retry: () => void }
