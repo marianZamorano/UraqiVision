@@ -20,11 +20,10 @@ test("recorre todos los destinos y la recarga conserva la estación", async ({ p
   await page.goBack();
   await expect(page.getByRole("heading", { level: 1, name: "Explorador" })).toBeVisible();
 
-  // Método y Acerca de se enlazan desde el pie de todas las páginas (#129, RF-15, RF-24).
-  const nav = page.getByRole("navigation", { name: "Más información" });
-  await nav.getByRole("link", { name: "Método" }).click();
+  // Método y Acerca de ya no están en la navegación (#131), pero sus rutas siguen abriendo (RF-15, RF-24).
+  await page.goto("/method");
   await expect(page.getByRole("heading", { level: 1, name: "Método" })).toBeVisible();
-  await nav.getByRole("link", { name: "Acerca de" }).click();
+  await page.goto("/about");
   await expect(page.getByRole("heading", { level: 1, name: "Acerca de" })).toBeVisible();
 
   expect(errores).toEqual([]);

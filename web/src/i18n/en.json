@@ -1,13 +1,11 @@
 {
   "app": {
     "title": "UraqiVision",
-    "subtitle": "Web base for station observation and validation.",
     "home": "Home",
     "exploreNav": "Explorer",
     "method": "Method",
     "about": "About",
     "mainNavigation": "Main navigation",
-    "footerNavigation": "More information",
     "loadingPage": "Loading the page…",
     "skipToContent": "Skip to content",
     "navigatedTo": "Page: {{page}}"

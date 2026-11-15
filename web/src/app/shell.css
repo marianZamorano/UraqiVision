@@ -13,7 +13,7 @@
   justify-content: space-between;
   gap: var(--espacio-3);
   padding: var(--espacio-3) var(--espacio-4);
-  border-bottom: 1px solid var(--color-borde);
+  /* Sin línea inferior (#131): el vidrio basta para separarla del contenido. */
   background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
   backdrop-filter: blur(var(--desenfoque-vidrio));
   position: sticky;
@@ -27,18 +27,10 @@
   gap: var(--espacio-2);
 }
 
-.brand-block strong,
-.brand-block small {
-  display: block;
-}
-
 .brand-block strong {
+  display: block;
   text-transform: uppercase;
   letter-spacing: var(--espaciado-letras-menu);
-}
-
-.brand-block small {
-  color: var(--color-texto-secundario);
 }
 
 /* Logo: órbita holográfica (SVG en AppShell.tsx), decorativo */
@@ -63,7 +55,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--espacio-1);
-  margin-inline: auto;
+  /* A la derecha, cerca del botón de idioma (#131). */
+  margin-inline-start: auto;
 }
 
 .main-nav a {
@@ -344,35 +337,16 @@
   outline: none;
 }
 
-/* Pie discreto con Método y Acerca de (RF-15, RF-24): la cabecera solo lleva Inicio y Explorador (#129). Por encima
-   de los fondos fijos (planeta de la portada, globo del explorador). */
-.site-footer {
-  position: relative;
-  z-index: 1;
-  padding: var(--espacio-3) var(--espacio-4) var(--espacio-4);
-  text-align: center;
-}
+/* Celular: marca e idioma en la primera fila; Inicio y Explorador debajo, alineados a la derecha (#131). */
+@media (max-width: 47.99rem) {
+  .topbar .language-switcher {
+    order: 2;
+    margin-inline-start: auto;
+  }
 
-.site-footer nav {
-  display: inline-flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--espacio-3);
-}
-
-.site-footer a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--objetivo-tactil-min);
-  color: var(--color-texto-secundario);
-  font-family: var(--fuente-menu);
-  font-size: 0.8rem;
-  letter-spacing: var(--espaciado-letras-menu);
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-.site-footer a:hover,
-.site-footer a.active {
-  color: var(--color-enlace);
+  .topbar .main-nav {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
 }
