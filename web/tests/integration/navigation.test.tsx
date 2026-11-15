@@ -11,6 +11,7 @@ function renderAt(path: string) {
 }
 
 const nav = () => within(screen.getByRole("navigation", { name: "Navegación principal" }));
+const footer = () => within(screen.getByRole("navigation", { name: "Más información" }));
 
 beforeEach(async () => {
   localStorage.clear();
@@ -18,6 +19,12 @@ beforeEach(async () => {
 });
 
 describe("navegación de la base web", () => {
+  it("la cabecera solo tiene Inicio y Explorador; Método y Acerca de van en el pie (#129, RF-15, RF-24)", () => {
+    renderAt("/");
+    expect(nav().getAllByRole("link").map((a) => a.textContent)).toEqual(["Inicio", "Explorador"]);
+    expect(footer().getAllByRole("link").map((a) => a.textContent)).toEqual(["Método", "Acerca de"]);
+  });
+
   it("desde la portada se llega a cada destino y ninguno queda vacío", async () => {
     renderAt("/");
 
@@ -28,10 +35,10 @@ describe("navegación de la base web", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Tarija" })).toBeInTheDocument();
     expect(window.location.pathname).toBe("/station/tarija");
 
-    fireEvent.click(nav().getByRole("link", { name: "Método" }));
+    fireEvent.click(footer().getByRole("link", { name: "Método" }));
     expect(screen.getByRole("heading", { level: 1, name: "Método" })).toBeInTheDocument();
 
-    fireEvent.click(nav().getByRole("link", { name: "Acerca de" }));
+    fireEvent.click(footer().getByRole("link", { name: "Acerca de" }));
     expect(screen.getByRole("heading", { level: 1, name: "Acerca de" })).toBeInTheDocument();
 
     fireEvent.click(nav().getByRole("link", { name: "Inicio" }));
@@ -56,7 +63,7 @@ describe("navegación de la base web", () => {
 
   it("atrás y adelante restauran el destino", async () => {
     renderAt("/");
-    fireEvent.click(nav().getByRole("link", { name: "Método" }));
+    fireEvent.click(footer().getByRole("link", { name: "Método" }));
     expect(screen.getByRole("heading", { level: 1, name: "Método" })).toBeInTheDocument();
 
     act(() => {
@@ -69,14 +76,14 @@ describe("navegación de la base web", () => {
 
   it("anuncia el cambio de página y actualiza el título del documento", async () => {
     renderAt("/");
-    fireEvent.click(nav().getByRole("link", { name: "Método" }));
+    fireEvent.click(footer().getByRole("link", { name: "Método" }));
 
     expect(await screen.findByText("Página: Método")).toBeInTheDocument();
     expect(document.title).toBe("Método · UraqiVision");
   });
 
-  it("marca la página actual en la navegación", () => {
+  it("marca la página actual en el pie", () => {
     renderAt("/about");
-    expect(nav().getByRole("link", { name: "Acerca de" })).toHaveAttribute("aria-current", "page");
+    expect(footer().getByRole("link", { name: "Acerca de" })).toHaveAttribute("aria-current", "page");
   });
 });
