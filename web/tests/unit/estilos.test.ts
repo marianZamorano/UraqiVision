@@ -50,12 +50,16 @@ describe("paleta y contraste por rol (RNF-04, WCAG 1.4.3 y 1.4.11)", () => {
     expect(contraste(token("color-texto-secundario"), token("color-superficie"))).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("los títulos en color de marca cumplen 4.5:1 sobre el fondo", () => {
-    expect(contraste(token("paleta-azul"), token("color-fondo"))).toBeGreaterThanOrEqual(4.5);
+  it("el texto principal es blanco sobre el cielo estrellado", () => {
+    expect(token("color-texto")).toBe("#ffffff");
   });
 
-  it("el texto del botón primario (fondo sobre marca) cumple 4.5:1", () => {
-    expect(contraste(token("color-fondo"), token("paleta-azul"))).toBeGreaterThanOrEqual(4.5);
+  it("los títulos en dorado cumplen 4.5:1 sobre el fondo", () => {
+    expect(contraste(token("color-titulo"), token("color-fondo"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("el texto del botón primario (texto inverso sobre oro) cumple 4.5:1", () => {
+    expect(contraste(token("color-texto-inverso"), token("paleta-oro"))).toBeGreaterThanOrEqual(4.5);
   });
 
   it("el rojo de acento nunca se usa como color de texto", () => {

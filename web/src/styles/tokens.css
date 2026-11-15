@@ -8,13 +8,6 @@
  * Nunca escribas colores, espaciados ni tipografías a mano en los componentes: usa estos tokens.
  */
 :root {
-  /* Superficie y texto */
-  --color-fondo: #ffffff;
-  --color-superficie: #f4f6fa;
-  --color-texto: #1b1b1b;
-  --color-texto-secundario: #4a4a4a;
-  --color-borde: #8a8a8a;
-
   /* Paleta inspirada en la NASA: 7 colores (propuesta de diseño, pendiente de aprobación del equipo) */
   --paleta-azul: #0b3d91;
   --paleta-rojo: #fc3d21;
@@ -24,14 +17,25 @@
   --paleta-plata: #c9d3e3;
   --paleta-humo: #f4f6fa;
 
-  /* Roles semánticos sobre la paleta */
+  /* Superficie y texto: tema oscuro de cielo estrellado */
+  --color-fondo: #0a1628;
+  --color-superficie: #14243f;
+  --color-texto: #ffffff;
+  --color-texto-secundario: #c9d3e3;
+  --color-texto-inverso: #0a1628;
+  --color-borde: #5d7196;
+  --color-titulo: #ffb81c;
   --color-marca: var(--paleta-azul);
   --color-acento: var(--paleta-rojo);
   --color-enlace: var(--paleta-cielo);
   --color-aviso: var(--paleta-oro);
 
+  /* Estrellas del fondo decorativo */
+  --color-estrella: #ffffff;
+  --color-estrella-tenue: #c9d3e3;
+
   /* Foco visible (RNF-04) */
-  --color-foco: #0b3d91;
+  --color-foco: #ffb81c;
   --foco-grosor: 3px;
   --foco-separacion: 2px;
 
@@ -56,12 +60,12 @@
   --texto-base: 1rem;
   --texto-titulo: clamp(1.5rem, 1.1rem + 2vw, 2.5rem);
   --texto-subtitulo: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
-  --ancho-pagina: 70rem;
-  --radio: 0.5rem;
   --interlineado: 1.5;
   --espacio-1: 0.25rem;
   --espacio-2: 0.5rem;
   --espacio-3: 1rem;
   --espacio-4: 1.5rem;
+  --ancho-pagina: 70rem;
+  --radio: 0.5rem;
   --objetivo-tactil-min: 24px; /* WCAG 2.5.8 */
 }
