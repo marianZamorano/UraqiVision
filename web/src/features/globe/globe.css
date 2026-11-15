@@ -178,7 +178,8 @@ html.globe-pointer body {
   border-radius: var(--radio);
 }
 
-/* La navegación muestra solo los puntos: el nombre de cada sección es su nombre accesible y su tooltip (title). */
+/* Celular: el panel abajo de cada sección y la navegación solo con puntos (el nombre es su nombre accesible y su
+   tooltip). En escritorio el nombre se ve junto al punto; el globo descuenta ese ancho al encuadrar. */
 .explore-tour--globe .tour-section {
   align-items: end;
 }
@@ -232,4 +233,12 @@ html.globe-pointer body {
     align-items: center;
   }
 
+  .tour-nav__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    text-shadow: 0 0 6px var(--paleta-negro-azulado);
+  }
 }

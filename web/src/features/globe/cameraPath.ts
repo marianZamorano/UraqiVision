@@ -23,7 +23,7 @@ export type TourSection = (typeof TOUR_SECTIONS)[number];
 export const KEYFRAMES: Record<TourSection, CameraPose> = {
   earth: { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], range: 20_000_000, heading: 0, pitch: -90 },
   southAmerica: { longitude: -61, latitude: -19, range: 8_000_000, heading: 0, pitch: -88 },
-  bolivia: { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], range: 2_700_000, heading: 0, pitch: -75 },
+  bolivia: { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], range: 2_900_000, heading: 0, pitch: -75 },
 };
 
 const POSES = TOUR_SECTIONS.map((section) => KEYFRAMES[section]);
