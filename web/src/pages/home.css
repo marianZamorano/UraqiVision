@@ -10,10 +10,11 @@
 }
 
 /* --- Cabecera y fondo de la portada sin desvanecido (#131) ---
-   Sin el vidrio de la cabecera ni el resplandor violeta de arriba: el cielo sigue limpio hasta el borde. La cabecera
+   Sin el vidrio de la cabecera, su línea inferior ni el resplandor violeta de arriba: el cielo sigue limpio hasta el borde. La cabecera
    no se queda fija en la portada, así el contenido nunca pasa por debajo de ella al desplazarse. */
 .app-shell:has(.home) .topbar {
   position: relative;
+  border-bottom: 0;
   background: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
