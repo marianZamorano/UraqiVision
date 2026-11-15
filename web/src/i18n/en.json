@@ -35,12 +35,38 @@
       "globeLoading": "Preparing the 3D globe… Meanwhile, you can use the station list.",
       "globeLabel": "3D globe of Bolivia",
       "boliviaMarker": "Bolivia",
-      "globeHint": "Click Bolivia on the globe or use the button.",
-      "goToBolivia": "Go to Bolivia",
-      "backToBolivia": "Back to Bolivia",
-      "viewEarth": "View the whole Earth",
-      "announceBolivia": "Globe view: Bolivia framed",
-      "announceEarth": "Globe view: the whole Earth"
+      "stationMarker": "San Ignacio de Velasco",
+      "tour": {
+        "nav": "Tour sections",
+        "hint": "Scroll to travel to the station. You can also click the markers on the globe.",
+        "earth": {
+          "nav": "Earth",
+          "eyebrow": "NISAR · L-band radar",
+          "body": "NISAR, the NASA–ISRO radar mission, observes the whole Earth every 12 days in L-band, seeing through smoke and clouds."
+        },
+        "southAmerica": {
+          "nav": "South America",
+          "eyebrow": "2026 fire season",
+          "title": "The 2026 fires",
+          "body": "In Bolivia, the 2026 fires affected 1.25 million hectares up to 11 October; in 2024 they exceeded 10 million.",
+          "source": "Source: Vice Ministry of Civil Defence, via Correo del Sur (27 Oct 2026)."
+        },
+        "bolivia": {
+          "nav": "Bolivia",
+          "eyebrow": "Bolivia · Santa Cruz",
+          "title": "San Ignacio de Velasco",
+          "body": "On 21 July 2026, San Ignacio de Velasco was the municipality with the most heat spots in the country: 735 of 2,835.",
+          "source": "Source: SIMB, via eju.tv (21 Jul 2026)."
+        },
+        "station": {
+          "nav": "Chiquitania",
+          "eyebrow": "Station · Chiquitania",
+          "title": "Two questions",
+          "body": "The San Ignacio de Velasco station answers two questions:",
+          "q1": "Where and when did the fire burn?",
+          "q2": "Burning or clearing?"
+        }
+      }
     },
     "method": {
       "title": "Method",

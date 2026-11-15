@@ -23,14 +23,16 @@ export const BOLIVIA_CENTER = [
   (BOLIVIA_RECTANGLE[1] + BOLIVIA_RECTANGLE[3]) / 2,
 ] as const;
 
-/** Vista de entrada (#115): la Tierra entera con Bolivia al frente. Altura de la cámara en metros. */
-export const EARTH_VIEW = { longitude: BOLIVIA_CENTER[0], latitude: BOLIVIA_CENTER[1], height: 20_000_000 } as const;
+/**
+ * Centro del recorte provisional de la estación San Ignacio de Velasco (caja de UraqiVisionBack
+ * pipeline_beta/config/aoi.yaml: oeste -61.20, sur -16.60, este -60.72, norte -16.14). DP-08 sigue pendiente: si el
+ * recorte cambia, cambia este punto.
+ */
+export const SAN_IGNACIO_CENTER = [(-61.2 + -60.72) / 2, (-16.6 + -16.14) / 2] as const;
 
-/** Duración del vuelo de cámara (RF-25); con movimiento reducido el cambio es instantáneo (RNF-12). */
-export const FLIGHT_SECONDS = 2.5;
-
-/** Destino de la cámara del globo: la Tierra entera o Bolivia encuadrada. */
-export type GlobeTarget = "earth" | "bolivia";
-
-/** Pedido de vuelo: `seq` cambia en cada pedido, así «Volver a Bolivia» funciona aunque ya se esté en Bolivia. */
-export type GlobeFlight = { target: GlobeTarget; seq: number };
+/**
+ * Hora fija del amanecer cinematográfico (#121): ~07:30 de hora solar en Bolivia (11:30 UTC). El Sol ya ilumina
+ * Bolivia y la línea entre el día y la noche cruza el Pacífico, con el brillo cálido en el horizonte. El reloj
+ * no avanza: la luz no cambia mientras se navega.
+ */
+export const SUNRISE_TIME_ISO = "2026-09-01T11:30:00Z";

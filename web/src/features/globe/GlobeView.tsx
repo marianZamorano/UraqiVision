@@ -1,32 +1,39 @@
-// #115 (RF-02, RF-25, RF-28, RF-30, DP-07, RNF-06, RNF-11, RNF-12): globo 3D con CesiumJS como fondo fijo y
-// transparente del explorador. Recibe el módulo ya cargado de forma diferida (la portada no lo descarga, RNF-01).
-// Con ion: World Terrain (asset 1) e imágenes Bing (asset 2); sin ion: NaturalEarthII incluida en CesiumJS.
-// - Fondo: el contenedor no recibe eventos (no bloquea el desplazamiento); el clic en el marcador «Bolivia» se
-//   detecta desde el documento, salvo sobre contenido interactivo o el panel ([data-globe-overlay]).
-// - Entrada desde la Tierra entera (decisión de Joaco, 14 nov 2026; RF-02 pide iniciar con Bolivia encuadrada, se
-//   avisa al equipo). El vuelo respeta el movimiento reducido (RNF-12).
-// - Sin cielo ni Sol ni Luna, atmósfera en tonos fríos y sin iluminación solar: el planeta flota sobre el fondo
-//   estrellado de la página. Las imágenes de satélite no se recolorean: son datos.
-// - Los créditos de los proveedores los muestra el propio visor y siguen siendo clicables (RNF-11).
+// #115, #121 (RF-02, RF-25, RF-30, DP-07, RNF-06, RNF-11, RNF-12): globo 3D con CesiumJS como fondo fijo y
+// transparente del recorrido del explorador. Recibe el módulo ya cargado de forma diferida (la portada no lo
+// descarga, RNF-01). Con ion: World Terrain (asset 1) e imágenes Bing (asset 2); sin ion: NaturalEarthII.
+// - Visor limpio: sin widgets ni controles de ratón. La cámara la mueven solo el scroll (cameraPath.ts, con
+//   aceleración y amortiguación), la navegación por secciones y el clic en los marcadores. Con movimiento reducido
+//   salta a la vista de la sección activa, sin interpolación (RNF-12).
+// - Fondo: el contenedor no recibe eventos (no bloquea el desplazamiento); el clic en un marcador se detecta desde
+//   el documento, salvo sobre contenido interactivo o paneles ([data-globe-overlay]).
+// - Amanecer sutil: luz solar real a una hora fija (globeConfig.ts), con el brillo cálido solo en el horizonte de la
+//   atmósfera; sin cielo, Sol ni Luna dibujados. Las imágenes de satélite no se recolorean: son datos.
+// - Modelos glTF locales opcionales (localModels.ts). Los créditos los muestra el visor y son clicables (RNF-11).
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { BOLIVIA_CENTER, BOLIVIA_RECTANGLE, EARTH_VIEW, FLIGHT_SECONDS, type GlobeConfig, type GlobeFlight, type GlobeTarget } from "./globeConfig";
+import { dampPose, poseAt, poseDistance, type CameraPose, type TourSection } from "./cameraPath";
+import { BOLIVIA_CENTER, SAN_IGNACIO_CENTER, SUNRISE_TIME_ISO, type GlobeConfig } from "./globeConfig";
+import { addLocalModels, ORBITAL_MODELS } from "./localModels";
+import type { ProgressStore } from "./scrollProgress";
 import "./globe.css";
 
 export type CesiumModule = typeof import("cesium");
 type Viewer = InstanceType<CesiumModule["Viewer"]>;
 type Entity = InstanceType<CesiumModule["Entity"]>;
 
+export type MarkerLabels = { bolivia: string; station: string };
+
 type GlobeViewProps = {
   cesium: CesiumModule;
   config: GlobeConfig;
   label: string;
-  /** Texto del marcador de Bolivia en el idioma activo (RNF-03). */
-  boliviaLabel: string;
-  flight: GlobeFlight;
+  /** Textos de los marcadores en el idioma activo (RNF-03). */
+  markerLabels: MarkerLabels;
+  /** Progreso del recorrido (scroll); el globo lo lee en cada fotograma. */
+  progress: ProgressStore;
   reducedMotion: boolean;
-  onSelectBolivia: () => void;
+  onSelectSection: (section: TourSection) => void;
   onReady: () => void;
   onError: () => void;
 };
@@ -34,41 +41,79 @@ type GlobeViewProps = {
 /** Contenido que tapa al globo: un clic ahí nunca se interpreta como clic en el globo. */
 const OVERLAY_SELECTOR = "a, button, input, select, textarea, label, summary, [role='button'], [data-globe-overlay], .topbar";
 
+/** Distancia de la cámara (m) a la que el marcador de Bolivia cede su lugar al de la estación. */
+const MARKER_SWAP_DISTANCE = 2_800_000;
+
+/** Cuándo la cámara ya llegó: por debajo de esto se deja de dibujar (requestRenderMode). */
+const ARRIVED = 1e-4;
+
 /** Color de un token de diseño (§20.2): los colores no se escriben a mano en los componentes. */
 function tokenColor(C: CesiumModule, element: Element, token: string, fallback: InstanceType<CesiumModule["Color"]>) {
   const value = getComputedStyle(element).getPropertyValue(token).trim();
   return (value && C.Color.fromCssColorString(value)) || fallback;
 }
 
-function destinationFor(C: CesiumModule, target: GlobeTarget) {
-  return target === "bolivia"
-    ? C.Rectangle.fromDegrees(...BOLIVIA_RECTANGLE)
-    : C.Cartesian3.fromDegrees(EARTH_VIEW.longitude, EARTH_VIEW.latitude, EARTH_VIEW.height);
-}
-
-/** Atmósfera fría y sin efectos cálidos (Sol, Luna, atardecer en el terminador). */
-function applyColdLook(C: CesiumModule, viewer: Viewer, element: Element) {
+/** Amanecer sutil (#121): luz del Sol a una hora fija y atmósfera iluminada por él; fondo transparente. */
+function applySunrise(C: CesiumModule, viewer: Viewer, element: Element) {
   const scene = viewer.scene;
   scene.backgroundColor = C.Color.TRANSPARENT;
+  viewer.clock.currentTime = C.JulianDate.fromIso8601(SUNRISE_TIME_ISO);
+  viewer.clock.shouldAnimate = false;
   if (scene.sun) scene.sun.show = false;
   if (scene.moon) scene.moon.show = false;
-  if (scene.skyAtmosphere) {
-    scene.skyAtmosphere.hueShift = 0.02;
-    scene.skyAtmosphere.saturationShift = -0.2;
-    scene.skyAtmosphere.brightnessShift = 0.15;
-  }
-  scene.globe.enableLighting = false;
-  scene.globe.dynamicAtmosphereLighting = false;
-  scene.globe.baseColor = tokenColor(C, element, "--paleta-azul-electrico", C.Color.BLUE); // visible mientras llegan las imágenes
+  scene.globe.enableLighting = true;
+  scene.globe.dynamicAtmosphereLighting = true;
+  scene.globe.dynamicAtmosphereLightingFromSun = true;
+  // La sombra del día y la noche se ve a escala continental y se desvanece al acercarse a la estación.
+  scene.globe.lightingFadeOutDistance = 4_000_000;
+  scene.globe.lightingFadeInDistance = 12_000_000;
+  scene.globe.baseColor = tokenColor(C, element, "--paleta-azul-electrico", C.Color.BLUE); // mientras llegan las imágenes
+  scene.screenSpaceCameraController.enableInputs = false;
+}
+
+function marker(
+  C: CesiumModule,
+  element: Element,
+  id: string,
+  [longitude, latitude]: readonly [number, number],
+  text: string,
+  visibleBetween: [number, number],
+) {
+  const visible = new C.DistanceDisplayCondition(visibleBetween[0], visibleBetween[1]);
+  return {
+    id,
+    position: C.Cartesian3.fromDegrees(longitude, latitude),
+    point: {
+      pixelSize: 14,
+      color: tokenColor(C, element, "--color-acento", C.Color.WHITE),
+      outlineColor: tokenColor(C, element, "--paleta-blanco", C.Color.WHITE),
+      outlineWidth: 2,
+      heightReference: C.HeightReference.CLAMP_TO_GROUND,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      distanceDisplayCondition: visible,
+    },
+    label: {
+      text,
+      font: "600 18px system-ui, sans-serif",
+      fillColor: tokenColor(C, element, "--paleta-blanco", C.Color.WHITE),
+      outlineColor: tokenColor(C, element, "--paleta-negro-azulado", C.Color.BLACK),
+      outlineWidth: 4,
+      style: C.LabelStyle.FILL_AND_OUTLINE,
+      pixelOffset: new C.Cartesian2(0, -26),
+      heightReference: C.HeightReference.CLAMP_TO_GROUND,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      distanceDisplayCondition: visible,
+    },
+  };
 }
 
 export function GlobeView(props: GlobeViewProps) {
-  const { cesium, config, label, boliviaLabel, flight, reducedMotion } = props;
+  const { cesium, config, label, markerLabels, reducedMotion } = props;
   const container = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | undefined>(undefined);
-  const markerRef = useRef<Entity | undefined>(undefined);
-  const handledSeq = useRef<number | null>(null);
-  // Lo que el visor necesita leer sin recrearse: callbacks, vuelo inicial y texto del marcador.
+  const markersRef = useRef<Partial<Record<TourSection, Entity>>>({});
+  const wakeRef = useRef<() => void>(() => undefined);
+  // Lo que el visor necesita leer sin recrearse: callbacks, progreso, movimiento reducido y textos.
   const latest = useRef(props);
   useEffect(() => {
     latest.current = props;
@@ -115,64 +160,93 @@ export function GlobeView(props: GlobeViewProps) {
         animation: false,
         sceneModePicker: false,
         navigationHelpButton: false,
+        navigationInstructionsInitiallyVisible: false,
         homeButton: false,
         fullscreenButton: false,
+        vrButton: false,
         infoBox: false,
         selectionIndicator: false,
+        projectionPicker: false,
         skyBox: false,
         contextOptions: { webgl: { alpha: true } },
         requestRenderMode: true,
         maximumRenderTimeChange: Infinity,
       });
       const v = viewer;
-      applyColdLook(C, v, element);
+      applySunrise(C, v, element);
 
-      // Vista inicial sin animación: la del pedido vigente (la Tierra entera al entrar).
-      const initial = latest.current.flight;
-      v.camera.setView({ destination: destinationFor(C, initial.target) });
-      handledSeq.current = initial.seq;
+      // Cámara: mira a un punto del suelo con rumbo, inclinación y distancia, y luego se suelta del punto.
+      const applyPose = (pose: CameraPose) => {
+        v.camera.lookAt(
+          C.Cartesian3.fromDegrees(pose.longitude, pose.latitude),
+          new C.HeadingPitchRange(C.Math.toRadians(pose.heading), C.Math.toRadians(pose.pitch), pose.range),
+        );
+        v.camera.lookAtTransform(C.Matrix4.IDENTITY);
+      };
+      const targetPose = () => {
+        const p = latest.current.progress.get();
+        return poseAt(latest.current.reducedMotion ? Math.round(p) : p);
+      };
+      let current = targetPose();
+      applyPose(current);
 
-      const marker = v.entities.add({
-        id: "bolivia",
-        position: C.Cartesian3.fromDegrees(BOLIVIA_CENTER[0], BOLIVIA_CENTER[1]),
-        point: {
-          pixelSize: 14,
-          color: tokenColor(C, element, "--color-acento", C.Color.WHITE),
-          outlineColor: tokenColor(C, element, "--paleta-blanco", C.Color.WHITE),
-          outlineWidth: 2,
-          heightReference: C.HeightReference.CLAMP_TO_GROUND,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        },
-        label: {
-          text: latest.current.boliviaLabel,
-          font: "600 18px system-ui, sans-serif",
-          fillColor: tokenColor(C, element, "--paleta-blanco", C.Color.WHITE),
-          outlineColor: tokenColor(C, element, "--paleta-negro-azulado", C.Color.BLACK),
-          outlineWidth: 4,
-          style: C.LabelStyle.FILL_AND_OUTLINE,
-          pixelOffset: new C.Cartesian2(0, -26),
-          heightReference: C.HeightReference.CLAMP_TO_GROUND,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        },
+      // Bucle de fotogramas solo mientras la cámara se mueve; se despierta con cada cambio de progreso.
+      let frame = 0;
+      let last = 0;
+      const tick = (now: number) => {
+        frame = 0;
+        if (v.isDestroyed()) return;
+        const target = targetPose();
+        if (latest.current.reducedMotion) current = target;
+        else current = dampPose(current, target, last ? Math.min((now - last) / 1000, 0.1) : 1 / 60);
+        const arrived = poseDistance(current, target) <= ARRIVED;
+        if (arrived) current = target; // encaja exacto al llegar
+        last = arrived ? 0 : now;
+        applyPose(current);
+        v.scene.requestRender();
+        if (!arrived) frame = requestAnimationFrame(tick);
+      };
+      const wake = () => {
+        if (!frame) frame = requestAnimationFrame(tick);
+      };
+      wakeRef.current = wake;
+      cleanups.push(latest.current.progress.subscribe(wake));
+      cleanups.push(() => {
+        cancelAnimationFrame(frame);
+        wakeRef.current = () => undefined;
       });
-      markerRef.current = marker;
+
+      // Marcadores: Bolivia de lejos y San Ignacio de Velasco al acercarse; se relevan a la misma distancia para no
+      // superponerse (en la sección de Bolivia ya se ve la estación, que es su título).
+      markersRef.current = {
+        bolivia: v.entities.add(
+          marker(C, element, "bolivia", BOLIVIA_CENTER, latest.current.markerLabels.bolivia, [MARKER_SWAP_DISTANCE, Number.POSITIVE_INFINITY]),
+        ),
+        station: v.entities.add(
+          marker(C, element, "station", SAN_IGNACIO_CENTER, latest.current.markerLabels.station, [0, MARKER_SWAP_DISTANCE]),
+        ),
+      };
 
       // El contenedor no recibe eventos (fondo): el clic y el puntero se leen del documento (RF-25).
-      const isMarkerAt = (event: MouseEvent) => {
+      const sectionAt = (event: MouseEvent): TourSection | null => {
         const target = event.target;
-        if (target instanceof Element && target.closest(OVERLAY_SELECTOR)) return false;
+        if (target instanceof Element && target.closest(OVERLAY_SELECTOR)) return null;
         const rect = v.canvas.getBoundingClientRect();
         const picked: unknown = v.scene.pick(new C.Cartesian2(event.clientX - rect.left, event.clientY - rect.top));
-        return typeof picked === "object" && picked !== null && (picked as { id?: unknown }).id === marker;
+        const entity = typeof picked === "object" && picked !== null ? (picked as { id?: unknown }).id : undefined;
+        if (entity && entity === markersRef.current.bolivia) return "bolivia";
+        if (entity && entity === markersRef.current.station) return "station";
+        return null;
       };
       const onClick = (event: MouseEvent) => {
-        if (isMarkerAt(event)) latest.current.onSelectBolivia();
+        const section = sectionAt(event);
+        if (section) latest.current.onSelectSection(section);
       };
-      let frame = 0;
+      let pointerFrame = 0;
       const onMove = (event: MouseEvent) => {
-        cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          document.documentElement.classList.toggle("globe-pointer", isMarkerAt(event));
+        cancelAnimationFrame(pointerFrame);
+        pointerFrame = requestAnimationFrame(() => {
+          document.documentElement.classList.toggle("globe-pointer", sectionAt(event) !== null);
         });
       };
       document.addEventListener("click", onClick);
@@ -180,7 +254,7 @@ export function GlobeView(props: GlobeViewProps) {
       cleanups.push(() => {
         document.removeEventListener("click", onClick);
         document.removeEventListener("mousemove", onMove);
-        cancelAnimationFrame(frame);
+        cancelAnimationFrame(pointerFrame);
         document.documentElement.classList.remove("globe-pointer");
       });
 
@@ -198,6 +272,8 @@ export function GlobeView(props: GlobeViewProps) {
         cleanups.push(() => observer.disconnect());
       }
 
+      void addLocalModels(C, v, ORBITAL_MODELS);
+
       viewerRef.current = v;
       latest.current.onReady();
     } catch {
@@ -207,32 +283,25 @@ export function GlobeView(props: GlobeViewProps) {
     return () => {
       for (const cleanup of cleanups) cleanup();
       viewerRef.current = undefined;
-      markerRef.current = undefined;
+      markersRef.current = {};
       if (viewer && !viewer.isDestroyed()) viewer.destroy();
     };
     // El visor solo se recrea si cambia el módulo, el modo o el token (no en cada render). Los assets de ion son fijos
     // (1 y 2, DP-07), así que `config` no hace falta como dependencia.
   }, [cesium, mode, token]);
 
-  // Vuelo pedido (RF-25): solo cuando llega un pedido nuevo; con movimiento reducido es instantáneo (RNF-12).
+  // Si el movimiento reducido cambia a mitad del recorrido, la cámara se recoloca (RNF-12).
   useEffect(() => {
-    const viewer = viewerRef.current;
-    if (!viewer || handledSeq.current === flight.seq) return;
-    handledSeq.current = flight.seq;
-    const destination = destinationFor(cesium, flight.target);
-    viewer.camera.cancelFlight();
-    if (reducedMotion) viewer.camera.setView({ destination });
-    else viewer.camera.flyTo({ destination, duration: FLIGHT_SECONDS });
-    viewer.scene.requestRender();
-  }, [cesium, flight, reducedMotion]);
+    wakeRef.current();
+  }, [reducedMotion]);
 
-  // El marcador cambia de idioma con la interfaz (RNF-03).
+  // Los marcadores cambian de idioma con la interfaz (RNF-03).
   useEffect(() => {
-    const marker = markerRef.current;
-    if (!marker?.label) return;
-    marker.label.text = new cesium.ConstantProperty(boliviaLabel);
+    const { bolivia, station } = markersRef.current;
+    if (bolivia?.label) bolivia.label.text = new cesium.ConstantProperty(markerLabels.bolivia);
+    if (station?.label) station.label.text = new cesium.ConstantProperty(markerLabels.station);
     viewerRef.current?.scene.requestRender();
-  }, [cesium, boliviaLabel]);
+  }, [cesium, markerLabels.bolivia, markerLabels.station]);
 
   return createPortal(
     <div ref={container} id="cesiumContainer" className="globe-view" role="region" aria-label={label} />,
