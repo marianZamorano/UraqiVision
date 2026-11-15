@@ -25,85 +25,201 @@
   max-height: 100vh;
 }
 
+/* Visor limpio (#121): contenedores de widgets que Cesium crea aunque estén vacíos. */
+#cesiumContainer .cesium-viewer-toolbar,
+#cesiumContainer .cesium-viewer-animationContainer,
+#cesiumContainer .cesium-viewer-timelineContainer,
+#cesiumContainer .cesium-viewer-fullscreenContainer {
+  display: none;
+}
+
 /* Créditos de los proveedores (RNF-11): siguen visibles y clicables aunque el fondo no reciba eventos. */
 #cesiumContainer .cesium-viewer-bottom {
   pointer-events: auto;
 }
 
-/* Puntero de mano al pasar sobre el marcador de Bolivia (la clase la pone GlobeView). */
+/* Puntero de mano al pasar sobre un marcador (la clase la pone GlobeView). */
 html.globe-pointer,
 html.globe-pointer body {
   cursor: pointer;
 }
 
-/* El contenido del explorador va por encima del globo. */
-.explore-page {
+/* Recorrido del explorador (#121): secciones de una pantalla de alto sobre el globo. El contenido va por encima. */
+.explore-tour {
   position: relative;
   z-index: 1;
 }
 
-.globe-controls {
-  display: flex;
-  flex-wrap: wrap;
+.tour-section {
+  display: grid;
   align-items: center;
-  gap: var(--espacio-2);
-  margin: var(--espacio-3) 0;
+  justify-items: start;
+  min-height: 100dvh;
+  padding-block: var(--espacio-4);
 }
 
-.globe-controls p {
-  flex-basis: 100%;
+/* Vidrio profundo, sin bordes ni líneas rígidas: desenfoque doble y sombra volumétrica en tonos espaciales. */
+.tour-panel {
+  width: min(28rem, 100%);
+  padding: calc(var(--espacio-4) * 1.25);
+  border: 0;
+  border-radius: calc(var(--radio) * 1.5);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-fuerte), transparent);
+  backdrop-filter: blur(calc(var(--desenfoque-vidrio) * 2)) saturate(140%);
+  -webkit-backdrop-filter: blur(calc(var(--desenfoque-vidrio) * 2)) saturate(140%);
+  box-shadow:
+    0 30px 80px -30px color-mix(in srgb, var(--paleta-negro-azulado) 90%, transparent),
+    0 0 60px -10px color-mix(in srgb, var(--paleta-hielo) 18%, transparent);
+}
+
+/* Jerarquía: antetítulo → título → texto principal → fuente. */
+.tour-eyebrow {
+  margin: 0 0 var(--espacio-2);
+  color: var(--color-acento);
+  font-family: var(--fuente-menu);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: var(--espaciado-letras-menu);
+}
+
+.tour-panel h1,
+.tour-panel h2 {
+  margin: 0 0 var(--espacio-3);
+  color: var(--color-titulo);
+  font-family: var(--fuente-titulo);
+  font-size: var(--texto-titulo);
+  letter-spacing: var(--espaciado-letras-titulo);
+  line-height: 1.15;
+}
+
+.tour-lead {
+  margin: 0 0 var(--espacio-3);
+  font-size: var(--texto-subtitulo);
+  line-height: 1.45;
+}
+
+.tour-source,
+.tour-hint {
   margin: 0;
   color: var(--color-texto-secundario);
+  font-size: 0.875rem;
 }
 
-.globe-controls button {
+.tour-questions {
+  margin: 0 0 var(--espacio-3);
+  padding-inline-start: var(--espacio-4);
+  font-family: var(--fuente-menu);
+  font-size: var(--texto-subtitulo);
+}
+
+/* Navegación del recorrido: puntos a la derecha, con su nombre visible en escritorio (operable con teclado).
+   Sticky y no fixed: la animación de entrada de <main> (transform) haría que fixed se midiera contra <main>. La
+   franja no ocupa alto; la lista queda centrada en la ventana. */
+.tour-nav {
+  position: sticky;
+  top: 50vh;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  height: 0;
+}
+
+.tour-nav ol {
+  transform: translateY(-50%);
+  display: grid;
+  gap: var(--espacio-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tour-nav button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espacio-2);
+  width: 100%;
+  min-width: var(--objetivo-tactil-min);
   min-height: var(--objetivo-tactil-min);
-  padding: var(--espacio-1) var(--espacio-3);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio);
-  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-fuerte), transparent);
-  color: var(--color-texto);
+  padding: var(--espacio-1);
+  border: 0;
+  background: transparent;
+  color: var(--color-texto-secundario);
   font: inherit;
+  font-family: var(--fuente-menu);
+  font-size: 0.8rem;
+  letter-spacing: var(--espaciado-letras-menu);
+  text-transform: uppercase;
   cursor: pointer;
 }
 
-.globe-controls button:focus-visible {
+.tour-nav__dot {
+  order: 2;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--paleta-blanco) 45%, transparent);
+  transition: transform var(--duracion-corta) ease, background-color var(--duracion-corta) ease;
+}
+
+.tour-nav button[aria-current="step"] {
+  color: var(--color-texto);
+}
+
+.tour-nav button[aria-current="step"] .tour-nav__dot {
+  background: var(--color-acento);
+  box-shadow: var(--resplandor);
+  transform: scale(1.4);
+}
+
+.tour-nav button:focus-visible {
   outline: var(--foco-grosor) solid var(--color-foco);
   outline-offset: var(--foco-separacion);
+  border-radius: var(--radio);
 }
 
-/* Sobre el planeta, el vidrio más opaco del diseño mantiene el contraste del texto (RNF-04). */
-.explore-page--globe .panel {
-  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-fuerte), transparent);
+/* Móvil (hasta 599 px): el globo arriba y el panel abajo en cada sección; la navegación queda en puntos. */
+.explore-tour--globe .tour-section {
+  align-items: end;
 }
 
-/* Móvil (hasta 599 px): el globo se ve primero; el panel sube por encima al desplazarse. */
-.explore-page--globe {
-  padding-top: 55dvh;
+.tour-nav__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-/* Tableta (600–768 px): menos espacio inicial, el panel ocupa el ancho de la página. */
+/* Tableta (600–768 px): el panel más ancho y centrado verticalmente en su sección. */
 @media (min-width: 600px) and (max-width: 768px) {
-  .explore-page--globe {
-    padding-top: 45dvh;
+  .explore-tour--globe .tour-section {
+    align-items: center;
+  }
+
+  .tour-panel {
+    width: min(32rem, 100%);
   }
 }
 
-/* Escritorio (más de 768 px): el globo nunca baja de media pantalla y el panel va a la izquierda, sin tapar el
-   centro donde está Bolivia. */
+/* Escritorio (más de 768 px): el globo nunca baja de media pantalla, el panel a la izquierda sin tapar el centro y
+   la navegación con su nombre visible. */
 @media (min-width: 769px) {
   #cesiumContainer.globe-view {
     min-height: 50vh;
   }
 
-  .explore-page--globe {
-    padding-top: 0;
-    justify-items: start;
+  .explore-tour--globe .tour-section {
+    align-items: center;
   }
 
-  .explore-page--globe .panel {
-    width: min(26rem, 100%);
-    max-height: calc(100dvh - 10rem);
-    overflow-y: auto;
+  .tour-nav__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
   }
 }

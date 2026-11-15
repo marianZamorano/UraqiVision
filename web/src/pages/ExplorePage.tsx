@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from '../app/router'
 import { serializeRoute } from '../app/routeState'
 import { useReducedMotion } from '../app/useReducedMotion'
@@ -8,14 +8,19 @@ import { useTranslation } from 'react-i18next'
 import { GlobeAttribution } from '../features/globe/GlobeAttribution'
 import { hasWebGLSupport, resolveGlobeProvider } from '../features/globe/GlobeProvider'
 import { GlobeView, type CesiumModule } from '../features/globe/GlobeView'
+import { TOUR_SECTIONS, type TourSection } from '../features/globe/cameraPath'
 import { resolveFallbackProvider } from '../features/globe/fallbackProvider'
-import { globeConfigFor, type GlobeFlight, type GlobeTarget } from '../features/globe/globeConfig'
+import { globeConfigFor } from '../features/globe/globeConfig'
 import { readPublicIonToken } from '../features/globe/ionProvider'
 import { loadCesiumModule, loadGlobeModule } from '../features/globe/lazyGlobe'
+import { useTourProgress } from '../features/globe/scrollProgress'
 
 type ExplorePageProps = {
   lang: Language
 }
+
+/** Secciones con un dato y su fuente (§4.2 del documento maestro). */
+const SOURCED: ReadonlySet<TourSection> = new Set(['southAmerica', 'bolivia'])
 
 export function ExplorePage({ lang }: ExplorePageProps) {
   const { t } = useTranslation()
@@ -31,12 +36,20 @@ export function ExplorePage({ lang }: ExplorePageProps) {
   const loadFailed = globeLoad === 'failed'
   const onGlobeReady = useCallback(() => setGlobeLoad('ready'), [])
   const onGlobeError = useCallback(() => setGlobeLoad('failed'), [])
-  // #115 (RF-25, RF-28, RNF-12): se entra viendo la Tierra entera; el clic en Bolivia o los botones piden un vuelo.
+
+  // #121 (RF-25, RNF-12): recorrido por secciones; el scroll mueve la cámara del globo.
   const reducedMotion = useReducedMotion()
-  const [flight, setFlight] = useState<GlobeFlight>({ target: 'earth', seq: 0 })
-  const flyTo = useCallback((target: GlobeTarget) => setFlight((f) => ({ target, seq: f.seq + 1 })), [])
-  const onSelectBolivia = useCallback(() => flyTo('bolivia'), [flyTo])
-  const atBolivia = flight.target === 'bolivia'
+  const sectionRefs = useRef<Array<HTMLElement | null>>([])
+  const { store: progress, active } = useTourProgress(sectionRefs)
+  const goTo = useCallback((section: TourSection) => {
+    const element = sectionRefs.current[TOUR_SECTIONS.indexOf(section)]
+    element?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
+  }, [reducedMotion])
+  const markerLabels = useMemo(
+    () => ({ bolivia: t('pages.explore.boliviaMarker'), station: t('pages.explore.stationMarker') }),
+    [t],
+  )
+
   // Versión beta (#110): estaciones publicadas por el backend; los ejemplos DEMO solo si no hay backend (RN-04).
   // Con backend, la lista empieza vacía para no mostrar un instante ejemplos que después desaparecen.
   const [stations, setStations] = useState<StationSummary[]>(() => (usesPublishedApi ? [] : Object.values(demoStations)))
@@ -89,62 +102,93 @@ export function ExplorePage({ lang }: ExplorePageProps) {
           cesium={cesium}
           config={config}
           label={t('pages.explore.globeLabel')}
-          boliviaLabel={t('pages.explore.boliviaMarker')}
-          flight={flight}
+          markerLabels={markerLabels}
+          progress={progress}
           reducedMotion={reducedMotion}
-          onSelectBolivia={onSelectBolivia}
+          onSelectSection={goTo}
           onReady={onGlobeReady}
           onError={onGlobeError}
         />
       ) : null}
 
-      <section className={showGlobe ? 'page explore-page explore-page--globe' : 'page explore-page'}>
-        <div className="panel" data-globe-overlay="">
-          <h1>{t('pages.explore.title')}</h1>
-          <p>{t('pages.explore.description')}</p>
+      <div className={showGlobe ? 'explore-tour explore-tour--globe' : 'explore-tour'}>
+        <nav className="tour-nav" aria-label={t('pages.explore.tour.nav')} data-globe-overlay="">
+          <ol>
+            {TOUR_SECTIONS.map((section, i) => (
+              <li key={section}>
+                <button type="button" aria-current={active === i ? 'step' : undefined} onClick={() => goTo(section)}>
+                  <span className="tour-nav__dot" aria-hidden="true" />
+                  <span className="tour-nav__label">{t(`pages.explore.tour.${section}.nav`)}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-          {fallback.active ? (
-            <p role="status">{fallbackMessage}</p>
-          ) : globeLoad === 'loading' ? (
-            <p role="status">{t('pages.explore.globeLoading')}</p>
-          ) : null}
+        {TOUR_SECTIONS.map((section, i) => (
+          <section
+            key={section}
+            ref={(element) => {
+              sectionRefs.current[i] = element
+            }}
+            className={`tour-section tour-section--${section}`}
+            aria-labelledby={`tour-${section}`}
+          >
+            <div className="tour-panel" data-globe-overlay="">
+              <p className="tour-eyebrow">{t(`pages.explore.tour.${section}.eyebrow`)}</p>
+              {section === 'earth' ? (
+                <h1 id="tour-earth">{t('pages.explore.title')}</h1>
+              ) : (
+                <h2 id={`tour-${section}`}>{t(`pages.explore.tour.${section}.title`)}</h2>
+              )}
+              <p className="tour-lead">{t(`pages.explore.tour.${section}.body`)}</p>
+              {SOURCED.has(section) ? (
+                <p className="tour-source">{t(`pages.explore.tour.${section}.source`)}</p>
+              ) : null}
 
-          {showGlobe && globeLoad === 'ready' ? (
-            <div className="globe-controls">
-              {atBolivia ? null : <p>{t('pages.explore.globeHint')}</p>}
-              <button type="button" onClick={() => flyTo('bolivia')}>
-                {atBolivia ? t('pages.explore.backToBolivia') : t('pages.explore.goToBolivia')}
-              </button>
-              {atBolivia ? (
-                <button type="button" onClick={() => flyTo('earth')}>{t('pages.explore.viewEarth')}</button>
+              {section === 'earth' ? (
+                <>
+                  {fallback.active ? (
+                    <p role="status">{fallbackMessage}</p>
+                  ) : globeLoad === 'loading' ? (
+                    <p role="status">{t('pages.explore.globeLoading')}</p>
+                  ) : (
+                    <p className="tour-hint">{t('pages.explore.tour.hint')}</p>
+                  )}
+                </>
+              ) : null}
+
+              {section === 'station' ? (
+                <>
+                  <ul className="tour-questions">
+                    <li>{t('pages.explore.tour.station.q1')}</li>
+                    <li>{t('pages.explore.tour.station.q2')}</li>
+                  </ul>
+                  <p>{t('pages.explore.description')}</p>
+                  {grupos.map((grupo) => (
+                    <section key={grupo.departamento ?? 'sin-departamento'} aria-label={grupo.departamento ?? t('pages.explore.stationListLabel')}>
+                      {grupo.departamento ? <h3 className="station-group">{grupo.departamento}</h3> : null}
+                      <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
+                        {grupo.items.map((station) => (
+                          <li key={station.stationId}>
+                            <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
+                              {station.label[lang]}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+                  <GlobeAttribution
+                    description={t('pages.explore.globeAttribution')}
+                    linkLabel={t('pages.explore.globeAttributionLink')}
+                  />
+                </>
               ) : null}
             </div>
-          ) : null}
-          <p className="visually-hidden" aria-live="polite">
-            {flight.seq > 0 ? t(atBolivia ? 'pages.explore.announceBolivia' : 'pages.explore.announceEarth') : ''}
-          </p>
-
-          {grupos.map((grupo) => (
-            <section key={grupo.departamento ?? 'sin-departamento'} aria-label={grupo.departamento ?? t('pages.explore.stationListLabel')}>
-              {grupo.departamento ? <h2 className="station-group">{grupo.departamento}</h2> : null}
-              <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
-                {grupo.items.map((station) => (
-                  <li key={station.stationId}>
-                    <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
-                      {station.label[lang]}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-
-          <GlobeAttribution
-            description={t('pages.explore.globeAttribution')}
-            linkLabel={t('pages.explore.globeAttributionLink')}
-          />
-        </div>
-      </section>
+          </section>
+        ))}
+      </div>
     </>
   )
 }
