@@ -11,7 +11,6 @@ function renderAt(path: string) {
 }
 
 const nav = () => within(screen.getByRole("navigation", { name: "Navegación principal" }));
-const footer = () => within(screen.getByRole("navigation", { name: "Más información" }));
 
 beforeEach(async () => {
   localStorage.clear();
@@ -19,10 +18,12 @@ beforeEach(async () => {
 });
 
 describe("navegación de la base web", () => {
-  it("la cabecera solo tiene Inicio y Explorador; Método y Acerca de van en el pie (#129, RF-15, RF-24)", () => {
+  it("la cabecera solo tiene Inicio y Explorador, sin subtítulo ni pie con Método o Acerca de (#129, #131)", () => {
     renderAt("/");
     expect(nav().getAllByRole("link").map((a) => a.textContent)).toEqual(["Inicio", "Explorador"]);
-    expect(footer().getAllByRole("link").map((a) => a.textContent)).toEqual(["Método", "Acerca de"]);
+    expect(screen.queryByRole("link", { name: "Método" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Acerca de" })).toBeNull();
+    expect(screen.queryByText(/base web de la observación/i)).toBeNull();
   });
 
   it("desde la portada se llega a cada destino y ninguno queda vacío", async () => {
@@ -35,14 +36,18 @@ describe("navegación de la base web", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Tarija" })).toBeInTheDocument();
     expect(window.location.pathname).toBe("/station/tarija");
 
-    fireEvent.click(footer().getByRole("link", { name: "Método" }));
-    expect(screen.getByRole("heading", { level: 1, name: "Método" })).toBeInTheDocument();
-
-    fireEvent.click(footer().getByRole("link", { name: "Acerca de" }));
-    expect(screen.getByRole("heading", { level: 1, name: "Acerca de" })).toBeInTheDocument();
-
     fireEvent.click(nav().getByRole("link", { name: "Inicio" }));
     expect(screen.getByRole("heading", { level: 1, name: "UraqiVision" })).toBeInTheDocument();
+  });
+
+  it("Método y Acerca de siguen abriendo por su ruta (RF-15, RF-24)", () => {
+    renderAt("/method");
+    expect(screen.getByRole("heading", { level: 1, name: "Método" })).toBeInTheDocument();
+  });
+
+  it("Acerca de abre por su ruta (RF-24)", () => {
+    renderAt("/about");
+    expect(screen.getByRole("heading", { level: 1, name: "Acerca de" })).toBeInTheDocument();
   });
 
   it("recargar una ruta de estación conserva la estación (FR-002)", async () => {
@@ -63,8 +68,8 @@ describe("navegación de la base web", () => {
 
   it("atrás y adelante restauran el destino", async () => {
     renderAt("/");
-    fireEvent.click(footer().getByRole("link", { name: "Método" }));
-    expect(screen.getByRole("heading", { level: 1, name: "Método" })).toBeInTheDocument();
+    fireEvent.click(nav().getByRole("link", { name: "Explorador" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "Explorador" })).toBeInTheDocument();
 
     act(() => {
       window.history.replaceState(null, "", "/");
@@ -76,14 +81,14 @@ describe("navegación de la base web", () => {
 
   it("anuncia el cambio de página y actualiza el título del documento", async () => {
     renderAt("/");
-    fireEvent.click(footer().getByRole("link", { name: "Método" }));
+    fireEvent.click(nav().getByRole("link", { name: "Explorador" }));
 
-    expect(await screen.findByText("Página: Método")).toBeInTheDocument();
-    expect(document.title).toBe("Método · UraqiVision");
+    expect(await screen.findByText("Página: Explorador")).toBeInTheDocument();
+    expect(document.title).toBe("Explorador · UraqiVision");
   });
 
-  it("marca la página actual en el pie", () => {
-    renderAt("/about");
-    expect(footer().getByRole("link", { name: "Acerca de" })).toHaveAttribute("aria-current", "page");
+  it("marca la página actual en la navegación", () => {
+    renderAt("/");
+    expect(nav().getByRole("link", { name: "Inicio" })).toHaveAttribute("aria-current", "page");
   });
 });

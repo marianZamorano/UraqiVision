@@ -37,8 +37,6 @@ describe("accesibilidad de la base web", () => {
       "Explorador",
       "English",
       "Explorar Bolivia",
-      "Método",
-      "Acerca de",
     ]);
   });
 
