@@ -85,5 +85,176 @@
   },
   "values": {
     "notReported": "No reportada"
+  },
+  "stationMap": {
+    "title": "Mapa de la estación",
+    "loading": "Cargando capas…",
+    "error": "No se pudieron cargar las capas de la estación.",
+    "draftTitle": "Borrador exploratorio: aún no son resultados",
+    "draftBody": "Los datos NISAR son reales, pero los umbrales no están calibrados y no hay zonas de control. Por eso la estación se marca DEMO (RN-04).",
+    "date": "Fecha de la imagen de radar",
+    "baseline": "línea base",
+    "gap": "Hueco de datos NISAR: {{from}} → {{to}}",
+    "excluded": "Fechas excluidas ({{n}})",
+    "dateState": {
+      "valores_malos": "valores fuera de rango",
+      "desplazada": "imagen desplazada",
+      "vacia": "sin datos (ceros)",
+      "cobertura_baja": "cobertura baja",
+      "sin_verificar": "sin verificar",
+      "ok": "válida"
+    },
+    "polarization": "Polarización",
+    "hv": "HV · volumen de vegetación",
+    "hh": "HH · superficies y doble rebote",
+    "ratio": "HV/HH · proporción de volumen",
+    "opacity": "Opacidad del radar: {{pct}} %",
+    "scale": "Escala: {{min}} dB (oscuro) a {{max}} dB (claro)",
+    "layers": "Capas",
+    "radar": "Imagen de radar",
+    "patches": "Parches con caída de HV",
+    "fires": "Focos de calor FIRMS",
+    "viewBolivia": "Ver Bolivia",
+    "viewStation": "Ver la estación",
+    "classes": "Clases candidatas (nunca causas confirmadas)",
+    "cumulative": "Superficie acumulada hasta la fecha elegida.",
+    "firesCount": "Focos de calor: {{n}}",
+    "firesNote": "Focos detectados entre el inicio de la serie y la fecha elegida.",
+    "class": {
+      "compatible_quema": "Compatible con quema",
+      "perdida_previa": "Pérdida previa de estructura",
+      "ambigua": "Evidencia ambigua",
+      "insuficiente": "Datos insuficientes"
+    },
+    "hectaresTitle": "Superficie con caída sostenida de HV",
+    "hectaresDate": "Fecha (hora de Bolivia)",
+    "hectaresValue": "Hectáreas",
+    "hectaresRange": "Rango (umbral {{a}} a {{b}} dB)",
+    "rangeNotReported": "Rango no reportado",
+    "noHour": "Sin hora de adquisición en el manifiesto",
+    "popup": {
+      "class": "Clase",
+      "area": "Superficie",
+      "first": "Primera detección",
+      "drop": "Caída de HV",
+      "during": "Focos durante la caída",
+      "after": "Focos después"
+    }
+  },
+  "view": {
+    "label": "Qué mostrar en el mapa",
+    "radar": "Imagen de radar de la fecha",
+    "base": "Lo normal (línea base)",
+    "cambio": "Cambio de HV en la fecha",
+    "dnbr": "Testigo óptico (Sentinel-2)",
+    "noChange": "En la línea base no se mide cambio: elige una fecha posterior."
+  },
+  "story": {
+    "eyebrow": "Una respuesta, paso a paso",
+    "title": "¿Dónde bajó la señal de vegetación y qué más lo confirma?",
+    "lead": "Medimos, comparamos y decimos dónde se acaba la medición. No confirmamos causas.",
+    "see": "Ver en el mapa",
+    "s1": {
+      "title": "Primero, lo normal de este lugar",
+      "body": "Mediana de HV de {{dates}}, antes del cambio. Claro es bosque con estructura; oscuro, desmonte, pasto o suelo."
+    },
+    "s2": {
+      "title": "Después, cómo cambió al {{date}}",
+      "body": "Esa fecha menos lo normal. Marrón: la señal bajó; azul: subió; blanco: casi no se movió. En la mayor parte del paisaje el cambio queda entre {{lo}} y {{hi}} dB."
+    },
+    "s3": {
+      "title": "Las zonas que cruzaron la regla",
+      "body": "{{n}} parches de al menos 1 ha donde HV cayó más de {{thr}} dB y siguió baja en la fecha siguiente: {{ha}} ha (rango {{min}}–{{max}}). Son señales de radar, no perímetros de incendio."
+    },
+    "s4": {
+      "title": "Un segundo testigo",
+      "body": "Sentinel-2 entre el {{from}} y el {{to}}. Marrón: perdió vegetación; verde: reverdeció.",
+      "brackets": "Sus fechas encierran el periodo del radar.",
+      "notBrackets": "Sus fechas no coinciden del todo con las del radar."
+    },
+    "s5": {
+      "title": "Acuerdo, y dónde se rompe",
+      "body": "Qué parte de cada clase óptica marcó el radar. Lo que no cambió debería quedar casi en cero.",
+      "fires": "{{a}} de {{b}} focos de calor del periodo caen en un parche o junto a él."
+    },
+    "optical": {
+      "severa": "Quema severa (dNBR > 0,44)",
+      "moderada": "Moderada (0,27–0,44)",
+      "leve": "Leve (0,10–0,27)",
+      "sin_cambio": "Sin cambio óptico",
+      "reverdecio": "Reverdeció"
+    },
+    "marked": "{{pct}} % marcado",
+    "cells": "{{a}} de {{b}} ha",
+    "breaks": "Dónde se rompe"
+  },
+  "serie": {
+    "title": "La serie completa",
+    "body": "La banda es el rango normal del paisaje en cada fecha (del 10 % al 90 % de los píxeles). Las líneas son la mediana de cada clase de parche. Un hueco es una fecha sin imagen usable.",
+    "band": "Rango normal del paisaje",
+    "threshold": "Umbral {{v}} dB",
+    "baseline": "Línea base",
+    "axis": "Cambio de HV (dB)",
+    "gaps": "Fechas sin imagen usable"
+  },
+  "colors": {
+    "title": "Cómo leer los colores",
+    "radar": "Imagen de radar (HV)",
+    "radarLo": "−21 dB oscuro",
+    "radarHi": "−9 dB claro",
+    "change": "Cambio de HV",
+    "changeLo": "−4 dB bajó",
+    "changeMid": "sin cambio",
+    "changeHi": "+4 dB subió",
+    "optical": "Testigo óptico (dNBR)",
+    "opticalLo": "−0,5 reverdeció",
+    "opticalHi": "+0,5 perdió vegetación",
+    "patches": "Parches y focos"
+  },
+  "downloads": {
+    "title": "Datos abiertos",
+    "change": "Cambio de HV (COG)",
+    "scars": "Parches (GeoJSON)",
+    "hectares": "Hectáreas (CSV)",
+    "serie": "Serie (JSON)",
+    "validation": "Validación (JSON)",
+    "manifest": "Manifiesto (JSON)"
+  },
+  "control": {
+    "title": "Propuesta: zonas de control",
+    "who": "Decide M-CIENCIA (Tabata), DP-05.",
+    "body": "Zonas de unos 100 ha que se parecen a lo que después perdió estructura, pero sin fuego ni cambio óptico. Si ahí HV también se mueve, ese movimiento es de la estación y se resta.",
+    "criteria": [
+      "Vegetación parecida: mediana de HV a ±1,5 dB de la que tenía lo que cayó ({{ref}} dB).",
+      "Sin focos de calor a menos de 2 km en todo el periodo, y a más de 1 km de cualquier parche y del borde.",
+      "Sin quema óptica moderada ni severa (dNBR < 0,27); al menos 5 km entre zonas."
+    ],
+    "found": "{{n}} bloques cumplen; se proponen los {{k}} más parecidos.",
+    "zones": "Zonas propuestas",
+    "zone": "{{id}}: {{ha}} ha, HV {{hv}} dB, foco más cercano a {{km}} km",
+    "effect": "Qué cambia si se usan",
+    "date": "Fecha",
+    "now": "Sin zonas de control (dB)",
+    "withControl": "Con las zonas (dB)",
+    "hectares": "Hectáreas al {{date}}: sin zonas de control {{now}}; con zonas y umbrales calibrados {{ctrl}}.",
+    "range": "{{c}} ha (rango {{a}}–{{b}})",
+    "noZones": "Ningún bloque cumple los criterios en esta caja.",
+    "layer": "Zonas de control propuestas",
+    "titleApplied": "Zonas de control (aplicadas)",
+    "whoApplied": "Acordado con M-CIENCIA (Tabata) el 14 nov 2026 (DP-05).",
+    "bodyApplied": "Zonas de unos 100 ha parecidas a lo que después perdió estructura, sin fuego ni cambio óptico. Lo que HV se movió ahí es de la estación y se resta en toda la caja.",
+    "calibration": "Umbrales calibrados con estas zonas y con Sentinel-2 (MC-03): {{s}} / {{c}} / {{e}} dB. Son los menos exigentes que dejan marcado como máximo el 2 %, el 1 % y el 0,5 % de la superficie donde Sentinel-2 no ve cambio.",
+    "falseAlarm": "Con el umbral sensible queda marcado el {{pct}} % de la superficie sin cambio óptico, y el {{ctrl}} % de las zonas de control.",
+    "zonesApplied": "Zonas usadas"
+  },
+  "limits": {
+    "linea_base_2_fechas": "La línea base usa 2 fechas, no 3 (MC-02): antes del hueco de datos no hay ninguna imagen sana en esta órbita.",
+    "quemado_antes_de_la_serie": "Lo quemado antes del {{start}} ya estaba quemado en la línea base: el radar no lo ve como cambio.",
+    "umbrales_sin_calibrar": "Los umbrales todavía no están calibrados con zonas de control.",
+    "optico_fuera_de_periodo": "Las imágenes Sentinel-2 no encierran el periodo del radar.",
+    "producto_provisional": "NISAR PROVISIONAL: calibrado, pero todavía no validado por completo por la misión.",
+    "optico_con_fenologia": "El testigo óptico incluye los cambios estacionales de la vegetación (caída de hojas, rebrote), que no son fuego.",
+    "revision_visual_pendiente": "Falta la revisión visual de una muestra de parches (VC-05).",
+    "procedencia_incompleta": "Falta la suma de verificación de algún archivo original (CQ-06)."
   }
 }
