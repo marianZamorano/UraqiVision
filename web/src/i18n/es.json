@@ -7,6 +7,7 @@
     "method": "Método",
     "about": "Acerca de",
     "mainNavigation": "Navegación principal",
+    "footerNavigation": "Más información",
     "loadingPage": "Cargando la página…",
     "skipToContent": "Saltar al contenido",
     "navigatedTo": "Página: {{page}}"

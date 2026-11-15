@@ -35,11 +35,10 @@ describe("accesibilidad de la base web", () => {
       "Saltar al contenido",
       "Inicio",
       "Explorador",
-      "Método",
-      "Acerca de",
       "English",
       "Explorar Bolivia",
       "Método",
+      "Acerca de",
     ]);
   });
 
