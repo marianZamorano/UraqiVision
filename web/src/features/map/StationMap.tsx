@@ -1,83 +1,32 @@
-// PROTOTIPO LOCAL (rama local/prueba-mapa-chiquitania, sin acordar con M-MAPA): mapa 2D de Bolivia con la estación
-// publicada por el backend. Muestra la vista de radar por fecha y polarización (RF-06, RF-08), las cicatrices por
-// clase candidata (RF-05, RN-05), los focos FIRMS del periodo (RF-10) y las hectáreas con rango (RF-09, RN-06).
-// Sin mapa base externo (DP-07 pendiente): el fondo son los límites departamentales publicados.
+// Versión beta (#110): mapa 2D de Bolivia con la estación publicada por el backend (§17.3). Muestra la vista de radar
+// por fecha y polarización (RF-06, RF-08), los parches por clase candidata (RF-05, RN-05), los focos FIRMS (RF-10) y
+// las hectáreas con rango (RF-09, RN-06); debajo, la respuesta paso a paso con sus imágenes y cifras (Respuesta). Textos en es.json/en.json (RNF-03). Sin mapa base externo: DP-07 pendiente.
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type ImageSource, type Map as MlMap } from "maplibre-gl";
+import { useTranslation } from "react-i18next";
+import maplibregl, { type ImageSource, type Map as MlMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./stationMap.css";
 import { GraficoHectareas, TablaHectareas, type PuntoHectareas } from "../interface/hectareas/Hectareas";
 import { formatearHectareas, type Idioma } from "../interface/formato/formato";
-
-type Capa = "hv" | "hh" | "ratio";
-interface Vista { archivo: string; fecha: string; capa: Capa; rango_db: [number, number] }
-interface IndiceVistas { esquinas_lonlat: [number, number][]; vistas: Vista[] }
-interface FechaEstacion { fecha: string; estado: string; motivo: string | null; rol: string | null }
-interface StationRaw {
-  aviso: Record<Idioma, string>;
-  area: { bbox_lonlat: [number, number, number, number] };
-  fechas: FechaEstacion[];
-  hueco_datos: [string, string];
-}
-type FC = GeoJSON.FeatureCollection;
-
-const CLASES = [
-  { id: "compatible_quema", es: "Compatible con quema", en: "Compatible with burning", color: "#c8501e" },
-  { id: "perdida_previa", es: "Pérdida previa de estructura", en: "Earlier loss of structure", color: "#6b4fa0" },
-  { id: "ambigua", es: "Evidencia ambigua", en: "Ambiguous evidence", color: "#c9a227" },
-  { id: "insuficiente", es: "Datos insuficientes", en: "Insufficient data", color: "#7d8793" },
-] as const;
-
-const T = {
-  es: {
-    titulo: "Mapa de la estación", aviso: "Aviso", cargando: "Cargando capas…", error: "No se pudieron cargar las capas.",
-    fecha: "Fecha de la imagen de radar", polar: "Polarización", opacidad: "Opacidad del radar", capas: "Capas",
-    radar: "Imagen de radar", cicatrices: "Parches con caída de HV", focos: "Focos de calor FIRMS", bolivia: "Ver Bolivia",
-    estacion: "Ver la estación", excluidas: "Fechas excluidas", hueco: "Hueco de datos NISAR",
-    hv: "HV · volumen de vegetación", hh: "HH · superficies y doble rebote", ratio: "HV/HH · proporción de volumen",
-    clases: "Clases candidatas (nunca causas confirmadas)", hasta: "acumulado hasta la fecha elegida",
-    focosLeyenda: "Foco detectado entre el inicio de la serie y la fecha elegida", base: "línea base",
-    hectareas: "Superficie con caída sostenida de HV",
-    popup: { clase: "Clase", ha: "Superficie", fecha: "Primera detección", caida: "Caída de HV", motivo: "Motivo" },
-  },
-  en: {
-    titulo: "Station map", aviso: "Notice", cargando: "Loading layers…", error: "Layers could not be loaded.",
-    fecha: "Radar image date", polar: "Polarization", opacidad: "Radar opacity", capas: "Layers",
-    radar: "Radar image", cicatrices: "Patches with HV drop", focos: "FIRMS hotspots", bolivia: "View Bolivia",
-    estacion: "View the station", excluidas: "Excluded dates", hueco: "NISAR data gap",
-    hv: "HV · vegetation volume", hh: "HH · surfaces and double bounce", ratio: "HV/HH · share of volume",
-    clases: "Candidate classes (never confirmed causes)", hasta: "cumulative up to the selected date",
-    focosLeyenda: "Hotspot detected between the start of the series and the selected date", base: "baseline",
-    hectareas: "Area with sustained HV drop",
-    popup: { clase: "Class", ha: "Area", fecha: "First detection", caida: "HV drop", motivo: "Reason" },
-  },
-} as const;
+import { Respuesta, type VistaMapa } from "./Respuesta";
+import { CLASES, leerCsv, type ArchivosEstacion, type Capa, type IndiceVistas } from "./stationFiles";
 
 const BOLIVIA: [[number, number], [number, number]] = [[-69.7, -22.95], [-57.4, -9.6]];
 const reducirMovimiento = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-function leerCsv(texto: string): Record<string, string>[] {
-  const [cab, ...filas] = texto.trim().split(/\r?\n/);
-  const cols = (cab ?? "").split(",");
-  return filas.map((f) => {
-    const celdas = f.match(/("([^"]|"")*"|[^,]*)(,|$)/g)?.map((c) => c.replace(/,$/, "").replace(/^"|"$/g, "")) ?? [];
-    return Object.fromEntries(cols.map((c, i) => [c, celdas[i] ?? ""]));
-  });
-}
-
 export default function StationMap({ base, lang }: { base: string; lang: Idioma }) {
-  const t = T[lang];
+  const { t } = useTranslation();
   const contenedor = useRef<HTMLDivElement>(null);
   const mapa = useRef<MlMap | null>(null);
   const [listo, setListo] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [datos, setDatos] = useState<{ vistas: IndiceVistas; estacion: StationRaw; scars: FC; fires: FC; deps: FC;
-    hect: Record<string, string>[]; horas: Record<string, string> } | null>(null);
+  const [datos, setDatos] = useState<ArchivosEstacion | null>(null);
   const [fecha, setFecha] = useState<string>("");
   const [capa, setCapa] = useState<Capa>("hv");
+  const [vista, setVista] = useState<VistaMapa>("radar");
   const [opacidad, setOpacidad] = useState(0.85);
-  const [visibles, setVisibles] = useState({ radar: true, cicatrices: true, focos: true });
+  const [visibles, setVisibles] = useState({ radar: true, patches: true, fires: true, control: true });
 
   // 1. Carga de los archivos publicados (§17.3)
   useEffect(() => {
@@ -86,25 +35,33 @@ export default function StationMap({ base, lang }: { base: string; lang: Idioma 
       if (!r.ok) throw new Error(`${p}: ${r.status}`);
       return r.json();
     });
+    // La propuesta de zonas de control es opcional: una estación publicada sin ella sigue funcionando.
+    const opcional = (p: string) => j(p).catch(() => null);
     Promise.all([j("views/index.json"), j("station.json"), j("scars.geojson"), j("fires.geojson"),
-      j("atlas/departments.geojson"), j("manifest.json"), fetch(`${base}/hectares.csv`, { signal: ctl.signal }).then((r) => r.text())])
-      .then(([vistas, estacion, scars, fires, deps, manifest, csv]) => {
+      j("atlas/departments.geojson"), j("manifest.json"), j("validation.json"), j("quality.json"),
+      j("serie.json"), opcional("control_propuesta.json"), opcional("control_candidatas.geojson"), fetch(`${base}/hectares.csv`, { signal: ctl.signal }).then((r) => r.text())])
+      .then(([vistas, estacion, scars, fires, deps, manifest, validacion, calidad, serie, control, zonasControl, csv]) => {
+        // RN-07: hora real de adquisición (UTC) a partir del nombre de cada escena del manifiesto.
         const horas: Record<string, string> = {};
-        for (const g of (manifest as { granulos: { escena: string; fecha: string }[] }).granulos) {
+        for (const g of (manifest as ArchivosEstacion["manifest"]).granulos) {
           const m = /_(\d{8})T(\d{2})(\d{2})(\d{2})_/.exec(g.escena);
           if (m) horas[g.fecha] = `${g.fecha}T${m[2]}:${m[3]}:${m[4]}Z`;
         }
-        setDatos({ vistas, estacion, scars, fires, deps, hect: leerCsv(csv), horas });
-        const fechas = [...new Set((vistas as IndiceVistas).vistas.map((v) => v.fecha))].sort();
+        setDatos({ vistas, estacion, scars, fires, deps, manifest, validacion, calidad, serie, control, zonasControl, hect: leerCsv(csv), horas });
+        const fechas = [...new Set((vistas as IndiceVistas).vistas.filter((v) => v.capa === "hv").map((v) => v.fecha!))].sort();
         setFecha(fechas[fechas.length - 1] ?? "");
       })
       .catch((e: unknown) => { if (!ctl.signal.aborted) setError(String(e)); });
     return () => ctl.abort();
   }, [base]);
 
-  const fechas = useMemo(() => [...new Set(datos?.vistas.vistas.map((v) => v.fecha) ?? [])].sort(), [datos]);
+  const fechas = useMemo(() => [...new Set(datos?.vistas.vistas.filter((v) => v.capa === "hv").map((v) => v.fecha!) ?? [])].sort(), [datos]);
   const inicioSerie = fechas[0] ?? "";
-  const vistaActual = datos?.vistas.vistas.find((v) => v.fecha === fecha && v.capa === capa);
+  // Qué imagen va sobre el mapa: la de la fecha y polarización, lo normal, el cambio de la fecha o el testigo óptico.
+  const vistaActual = datos?.vistas.vistas.find((v) =>
+    vista === "radar" ? v.fecha === fecha && v.capa === capa
+      : vista === "cambio" ? v.fecha === fecha && v.capa === "cambio"
+        : v.capa === vista);
 
   // 2. Creación del mapa (una vez que hay datos)
   useEffect(() => {
@@ -123,7 +80,7 @@ export default function StationMap({ base, lang }: { base: string; lang: Idioma 
       const [w, s, e, n] = datos.estacion.area.bbox_lonlat;
       m.addSource("deps", { type: "geojson", data: datos.deps });
       m.addLayer({ id: "deps-relleno", type: "fill", source: "deps",
-        paint: { "fill-color": ["case", ["==", ["get", "shapeName"], "Santa Cruz"], "#f6f1e7", "#fbfbf8"], "fill-opacity": 1 } });
+        paint: { "fill-color": ["case", ["==", ["get", "shapeName"], datos.estacion.departamento ?? ""], "#f6f1e7", "#fbfbf8"], "fill-opacity": 1 } });
       m.addLayer({ id: "deps-borde", type: "line", source: "deps", paint: { "line-color": "#8a8a8a", "line-width": 1 } });
       const c = datos.vistas.esquinas_lonlat;
       const v0 = datos.vistas.vistas.find((v) => v.capa === "hv")!;
@@ -139,23 +96,13 @@ export default function StationMap({ base, lang }: { base: string; lang: Idioma 
       m.addSource("scars", { type: "geojson", data: datos.scars });
       const colorClase = ["match", ["get", "clase"], ...CLASES.flatMap((k) => [k.id, k.color]), "#999"] as unknown as string;
       m.addLayer({ id: "scars", type: "fill", source: "scars", paint: { "fill-color": colorClase, "fill-opacity": 0.9 } });
-      m.addLayer({ id: "scars-borde", type: "line", source: "scars", paint: { "line-color": colorClase, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 1] } });
-      m.on("click", "scars", (ev) => {
-        const p = ev.features?.[0]?.properties as Record<string, string | number> | undefined;
-        if (!p) return;
-        const k = CLASES.find((x) => x.id === p.clase);
-        const tt = T[lang].popup;
-        const div = document.createElement("div");
-        div.className = "mapa-popup";
-        [[tt.clase, k ? k[lang] : String(p.clase)], [tt.ha, `${formatearHectareas(Number(p.ha), lang)} ha`],
-         [tt.fecha, String(p.fecha_primera_deteccion)], [tt.caida, `${Number(p.caida_hv_db).toFixed(1)} dB`],
-         [tt.motivo, String(p.motivo)]].forEach(([a, b]) => {
-          const fila = document.createElement("p");
-          const s1 = document.createElement("strong"); s1.textContent = `${a}: `;
-          fila.append(s1, document.createTextNode(String(b))); div.append(fila);
-        });
-        new maplibregl.Popup({ maxWidth: "280px" }).setLngLat(ev.lngLat).setDOMContent(div).addTo(m);
-      });
+      m.addLayer({ id: "scars-borde", type: "line", source: "scars",
+        paint: { "line-color": colorClase, "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 1] } });
+      if (datos.zonasControl) {
+        m.addSource("control", { type: "geojson", data: datos.zonasControl });
+        m.addLayer({ id: "control", type: "line", source: "control",
+          paint: { "line-color": "#0b6b3a", "line-width": 2.5, "line-dasharray": [1.5, 1] } });
+      }
       m.on("mouseenter", "scars", () => { m.getCanvas().style.cursor = "pointer"; });
       m.on("mouseleave", "scars", () => { m.getCanvas().style.cursor = ""; });
       setListo(true);
@@ -163,23 +110,50 @@ export default function StationMap({ base, lang }: { base: string; lang: Idioma 
       window.setTimeout(() => m.fitBounds([[w, s], [e, n]], { padding: 40, animate: !reducirMovimiento(), duration: 3000 }), 1800);
     });
     return () => { m.remove(); mapa.current = null; setListo(false); };
-  }, [datos, base, lang]);
+  }, [datos, base]);
 
-  // 3. Sincronización con los controles (RF-36)
+  // 3. Ventana emergente de cada parche, en el idioma vigente (los textos se arman aquí, no vienen del backend)
   useEffect(() => {
     const m = mapa.current;
-    if (!listo || !m || !vistaActual) return;
-    const c = datos!.vistas.esquinas_lonlat;
-    (m.getSource("radar") as ImageSource).updateImage({ url: `${base}/${vistaActual.archivo}`, coordinates: [c[0]!, c[1]!, c[2]!, c[3]!] });
+    if (!listo || !m) return;
+    const alClic = (ev: maplibregl.MapLayerMouseEvent) => {
+      const p = ev.features?.[0]?.properties as Record<string, string | number> | undefined;
+      if (!p) return;
+      const div = document.createElement("div");
+      div.className = "mapa-popup";
+      ([[t("stationMap.popup.class"), t(`stationMap.class.${p.clase}`)],
+        [t("stationMap.popup.area"), `${formatearHectareas(Number(p.ha), lang)} ha`],
+        [t("stationMap.popup.first"), String(p.fecha_primera_deteccion)],
+        [t("stationMap.popup.drop"), `${Number(p.caida_hv_db).toFixed(1)} dB`],
+        [t("stationMap.popup.during"), String(p.focos_durante)],
+        [t("stationMap.popup.after"), String(p.focos_despues)]] as const).forEach(([a, b]) => {
+        const fila = document.createElement("p");
+        const s1 = document.createElement("strong"); s1.textContent = `${a}: `;
+        fila.append(s1, document.createTextNode(b)); div.append(fila);
+      });
+      new maplibregl.Popup({ maxWidth: "280px" }).setLngLat(ev.lngLat).setDOMContent(div).addTo(m);
+    };
+    m.on("click", "scars", alClic);
+    return () => { m.off("click", "scars", alClic); };
+  }, [listo, t, lang]);
+
+  // 4. Sincronización con los controles (RF-36)
+  useEffect(() => {
+    const m = mapa.current;
+    if (!listo || !m || !datos) return;
+    const c = datos.vistas.esquinas_lonlat;
+    if (vistaActual) {
+      (m.getSource("radar") as ImageSource).updateImage({ url: `${base}/${vistaActual.archivo}`, coordinates: [c[0]!, c[1]!, c[2]!, c[3]!] });
+    }
     m.setPaintProperty("radar", "raster-opacity", opacidad);
-    m.setLayoutProperty("radar", "visibility", visibles.radar ? "visible" : "none");
-    m.setFilter("scars", ["<=", ["get", "fecha_primera_deteccion"], fecha]);
-    m.setFilter("scars-borde", ["<=", ["get", "fecha_primera_deteccion"], fecha]);
-    m.setLayoutProperty("scars", "visibility", visibles.cicatrices ? "visible" : "none");
-    m.setLayoutProperty("scars-borde", "visibility", visibles.cicatrices ? "visible" : "none");
+    m.setLayoutProperty("radar", "visibility", visibles.radar && vistaActual ? "visible" : "none");
+    for (const id of ["scars", "scars-borde"]) {
+      m.setFilter(id, ["<=", ["get", "fecha_primera_deteccion"], fecha]);
+      m.setLayoutProperty(id, "visibility", visibles.patches ? "visible" : "none");
+    }
     m.setFilter("fires", ["all", [">", ["get", "fecha"], inicioSerie], ["<=", ["get", "fecha"], fecha]]);
-    m.setLayoutProperty("fires", "visibility", visibles.focos ? "visible" : "none");
-    void (m.getSource("scars") as GeoJSONSource);
+    m.setLayoutProperty("fires", "visibility", visibles.fires ? "visible" : "none");
+    if (m.getLayer("control")) m.setLayoutProperty("control", "visibility", visibles.control ? "visible" : "none");
   }, [listo, vistaActual, opacidad, visibles, fecha, inicioSerie, datos, base]);
 
   const resumen = useMemo(() => {
@@ -195,80 +169,104 @@ export default function StationMap({ base, lang }: { base: string; lang: Idioma 
     return d > inicioSerie && d <= fecha;
   }).length, [datos, fecha, inicioSerie]);
 
-  // RN-07: hora real de adquisición (UTC) del manifiesto; sin ella la fila no se informa (RN-13), no se inventa.
-  const puntos: PuntoHectareas[] = (datos?.hect ?? []).map((r): PuntoHectareas => {
-    const hora = datos?.horas[r.fecha ?? ""];
+  if (error) return <p role="alert" className="panel">{t("stationMap.error")} ({error})</p>;
+  if (!datos) return <p role="status" className="panel">{t("stationMap.loading")}</p>;
+
+  // RN-07: hora real de adquisición del manifiesto; sin ella la fila no se informa (RN-13), no se inventa.
+  const puntos: PuntoHectareas[] = datos.hect.map((r): PuntoHectareas => {
+    const hora = datos.horas[r.fecha ?? ""];
     return hora
       ? { fecha: hora, estado: "reportado", valor: Number(r.hectareas),
           rango: { min: Number(r.rango_inferior), max: Number(r.rango_superior) } }
-      : { fecha: `${r.fecha}T00:00:00Z`, estado: "no-reportado", motivo: "Sin hora de adquisición en el manifiesto" };
+      : { fecha: `${r.fecha}T00:00:00Z`, estado: "no-reportado", motivo: t("stationMap.noHour") };
   });
-  const etqH = { titulo: t.hectareas, fecha: lang === "es" ? "Fecha" : "Date", valor: lang === "es" ? "Hectáreas" : "Hectares",
-    rango: lang === "es" ? "Rango (umbral −3 a −2 dB)" : "Range (−3 to −2 dB threshold)",
-    noReportada: lang === "es" ? "No reportada" : "Not reported", rangoNoReportado: lang === "es" ? "Rango no reportado" : "Range not reported" };
-
-  if (error) return <p role="alert" className="panel">{t.error} ({error})</p>;
-  if (!datos) return <p role="status" className="panel">{t.cargando}</p>;
+  const etqH = { titulo: t("stationMap.hectaresTitle"), fecha: t("stationMap.hectaresDate"), valor: t("stationMap.hectaresValue"),
+    rango: t("stationMap.hectaresRange", { a: datos.serie.umbrales_db[0].toLocaleString(lang === "es" ? "es-BO" : "en-US"),
+      b: datos.serie.umbrales_db[1].toLocaleString(lang === "es" ? "es-BO" : "en-US") }), noReportada: t("values.notReported"), rangoNoReportado: t("stationMap.rangeNotReported") };
   const excluidas = datos.estacion.fechas.filter((f) => f.estado !== "ok");
   const rol = (f: string) => datos.estacion.fechas.find((x) => x.fecha === f)?.rol;
+  const encuadrar = (b: [[number, number], [number, number]], padding: number) =>
+    mapa.current?.fitBounds(b, { padding, animate: !reducirMovimiento() });
+  const [w, s, e, n] = datos.estacion.area.bbox_lonlat;
 
   return (
-    <section className="mapa-estacion" aria-label={t.titulo}>
-      <p className="mapa-aviso" role="note"><strong>{t.aviso}:</strong> {datos.estacion.aviso[lang]}</p>
+    <section className="mapa-estacion" aria-label={t("stationMap.title")}>
+      {datos.estacion.estado === "borrador_exploratorio" ? (
+        <div className="mapa-aviso" role="note">
+          <strong>{t("stationMap.draftTitle")}</strong>
+          <p>{t("stationMap.draftBody")}</p>
+        </div>
+      ) : null}
       <div className="mapa-cuerpo">
-        <div className="mapa-lienzo" ref={contenedor} role="region" aria-label={t.titulo} />
+        <div className="mapa-lienzo" ref={contenedor} role="region" aria-label={t("stationMap.title")} />
         <aside className="mapa-controles">
           <fieldset>
-            <legend>{t.fecha}</legend>
+            <legend>{t("stationMap.date")}</legend>
             <div className="mapa-fechas">
               {fechas.map((f) => (
                 <button key={f} type="button" aria-pressed={f === fecha} onClick={() => setFecha(f)}
                   className={f === fecha ? "activa" : ""}>
-                  {f.slice(5)}{rol(f) === "linea_base" ? <small> · {t.base}</small> : null}
+                  {f.slice(5)}{rol(f) === "linea_base" ? <small> · {t("stationMap.baseline")}</small> : null}
                 </button>
               ))}
             </div>
-            <p className="mapa-nota">{t.hueco}: {datos.estacion.hueco_datos.join(" → ")}</p>
+            <p className="mapa-nota">{t("stationMap.gap", { from: datos.estacion.hueco_datos[0], to: datos.estacion.hueco_datos[1] })}</p>
             <details>
-              <summary>{t.excluidas} ({excluidas.length})</summary>
-              <ul>{excluidas.map((f) => <li key={f.fecha}><strong>{f.fecha}</strong>: {f.motivo ?? f.estado}</li>)}</ul>
+              <summary>{t("stationMap.excluded", { n: excluidas.length })}</summary>
+              <ul>{excluidas.map((f) => <li key={f.fecha}><strong>{f.fecha}</strong>: {t(`stationMap.dateState.${f.estado}`)}</li>)}</ul>
             </details>
           </fieldset>
           <fieldset>
-            <legend>{t.polar}</legend>
+            <legend>{t("view.label")}</legend>
+            {(["radar", "base", "cambio", "dnbr"] as VistaMapa[]).map((k) => (
+              <label key={k} className="mapa-opcion">
+                <input type="radio" name="vista" checked={vista === k} onChange={() => setVista(k)} /> {t(`view.${k}`)}
+              </label>
+            ))}
+            {vista === "cambio" && !vistaActual ? <p className="mapa-nota" role="status">{t("view.noChange")}</p> : null}
+          </fieldset>
+          <fieldset disabled={vista !== "radar"}>
+            <legend>{t("stationMap.polarization")}</legend>
             {(["hv", "hh", "ratio"] as Capa[]).map((k) => (
               <label key={k} className="mapa-opcion">
-                <input type="radio" name="capa" checked={capa === k} onChange={() => setCapa(k)} /> {t[k]}
+                <input type="radio" name="capa" checked={capa === k} onChange={() => setCapa(k)} /> {t(`stationMap.${k}`)}
               </label>
             ))}
-            <label className="mapa-opcion">{t.opacidad}: {Math.round(opacidad * 100)} %
-              <input type="range" min={0} max={1} step={0.05} value={opacidad} onChange={(e) => setOpacidad(Number(e.target.value))} />
+            <label className="mapa-opcion">{t("stationMap.opacity", { pct: Math.round(opacidad * 100) })}
+              <input type="range" min={0} max={1} step={0.05} value={opacidad} onChange={(ev) => setOpacidad(Number(ev.target.value))} />
             </label>
-            {vistaActual ? <p className="mapa-nota">{vistaActual.rango_db[0]} dB ▸ {vistaActual.rango_db[1]} dB</p> : null}
+            {vista === "radar" && vistaActual?.rango_db ? (
+              <p className="mapa-nota">{t("stationMap.scale", { min: vistaActual.rango_db[0], max: vistaActual.rango_db[1] })}</p>
+            ) : null}
           </fieldset>
           <fieldset>
-            <legend>{t.capas}</legend>
-            {(["radar", "cicatrices", "focos"] as const).map((k) => (
+            <legend>{t("stationMap.layers")}</legend>
+            {(["radar", "patches", "fires"] as const).map((k) => (
               <label key={k} className="mapa-opcion">
-                <input type="checkbox" checked={visibles[k]} onChange={() => setVisibles((v) => ({ ...v, [k]: !v[k] }))} /> {t[k]}
+                <input type="checkbox" checked={visibles[k]} onChange={() => setVisibles((v) => ({ ...v, [k]: !v[k] }))} /> {t(`stationMap.${k}`)}
               </label>
             ))}
+            {datos.zonasControl?.features.length ? (
+              <label className="mapa-opcion">
+                <input type="checkbox" checked={visibles.control} onChange={() => setVisibles((v) => ({ ...v, control: !v.control }))} />
+                <span className="muestra muestra--control" aria-hidden="true" /> {t("control.layer")}
+              </label>
+            ) : null}
             <div className="mapa-botones">
-              <button type="button" onClick={() => mapa.current?.fitBounds(BOLIVIA, { padding: 24, animate: !reducirMovimiento() })}>{t.bolivia}</button>
-              <button type="button" onClick={() => { const [w, s, e, n] = datos.estacion.area.bbox_lonlat;
-                mapa.current?.fitBounds([[w, s], [e, n]], { padding: 40, animate: !reducirMovimiento() }); }}>{t.estacion}</button>
+              <button type="button" onClick={() => encuadrar(BOLIVIA, 24)}>{t("stationMap.viewBolivia")}</button>
+              <button type="button" onClick={() => encuadrar([[w, s], [e, n]], 40)}>{t("stationMap.viewStation")}</button>
             </div>
           </fieldset>
           <fieldset>
-            <legend>{t.clases}</legend>
+            <legend>{t("stationMap.classes")}</legend>
             <ul className="mapa-leyenda">
               {CLASES.map((k) => (
                 <li key={k.id}><span className="muestra" style={{ background: k.color }} aria-hidden="true" />
-                  {k[lang]} <strong>{formatearHectareas(resumen[k.id] ?? 0, lang)} ha</strong></li>
+                  {t(`stationMap.class.${k.id}`)} <strong>{formatearHectareas(resumen[k.id] ?? 0, lang)} ha</strong></li>
               ))}
-              <li><span className="muestra punto" style={{ background: "#ffd23f" }} aria-hidden="true" />{t.focos}: <strong>{focosVisibles}</strong></li>
+              <li><span className="muestra punto" aria-hidden="true" />{t("stationMap.firesCount", { n: focosVisibles })}</li>
             </ul>
-            <p className="mapa-nota">{t.hasta}. {t.focosLeyenda}.</p>
+            <p className="mapa-nota">{t("stationMap.cumulative")} {t("stationMap.firesNote")}</p>
           </fieldset>
         </aside>
       </div>
@@ -276,6 +274,11 @@ export default function StationMap({ base, lang }: { base: string; lang: Idioma 
         <GraficoHectareas puntos={puntos} idioma={lang} etiquetas={etqH} ancho={560} alto={220} />
         <TablaHectareas puntos={puntos} idioma={lang} etiquetas={etqH} />
       </div>
+      <Respuesta base={base} datos={datos} lang={lang} onVer={(v, f) => {
+        setVista(v);
+        if (f) setFecha(f);
+        contenedor.current?.scrollIntoView({ behavior: reducirMovimiento() ? "auto" : "smooth", block: "center" });
+      }} />
     </section>
   );
 }

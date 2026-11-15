@@ -85,5 +85,176 @@
   },
   "values": {
     "notReported": "Not reported"
+  },
+  "stationMap": {
+    "title": "Station map",
+    "loading": "Loading layers…",
+    "error": "The station layers could not be loaded.",
+    "draftTitle": "Exploratory draft: not results yet",
+    "draftBody": "The NISAR data are real, but the thresholds are uncalibrated and there are no control zones. That is why the station is marked DEMO (RN-04).",
+    "date": "Radar image date",
+    "baseline": "baseline",
+    "gap": "NISAR data gap: {{from}} → {{to}}",
+    "excluded": "Excluded dates ({{n}})",
+    "dateState": {
+      "valores_malos": "values out of range",
+      "desplazada": "misplaced image",
+      "vacia": "no data (zeros)",
+      "cobertura_baja": "low coverage",
+      "sin_verificar": "not checked",
+      "ok": "valid"
+    },
+    "polarization": "Polarization",
+    "hv": "HV · vegetation volume",
+    "hh": "HH · surfaces and double bounce",
+    "ratio": "HV/HH · share of volume",
+    "opacity": "Radar opacity: {{pct}} %",
+    "scale": "Scale: {{min}} dB (dark) to {{max}} dB (light)",
+    "layers": "Layers",
+    "radar": "Radar image",
+    "patches": "Patches with HV drop",
+    "fires": "FIRMS hotspots",
+    "viewBolivia": "View Bolivia",
+    "viewStation": "View the station",
+    "classes": "Candidate classes (never confirmed causes)",
+    "cumulative": "Area accumulated up to the selected date.",
+    "firesCount": "Hotspots: {{n}}",
+    "firesNote": "Hotspots detected between the start of the series and the selected date.",
+    "class": {
+      "compatible_quema": "Compatible with burning",
+      "perdida_previa": "Earlier loss of structure",
+      "ambigua": "Ambiguous evidence",
+      "insuficiente": "Insufficient data"
+    },
+    "hectaresTitle": "Area with sustained HV drop",
+    "hectaresDate": "Date (Bolivia time)",
+    "hectaresValue": "Hectares",
+    "hectaresRange": "Range ({{a}} to {{b}} dB threshold)",
+    "rangeNotReported": "Range not reported",
+    "noHour": "No acquisition time in the manifest",
+    "popup": {
+      "class": "Class",
+      "area": "Area",
+      "first": "First detection",
+      "drop": "HV drop",
+      "during": "Hotspots during the drop",
+      "after": "Hotspots after"
+    }
+  },
+  "view": {
+    "label": "What to show on the map",
+    "radar": "Radar image of the date",
+    "base": "The normal (baseline)",
+    "cambio": "HV change on the date",
+    "dnbr": "Optical witness (Sentinel-2)",
+    "noChange": "Change is not measured on baseline dates: pick a later date."
+  },
+  "story": {
+    "eyebrow": "One answer, step by step",
+    "title": "Where did the vegetation signal drop, and what else agrees?",
+    "lead": "We measure, compare and say where the measurement runs out. We do not confirm causes.",
+    "see": "Show on the map",
+    "s1": {
+      "title": "First, this place's normal",
+      "body": "Median HV of {{dates}}, before the change. Light is forest with structure; dark is clearing, pasture or soil."
+    },
+    "s2": {
+      "title": "Then, how it changed by {{date}}",
+      "body": "That date minus the normal. Brown: the signal dropped; blue: it rose; white: it barely moved. Across most of the landscape the change stays between {{lo}} and {{hi}} dB."
+    },
+    "s3": {
+      "title": "The areas that crossed the rule",
+      "body": "{{n}} patches of at least 1 ha where HV fell more than {{thr}} dB and stayed low on the next date: {{ha}} ha (range {{min}}–{{max}}). These are radar signals, not fire perimeters."
+    },
+    "s4": {
+      "title": "A second witness",
+      "body": "Sentinel-2 between {{from}} and {{to}}. Brown: vegetation lost; green: greener.",
+      "brackets": "Its dates bracket the radar period.",
+      "notBrackets": "Its dates do not fully match the radar's."
+    },
+    "s5": {
+      "title": "Agreement, and where it breaks",
+      "body": "How much of each optical class the radar flagged. Unchanged land should stay close to zero.",
+      "fires": "{{a}} of {{b}} hotspots in the period fall on or next to a patch."
+    },
+    "optical": {
+      "severa": "Severe burn (dNBR > 0.44)",
+      "moderada": "Moderate (0.27–0.44)",
+      "leve": "Low (0.10–0.27)",
+      "sin_cambio": "No optical change",
+      "reverdecio": "Greener"
+    },
+    "marked": "{{pct}} % flagged",
+    "cells": "{{a}} of {{b}} ha",
+    "breaks": "Where it breaks"
+  },
+  "serie": {
+    "title": "The whole series",
+    "body": "The band is the landscape's normal range on each date (10 % to 90 % of pixels). The lines are the median of each patch class. A gap is a date with no usable image.",
+    "band": "Landscape normal range",
+    "threshold": "{{v}} dB threshold",
+    "baseline": "Baseline",
+    "axis": "HV change (dB)",
+    "gaps": "Dates with no usable image"
+  },
+  "colors": {
+    "title": "How to read the colours",
+    "radar": "Radar image (HV)",
+    "radarLo": "−21 dB dark",
+    "radarHi": "−9 dB light",
+    "change": "HV change",
+    "changeLo": "−4 dB dropped",
+    "changeMid": "no change",
+    "changeHi": "+4 dB rose",
+    "optical": "Optical witness (dNBR)",
+    "opticalLo": "−0.5 greener",
+    "opticalHi": "+0.5 vegetation lost",
+    "patches": "Patches and hotspots"
+  },
+  "downloads": {
+    "title": "Open data",
+    "change": "HV change (COG)",
+    "scars": "Patches (GeoJSON)",
+    "hectares": "Hectares (CSV)",
+    "serie": "Series (JSON)",
+    "validation": "Validation (JSON)",
+    "manifest": "Manifest (JSON)"
+  },
+  "control": {
+    "title": "Proposal: control zones",
+    "who": "Decided by M-CIENCIA (Tabata), DP-05.",
+    "body": "Areas of about 100 ha that resemble what later lost structure, but with no fire and no optical change. If HV also moves there, that movement is seasonal and is subtracted.",
+    "criteria": [
+      "Similar vegetation: median HV within ±1.5 dB of what fell ({{ref}} dB).",
+      "No hotspots within 2 km over the whole period, and more than 1 km from any patch and from the edge.",
+      "No moderate or severe optical burn (dNBR < 0.27); at least 5 km between zones."
+    ],
+    "found": "{{n}} blocks qualify; the {{k}} most similar are proposed.",
+    "zones": "Proposed zones",
+    "zone": "{{id}}: {{ha}} ha, HV {{hv}} dB, nearest hotspot {{km}} km away",
+    "effect": "What changes if they are used",
+    "date": "Date",
+    "now": "Without control zones (dB)",
+    "withControl": "With the zones (dB)",
+    "hectares": "Hectares by {{date}}: without control zones {{now}}; with zones and calibrated thresholds {{ctrl}}.",
+    "range": "{{c}} ha (range {{a}}–{{b}})",
+    "noZones": "No block meets the criteria in this box.",
+    "layer": "Proposed control zones",
+    "titleApplied": "Control zones (applied)",
+    "whoApplied": "Agreed with M-CIENCIA (Tabata) on 14 Nov 2026 (DP-05).",
+    "bodyApplied": "Areas of about 100 ha that resemble what later lost structure, with no fire and no optical change. Whatever HV did there is seasonal and is subtracted across the box.",
+    "calibration": "Thresholds calibrated with these zones and with Sentinel-2 (MC-03): {{s}} / {{c}} / {{e}} dB, the least strict values that flag at most 2 %, 1 % and 0.5 % of the area where Sentinel-2 sees no change.",
+    "falseAlarm": "With the sensitive threshold, {{pct}} % of the area with no optical change ends up flagged, and {{ctrl}} % of the control zones.",
+    "zonesApplied": "Zones used"
+  },
+  "limits": {
+    "linea_base_2_fechas": "The baseline uses 2 dates, not 3 (MC-02): before the data gap there is no sound image on this orbit.",
+    "quemado_antes_de_la_serie": "Anything burned before {{start}} was already burned in the baseline: the radar cannot see it as change.",
+    "umbrales_sin_calibrar": "The thresholds are not yet calibrated with control zones.",
+    "optico_fuera_de_periodo": "The Sentinel-2 images do not bracket the radar period.",
+    "producto_provisional": "NISAR PROVISIONAL: calibrated, but not yet fully validated by the mission.",
+    "optico_con_fenologia": "The optical witness includes seasonal vegetation changes (leaf fall, regrowth), which are not fire.",
+    "revision_visual_pendiente": "A visual review of a sample of patches is still missing (VC-05).",
+    "procedencia_incompleta": "An original file checksum is missing (CQ-06)."
   }
 }
