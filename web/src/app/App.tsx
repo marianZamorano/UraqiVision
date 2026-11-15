@@ -1,8 +1,9 @@
 // Shell y rutas de la base web (001 T016, T023): cinco rutas de §20.1 sobre el adaptador de History API (T013).
 // El explorador es un módulo diferido: la portada no descarga su código ni CesiumJS (RNF-01).
-import { Suspense, lazy, useEffect, useState } from "react";
-import type { Language } from "../contracts/view-state";
-import { getPreferredLanguage } from "../i18n";
+// El idioma lo gestiona i18n (T015): cambiarlo no recarga ni cambia la ruta (RF-20).
+import { Suspense, lazy, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "../i18n";
 import { AboutPage } from "../pages/AboutPage";
 import { HomePage } from "../pages/HomePage";
 import { MethodPage } from "../pages/MethodPage";
@@ -16,12 +17,9 @@ const ExplorePage = lazy(async () => {
 });
 
 export default function App() {
-  const [lang, setLang] = useState<Language>(getPreferredLanguage);
+  const { t } = useTranslation();
+  const lang = useLanguage();
   const location = useRoute();
-
-  useEffect(() => {
-    localStorage.setItem("uraqivision-lang", lang);
-  }, [lang]);
 
   // Una ruta desconocida vuelve a la portada sin dejar la URL inválida en el historial.
   useEffect(() => {
@@ -37,18 +35,18 @@ export default function App() {
       page = <StationPage lang={lang} stationId={location.stationId} />;
       break;
     case "method":
-      page = <MethodPage lang={lang} />;
+      page = <MethodPage />;
       break;
     case "about":
-      page = <AboutPage lang={lang} />;
+      page = <AboutPage />;
       break;
     default:
-      page = <HomePage lang={lang} />;
+      page = <HomePage />;
   }
 
   return (
-    <AppShell lang={lang} onChangeLanguage={setLang}>
-      <Suspense fallback={<div aria-live="polite">Loading…</div>}>{page}</Suspense>
+    <AppShell>
+      <Suspense fallback={<div aria-live="polite">{t("app.loadingPage")}</div>}>{page}</Suspense>
     </AppShell>
   );
 }

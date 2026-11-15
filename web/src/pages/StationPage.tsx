@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from '../app/router'
 import type { Language, PublishedStation, ViewState } from '../contracts/view-state'
 import { createLoadingState, createPublishedStationState, createErrorState } from '../data/viewState'
 import { fetchStation } from '../data/publicationRepository'
 import { ViewStatePresenter } from '../app/ViewStatePresenter'
-import { getDictionary } from '../i18n'
 
 type StationPageProps = {
   stationId?: string
@@ -12,33 +12,39 @@ type StationPageProps = {
 }
 
 export function StationPage({ lang, stationId }: StationPageProps) {
-  const dict = getDictionary(lang)
+  const { t } = useTranslation()
+  // El idioma no dispara una nueva carga: cambiarlo solo traduce la vista (FR-013, FR-014).
+  const langRef = useRef(lang)
+  useEffect(() => {
+    langRef.current = lang
+  }, [lang])
   const [state, setState] = useState<ViewState<PublishedStation>>(createLoadingState(lang))
 
   const loadStation = useCallback(
     async (nextStationId: string) => {
       const controller = new AbortController()
-      setState(createLoadingState(lang))
+      const language = langRef.current
+      setState(createLoadingState(language))
 
       try {
         const station = await fetchStation(nextStationId, controller.signal)
-        setState(createPublishedStationState(station, lang))
+        setState(createPublishedStationState(station, language))
       } catch (error) {
         const message =
           error instanceof Error && error.name === 'AbortError'
-            ? lang === 'es'
+            ? language === 'es'
               ? 'Solicitud cancelada'
               : 'Request cancelled'
             : 'No se pudo cargar la estación.'
 
-        setState(createErrorState(lang, message, () => {
+        setState(createErrorState(language, message, () => {
           if (nextStationId) {
             void loadStation(nextStationId)
           }
         }))
       }
     },
-    [lang],
+    [],
   )
 
   const retry = useCallback(() => {
@@ -53,15 +59,15 @@ export function StationPage({ lang, stationId }: StationPageProps) {
     if (!stationId) {
       setState({
         status: 'no-data',
-        language: lang,
-        message: lang === 'es' ? 'Sin estación' : 'No station',
+        language: langRef.current,
+        message: langRef.current === 'es' ? 'Sin estación' : 'No station',
         reason: 'No station id.',
       })
       return
     }
 
     void loadStation(stationId)
-  }, [lang, loadStation, stationId])
+  }, [loadStation, stationId])
 
   if (state.status === 'available' && state.data) {
     const station = state.data
@@ -69,28 +75,28 @@ export function StationPage({ lang, stationId }: StationPageProps) {
     return (
       <section className="page">
         <div className="panel">
-          <p className="eyebrow">{dict.pages.station.title}</p>
+          <p className="eyebrow">{t('pages.station.title')}</p>
           <h1>{station.label[lang]}</h1>
           <p>{station.summary[lang]}</p>
 
           <dl className="meta-grid">
             <div>
-              <dt>Evidence</dt>
+              <dt>{t('pages.station.evidence')}</dt>
               <dd>{station.evidenceMode}</dd>
             </div>
             <div>
-              <dt>Orbit</dt>
+              <dt>{t('pages.station.orbit')}</dt>
               <dd>{station.orbit}</dd>
             </div>
             <div>
-              <dt>Source</dt>
+              <dt>{t('pages.station.source')}</dt>
               <dd>{station.provenance.source}</dd>
             </div>
           </dl>
 
           <div className="station-actions">
             <Link className="button-primary" to="/explore">
-              {lang === 'es' ? 'Volver al explorador' : 'Back to explorer'}
+              {t('pages.station.back')}
             </Link>
           </div>
         </div>

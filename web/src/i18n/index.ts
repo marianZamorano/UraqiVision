@@ -1,118 +1,90 @@
-import type { Language } from '../contracts/view-state'
+// T015 (001-base-web): i18n español/inglés con react-i18next (RF-20, RNF-03). Los textos viven en es.json y
+// en.json; tests/unit/i18n.test.ts exige paridad de claves. El idioma se persiste de forma segura y se refleja en
+// <html lang> (research.md §2: el idioma vive en contexto persistible, no en la URL). Presupuesto inicial del plan
+// de 001: la portada solo incluye el español; el inglés se descarga al elegirlo (changeLanguage).
+import i18n from "i18next";
+import { initReactI18next, useTranslation } from "react-i18next";
+import type { Language } from "../contracts/view-state";
+import es from "./es.json";
 
-export const dictionaries = {
-  es: {
-    app: {
-      title: 'UraqiVision',
-      subtitle: 'Base web de la observación y validación de estaciones.',
-      explore: 'Explorar Bolivia',
-      changeLanguage: 'Cambiar idioma',
-      home: 'Inicio',
-      method: 'Método',
-      about: 'Acerca de',
-      exploreNav: 'Explorador',
-      stationDetail: 'Estación',
-    },
-    pages: {
-      home: {
-        headline: 'Base web del proyecto UraqiVision',
-        description: 'Recorrido principal, estados honestos y rutas reales para la validación de publicaciones estáticas.',
-        cta: 'Explorar Bolivia',
-      },
-      explore: {
-        title: 'Explorador',
-        description: 'Seleccione una estación pública para abrir su análisis o detalle.',
-        globeAttribution: 'La experiencia 3D conserva una alternativa textual y reconoce el proveedor visual.',
-        globeAttributionLink: 'Atribución de Cesium',
-        stationListLabel: 'Estaciones disponibles',
-        fallbackWebglUnavailable:
-          'Este navegador no puede mostrar el globo 3D (WebGL no disponible). Usa la lista de estaciones para explorar.',
-        fallbackLoadFailed: 'No se pudo cargar el globo 3D. Usa la lista de estaciones para explorar.',
-      },
-      method: {
-        title: 'Método',
-        description: 'La web solo lee archivos publicados y presenta su provenance, método y rango.',
-      },
-      about: {
-        title: 'Acerca de',
-        description: 'UraqiVision es una base web estática con principios de trazabilidad, accesibilidad y rigor científico.',
-      },
-      station: {
-        title: 'Estación',
-        summary: 'Resumen',
-      },
-    },
-    states: {
-      loading: 'Cargando publicación…',
-      available: 'Resultado disponible',
-      limited: 'Datos limitados',
-      noData: 'Sin datos',
-      incompatibleDate: 'Fecha incompatible',
-      error: 'Error en la publicación',
-      retry: 'Reintentar',
-    },
-  },
-  en: {
-    app: {
-      title: 'UraqiVision',
-      subtitle: 'Web base for station observation and validation.',
-      explore: 'Explore Bolivia',
-      changeLanguage: 'Change language',
-      home: 'Home',
-      method: 'Method',
-      about: 'About',
-      exploreNav: 'Explorer',
-      stationDetail: 'Station',
-    },
-    pages: {
-      home: {
-        headline: 'UraqiVision web base',
-        description: 'Main route, honest states and real paths for static publication validation.',
-        cta: 'Explore Bolivia',
-      },
-      explore: {
-        title: 'Explorer',
-        description: 'Select a public station to open its analysis or detail view.',
-        globeAttribution: 'The 3D experience keeps a textual alternative and credits its visual provider.',
-        globeAttributionLink: 'Cesium attribution',
-        stationListLabel: 'Available stations',
-        fallbackWebglUnavailable:
-          'This browser cannot display the 3D globe (WebGL unavailable). Use the station list to explore.',
-        fallbackLoadFailed: 'The 3D globe could not be loaded. Use the station list to explore.',
-      },
-      method: {
-        title: 'Method',
-        description: 'The web only reads published files and presents their provenance, method and range.',
-      },
-      about: {
-        title: 'About',
-        description: 'UraqiVision is a static web base built on traceability, accessibility and scientific rigor.',
-      },
-      station: {
-        title: 'Station',
-        summary: 'Summary',
-      },
-    },
-    states: {
-      loading: 'Loading publication…',
-      available: 'Result available',
-      limited: 'Limited data',
-      noData: 'No data',
-      incompatibleDate: 'Incompatible date',
-      error: 'Publication error',
-      retry: 'Retry',
-    },
-  },
-} as const
+export const LANGUAGE_STORAGE_KEY = "uraqivision-lang";
 
-export function getDictionary(language: Language) {
-  return dictionaries[language]
-}
-
-export function getPreferredLanguage(): Language {
-  const stored = localStorage.getItem('uraqivision-lang')
-  if (stored === 'es' || stored === 'en') {
-    return stored
+/** Idioma guardado, o español si no hay uno válido o el almacenamiento está bloqueado. */
+export function readStoredLanguage(): Language {
+  try {
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (stored === "es" || stored === "en") return stored;
+  } catch {
+    // Navegación privada o almacenamiento bloqueado: se usa el idioma por defecto.
   }
-  return 'es'
+  return "es";
 }
+
+/** Guarda el idioma sin fallar si el almacenamiento no está disponible. */
+export function storeLanguage(language: Language): void {
+  try {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  } catch {
+    // Sin almacenamiento, el idioma dura solo esta visita.
+  }
+}
+
+/** Claves (con ruta a.b.c) que están en `source` y faltan en `target`. */
+export function missingKeys(source: object, target: object, prefix = ""): string[] {
+  return Object.entries(source).flatMap(([key, value]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    const other = (target as Record<string, unknown>)[key];
+    if (value && typeof value === "object") {
+      return other && typeof other === "object" ? missingKeys(value, other, path) : [path];
+    }
+    return other === undefined ? [path] : [];
+  });
+}
+
+/** Claves pedidas que no existen en el diccionario (detección de claves faltantes). */
+export const missingKeysSeen = new Set<string>();
+
+void i18n.use(initReactI18next).init({
+  resources: { es: { translation: es } },
+  lng: "es",
+  fallbackLng: "es",
+  supportedLngs: ["es", "en"],
+  initAsync: false,
+  interpolation: { escapeValue: false },
+  returnEmptyString: false,
+  saveMissing: true,
+  missingKeyHandler: (_languages, _namespace, key) => {
+    missingKeysSeen.add(key);
+    if (import.meta.env.DEV && import.meta.env.MODE !== "test") console.warn(`[i18n] clave faltante: ${key}`);
+  },
+});
+
+function reflectLanguage(language: string): void {
+  const value: Language = language === "en" ? "en" : "es";
+  storeLanguage(value);
+  if (typeof document !== "undefined") document.documentElement.lang = value;
+}
+
+i18n.on("languageChanged", reflectLanguage);
+
+/** Cambia el idioma sin recargar; descarga el diccionario inglés la primera vez que se pide. */
+export async function changeLanguage(language: Language): Promise<void> {
+  if (!i18n.hasResourceBundle(language, "translation")) {
+    const dictionary = language === "en" ? await import("./en.json") : { default: es };
+    i18n.addResourceBundle(language, "translation", dictionary.default);
+  }
+  await i18n.changeLanguage(language);
+}
+
+// Arranque: español inmediato; si la persona eligió inglés antes, se carga y se aplica enseguida.
+// <html lang> refleja el idioma realmente mostrado: pasa a "en" solo cuando el inglés ya está cargado.
+if (readStoredLanguage() === "en") void changeLanguage("en");
+else reflectLanguage("es");
+
+/** Idioma activo de la interfaz; se actualiza al cambiarlo sin recargar. */
+export function useLanguage(): Language {
+  const { i18n: instance } = useTranslation();
+  return instance.resolvedLanguage === "en" ? "en" : "es";
+}
+
+export default i18n;

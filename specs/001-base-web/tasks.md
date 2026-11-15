@@ -45,8 +45,8 @@ description: "Tareas de implementación de la base web navegable y confiable"
 - [ ] T011 Implementar la máquina de los seis estados RF-34 y el control de solicitudes vigentes en `web/src/data/viewState.ts` (RF-34, FR-007 a FR-010, FR-022).
 - [X] T012 [P] Escribir pruebas del analizador y serializador de rutas recargables en `web/tests/unit/routes.test.ts` (§20.1, RF-29).
 - [X] T013 Implementar el adaptador History API y el estado territorial de URL en `web/src/app/router.tsx` (exporta `Link` y `NavLink`; pruebas en `web/tests/unit/router.test.tsx`) y `web/src/app/routeState.ts` (FR-001, FR-002, RF-29).
-- [ ] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
-- [ ] T015 Implementar i18n español/inglés con `react-i18next`, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
+- [X] T014 [P] Escribir pruebas de paridad de diccionarios, persistencia de idioma y cambio sin recarga en `web/tests/unit/i18n.test.ts` (RF-20, RNF-03, PS-04).
+- [X] T015 Implementar i18n español/inglés con `react-i18next`, detección de claves faltantes y persistencia segura de preferencia en `web/src/i18n/index.ts`, `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
 - [ ] T016 Configurar el shell de la aplicación, navegación semántica y región de anuncios de estados en `web/src/app/App.tsx` y `web/src/app/AppShell.tsx` (RNF-04, RF-34).
 
 **Checkpoint**: Las compuertas T051 y T047 están cerradas y la base de contratos, rutas, idiomas y estados está lista antes de implementar una historia.
@@ -95,8 +95,8 @@ description: "Tareas de implementación de la base web navegable y confiable"
 
 **Independent Test**: Al alternar idioma en cada ruta y estado, la ubicación, selección y mensajes permanecen coherentes y sin claves faltantes.
 
-- [ ] T031 [P] [US3] Escribir pruebas de cambio de idioma en rutas y estados de carga/error en `web/tests/integration/languageSwitch.test.tsx` (RF-20, RNF-03, PS-04).
-- [ ] T032 [US3] Implementar el selector de idioma accesible con `react-i18next` y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
+- [X] T031 [P] [US3] Escribir pruebas de cambio de idioma en rutas y estados de carga/error en `web/tests/integration/languageSwitch.test.tsx` (RF-20, RNF-03, PS-04).
+- [X] T032 [US3] Implementar el selector de idioma accesible con `react-i18next` y su conexión con el shell en `web/src/app/LanguageSwitcher.tsx` y `web/src/app/AppShell.tsx` (RF-20, RNF-03).
 - [ ] T033 [US3] Completar las claves de navegación, páginas, estados, errores y acciones en `web/src/i18n/es.json` y `web/src/i18n/en.json` (RF-20, RNF-03).
 - [ ] T034 [US3] Verificar que los mensajes producidos por `ViewStatePresenter` se traduzcan sin alterar estado o selección en `web/src/app/ViewStatePresenter.tsx` (FR-013, FR-014).
 

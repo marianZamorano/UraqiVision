@@ -1,0 +1,65 @@
+{
+  "app": {
+    "title": "UraqiVision",
+    "subtitle": "Base web de la observación y validación de estaciones.",
+    "home": "Inicio",
+    "exploreNav": "Explorador",
+    "method": "Método",
+    "about": "Acerca de",
+    "mainNavigation": "Navegación principal",
+    "loadingPage": "Cargando la página…"
+  },
+  "language": {
+    "switchTo": "Cambiar el idioma a",
+    "names": {
+      "es": "Español",
+      "en": "English"
+    }
+  },
+  "pages": {
+    "home": {
+      "headline": "Base web del proyecto UraqiVision",
+      "description": "Recorrido principal, estados honestos y rutas reales para la validación de publicaciones estáticas.",
+      "cta": "Explorar Bolivia"
+    },
+    "explore": {
+      "title": "Explorador",
+      "description": "Seleccione una estación pública para abrir su análisis o detalle.",
+      "globeAttribution": "La experiencia 3D conserva una alternativa textual y reconoce el proveedor visual.",
+      "globeAttributionLink": "Atribución de Cesium",
+      "stationListLabel": "Estaciones disponibles",
+      "fallbackWebglUnavailable": "Este navegador no puede mostrar el globo 3D (WebGL no disponible). Usa la lista de estaciones para explorar.",
+      "fallbackLoadFailed": "No se pudo cargar el globo 3D. Usa la lista de estaciones para explorar."
+    },
+    "method": {
+      "title": "Método",
+      "description": "La web solo lee archivos publicados y presenta su procedencia, método y rango.",
+      "provenance": "Procedencia: origen de la publicación y gránulos.",
+      "date": "Fecha: UTC preservada para comparación en hora local.",
+      "absence": "Ausencia: nunca se normaliza a cero."
+    },
+    "about": {
+      "title": "Acerca de",
+      "description": "UraqiVision es una base web estática con principios de trazabilidad, accesibilidad y rigor científico.",
+      "scope": "La base web cumple con trazabilidad, accesibilidad, rendimiento y honestidad de datos para el recorrido principal de UraqiVision."
+    },
+    "station": {
+      "title": "Estación",
+      "evidence": "Evidencia",
+      "orbit": "Órbita",
+      "source": "Fuente",
+      "back": "Volver al explorador"
+    }
+  },
+  "states": {
+    "label": {
+      "loading": "Cargando",
+      "available": "Resultado",
+      "limited": "Limitado",
+      "no-data": "Sin datos",
+      "incompatible-date": "Fecha incompatible",
+      "error": "Error"
+    },
+    "retry": "Reintentar"
+  }
+}

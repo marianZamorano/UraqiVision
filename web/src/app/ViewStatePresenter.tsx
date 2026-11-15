@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { ViewState } from '../contracts/view-state'
 
 type ViewStatePresenterProps<T> = {
@@ -6,18 +7,8 @@ type ViewStatePresenterProps<T> = {
 }
 
 export function ViewStatePresenter<T>({ state, onRetry }: ViewStatePresenterProps<T>) {
-  const statusLabel =
-    state.status === 'available'
-      ? 'result'
-      : state.status === 'limited'
-        ? 'limited'
-        : state.status === 'no-data'
-          ? 'no-data'
-          : state.status === 'incompatible-date'
-            ? 'incompatible-date'
-            : state.status === 'error'
-              ? 'error'
-              : 'loading'
+  const { t } = useTranslation()
+  const statusLabel = t(`states.label.${state.status}`)
 
   return (
     <section className="view-state" aria-live="polite" aria-atomic="true">
@@ -26,7 +17,7 @@ export function ViewStatePresenter<T>({ state, onRetry }: ViewStatePresenterProp
       {state.status !== 'loading' && 'reason' in state && state.reason ? <p>{state.reason}</p> : null}
       {state.status === 'error' && state.retry ? (
         <button type="button" onClick={state.retry || onRetry} className="button-primary">
-          {state.language === 'es' ? 'Reintentar' : 'Retry'}
+          {t('states.retry')}
         </button>
       ) : null}
     </section>

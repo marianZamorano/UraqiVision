@@ -3,7 +3,7 @@ import { Link } from '../app/router'
 import { serializeRoute } from '../app/routeState'
 import type { Language } from '../contracts/view-state'
 import { demoStations } from '../data/publicationRepository'
-import { getDictionary } from '../i18n'
+import { useTranslation } from 'react-i18next'
 import { GlobeAttribution } from '../features/globe/GlobeAttribution'
 import { hasWebGLSupport, resolveGlobeProvider } from '../features/globe/GlobeProvider'
 import { resolveFallbackProvider } from '../features/globe/fallbackProvider'
@@ -17,7 +17,7 @@ type ExplorePageProps = {
 type CesiumModule = Awaited<ReturnType<typeof loadCesiumModule>>
 
 export function ExplorePage({ lang }: ExplorePageProps) {
-  const dict = getDictionary(lang)
+  const { t } = useTranslation()
   // RNF-01, RF-30: CesiumJS solo se pide aquí y nunca sin WebGL.
   const [decision] = useState(() => resolveGlobeProvider({
     token: readPublicIonToken(),
@@ -44,18 +44,18 @@ export function ExplorePage({ lang }: ExplorePageProps) {
 
   const fallback = resolveFallbackProvider(decision, loadFailed)
   const fallbackMessage = fallback.reason === 'webgl-unavailable'
-    ? dict.pages.explore.fallbackWebglUnavailable
-    : dict.pages.explore.fallbackLoadFailed
+    ? t('pages.explore.fallbackWebglUnavailable')
+    : t('pages.explore.fallbackLoadFailed')
 
   return (
     <section className="page">
       <div className="panel">
-        <h1>{dict.pages.explore.title}</h1>
-        <p>{dict.pages.explore.description}</p>
+        <h1>{t('pages.explore.title')}</h1>
+        <p>{t('pages.explore.description')}</p>
 
         {fallback.active ? <p role="status">{fallbackMessage}</p> : null}
 
-        <ul className="station-list" aria-label={dict.pages.explore.stationListLabel}>
+        <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
           {Object.values(demoStations).map((station) => (
             <li key={station.stationId}>
               <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
@@ -66,8 +66,8 @@ export function ExplorePage({ lang }: ExplorePageProps) {
         </ul>
 
         <GlobeAttribution
-          description={dict.pages.explore.globeAttribution}
-          linkLabel={dict.pages.explore.globeAttributionLink}
+          description={t('pages.explore.globeAttribution')}
+          linkLabel={t('pages.explore.globeAttributionLink')}
         />
       </div>
     </section>
