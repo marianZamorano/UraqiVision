@@ -22,6 +22,9 @@ import { readPublicIonToken } from '../features/globe/ionProvider'
 import { loadCesiumModule, loadGlobeModule } from '../features/globe/lazyGlobe'
 import { useTourProgress } from '../features/globe/scrollProgress'
 
+/** Separación (px) entre la escena del globo y la navegación del recorrido. */
+const NAV_MARGIN = 48
+
 type ExplorePageProps = {
   lang: Language
 }
@@ -46,32 +49,6 @@ export function ExplorePage({ lang }: ExplorePageProps) {
   const sectionRefs = useRef<Array<HTMLElement | null>>([])
   const panelRefs = useRef<Array<HTMLElement | null>>([])
   const { store: progress, active } = useTourProgress(sectionRefs)
-  // #123: la escena del globo se centra en la parte de la pantalla que no tapan la cabecera, la navegación del
-  // recorrido y el panel de la sección activa (a la izquierda en escritorio, abajo en celular y tableta).
-  const navRef = useRef<HTMLElement | null>(null)
-  const [framing, setFraming] = useState<GlobeFraming>(NO_FRAMING)
-  useEffect(() => {
-    const measure = () => {
-      const panel = panelRefs.current[active]
-      if (!panel) return
-      const rect = panel.getBoundingClientRect()
-      const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 769px)').matches
-      const header = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0
-      const nav = navRef.current?.querySelector('ol')?.getBoundingClientRect()
-      const next: GlobeFraming = {
-        left: desktop ? Math.round(rect.right) : 0,
-        right: nav && nav.width > 0 ? Math.round(window.innerWidth - nav.left) : 0,
-        top: Math.max(0, Math.round(header)),
-        bottom: desktop ? 0 : Math.round(rect.height),
-      }
-      setFraming((f) =>
-        f.left === next.left && f.right === next.right && f.top === next.top && f.bottom === next.bottom ? f : next,
-      )
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [active])
   const goTo = useCallback((section: TourSection) => {
     const element = sectionRefs.current[TOUR_SECTIONS.indexOf(section)]
     element?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
@@ -138,6 +115,42 @@ export function ExplorePage({ lang }: ExplorePageProps) {
     ? t('pages.explore.fallbackWebglUnavailable')
     : t('pages.explore.fallbackLoadFailed')
   const showGlobe = cesium !== null && !fallback.active
+  // #125: con los puntos en el globo, el panel de Bolivia sobra; queda solo para el teclado (aparece con el foco).
+  const boliviaOnDemand = showGlobe && zones.length > 0
+
+  // #123: la escena del globo se centra en la parte de la pantalla que no tapan la cabecera, la navegación del
+  // recorrido y el panel de la sección activa (a la izquierda en escritorio, abajo en celular y tableta).
+  const navRef = useRef<HTMLElement | null>(null)
+  const [framing, setFraming] = useState<GlobeFraming>(NO_FRAMING)
+  useEffect(() => {
+    const measure = () => {
+      const panel = panelRefs.current[active]
+      if (!panel) return
+      const rect = panel.getBoundingClientRect()
+      const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 769px)').matches
+      const header = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0
+      const nav = navRef.current?.querySelector('ol')?.getBoundingClientRect()
+      const next: GlobeFraming = {
+        left: desktop ? Math.round(rect.right) : 0,
+        // Margen extra para que los puntos del globo nunca queden pegados a la navegación (#125).
+        right: nav && nav.width > 0 ? Math.round(window.innerWidth - nav.left + NAV_MARGIN) : 0,
+        top: Math.max(0, Math.round(header)),
+        bottom: desktop ? 0 : Math.round(rect.height),
+      }
+      setFraming((f) =>
+        f.left === next.left && f.right === next.right && f.top === next.top && f.bottom === next.bottom ? f : next,
+      )
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    document.addEventListener('focusin', measure)
+    document.addEventListener('focusout', measure)
+    return () => {
+      window.removeEventListener('resize', measure)
+      document.removeEventListener('focusin', measure)
+      document.removeEventListener('focusout', measure)
+    }
+  }, [active, boliviaOnDemand])
 
   return (
     <>
@@ -188,7 +201,7 @@ export function ExplorePage({ lang }: ExplorePageProps) {
             aria-labelledby={`tour-${section}`}
           >
             <div
-              className="tour-panel"
+              className={section === 'bolivia' && boliviaOnDemand ? 'tour-panel tour-panel--on-demand' : 'tour-panel'}
               data-globe-overlay=""
               ref={(element) => {
                 panelRefs.current[i] = element
@@ -218,6 +231,10 @@ export function ExplorePage({ lang }: ExplorePageProps) {
                   ) : (
                     <p className="tour-hint">{t('pages.explore.tour.hint')}</p>
                   )}
+                  <GlobeAttribution
+                    description={t('pages.explore.globeAttribution')}
+                    linkLabel={t('pages.explore.globeAttributionLink')}
+                  />
                 </>
               ) : null}
 
@@ -240,10 +257,6 @@ export function ExplorePage({ lang }: ExplorePageProps) {
                       </ul>
                     </section>
                   ))}
-                  <GlobeAttribution
-                    description={t('pages.explore.globeAttribution')}
-                    linkLabel={t('pages.explore.globeAttributionLink')}
-                  />
                 </>
               ) : null}
             </div>

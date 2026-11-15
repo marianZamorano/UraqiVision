@@ -15,7 +15,17 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { BOLIVIA_OUTLINE_CREDIT, loadBoliviaOutline } from "./boliviaOutline";
-import { dampPose, framingShift, poseAt, poseDistance, type CameraPose, type GlobeFraming, type TourSection } from "./cameraPath";
+import {
+  dampPose,
+  framingShift,
+  portraitZoom,
+  poseAt,
+  poseDistance,
+  ZONES_FROM_PROGRESS,
+  type CameraPose,
+  type GlobeFraming,
+  type TourSection,
+} from "./cameraPath";
 import { BOLIVIA_CENTER, SUNRISE_TIME_ISO, type GlobeConfig } from "./globeConfig";
 import { addLocalModels, ORBITAL_MODELS } from "./localModels";
 import type { ProgressStore } from "./scrollProgress";
@@ -51,9 +61,6 @@ type GlobeViewProps = {
 /** Contenido que tapa al globo: un clic ahí nunca se interpreta como clic en el globo. */
 const OVERLAY_SELECTOR = "a, button, input, select, textarea, label, summary, [role='button'], [data-globe-overlay], .topbar";
 
-/** Distancia de la cámara (m) a la que el marcador de Bolivia cede su lugar a los puntos de las zonas. */
-const MARKER_SWAP_DISTANCE = 3_200_000;
-
 /** Cuándo la cámara ya llegó: por debajo de esto se deja de dibujar (requestRenderMode). */
 const ARRIVED = 1e-4;
 
@@ -87,13 +94,13 @@ function marker(
   id: string,
   [longitude, latitude]: readonly [number, number],
   text: string,
-  visibleBetween: [number, number],
   /** Desplazamiento vertical de la etiqueta en píxeles (negativo: encima del punto). */
   labelOffsetY = -26,
+  show = true,
 ) {
-  const visible = new C.DistanceDisplayCondition(visibleBetween[0], visibleBetween[1]);
   return {
     id,
+    show,
     position: C.Cartesian3.fromDegrees(longitude, latitude),
     point: {
       pixelSize: 14,
@@ -102,22 +109,24 @@ function marker(
       outlineWidth: 2,
       heightReference: C.HeightReference.CLAMP_TO_GROUND,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      distanceDisplayCondition: visible,
     },
     label: {
       text,
-      font: "600 16px system-ui, sans-serif",
+      // Letra más chica en pantallas estrechas para que las zonas vecinas no se amontonen.
+      font: `600 ${element.clientWidth < 600 ? 12 : 16}px system-ui, sans-serif`,
       fillColor: tokenColor(C, element, "--paleta-blanco", C.Color.WHITE),
       outlineColor: tokenColor(C, element, "--paleta-negro-azulado", C.Color.BLACK),
       outlineWidth: 4,
       style: C.LabelStyle.FILL_AND_OUTLINE,
-      pixelOffset: new C.Cartesian2(0, labelOffsetY),
+      pixelOffset: new C.Cartesian2(0, element.clientWidth < 600 ? Math.round(labelOffsetY * 0.75) : labelOffsetY),
       heightReference: C.HeightReference.CLAMP_TO_GROUND,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      distanceDisplayCondition: visible,
     },
   };
 }
+
+/** ¿Ya se ven las zonas (al llegar a Bolivia) en lugar del marcador de Bolivia? */
+const zonesVisible = (progress: number) => progress >= ZONES_FROM_PROGRESS;
 
 export function GlobeView(props: GlobeViewProps) {
   const { cesium, config, label, boliviaLabel, zones, reducedMotion, framing } = props;
@@ -155,7 +164,7 @@ export function GlobeView(props: GlobeViewProps) {
       .sort((a, b) => a.longitude - b.longitude)
       .forEach((zone, i) => {
         const entity = viewer.entities.add(
-          marker(cesium, element, `zona-${zone.id}`, [zone.longitude, zone.latitude], zone.label, [0, MARKER_SWAP_DISTANCE], i % 2 === 0 ? -26 : 30),
+          marker(cesium, element, `zona-${zone.id}`, [zone.longitude, zone.latitude], zone.label, i % 2 === 0 ? -26 : 30, zonesVisible(latest.current.progress.get())),
         );
         next.set(entity, zone.id);
       });
@@ -214,13 +223,16 @@ export function GlobeView(props: GlobeViewProps) {
       // Cámara: mira a un punto del suelo con rumbo, inclinación y distancia, se suelta del punto y se corre para que
       // la escena quede en la parte de la pantalla que no tapa el panel.
       const applyPose = (pose: CameraPose) => {
+        const width = v.canvas.clientWidth;
+        const height = v.canvas.clientHeight;
+        const range = pose.range * portraitZoom(width, height);
         v.camera.lookAt(
           C.Cartesian3.fromDegrees(pose.longitude, pose.latitude),
-          new C.HeadingPitchRange(C.Math.toRadians(pose.heading), C.Math.toRadians(pose.pitch), pose.range),
+          new C.HeadingPitchRange(C.Math.toRadians(pose.heading), C.Math.toRadians(pose.pitch), range),
         );
         v.camera.lookAtTransform(C.Matrix4.IDENTITY);
         const fov = (v.camera.frustum as { fov?: number }).fov ?? Math.PI / 3;
-        const shift = framingShift(pose.range, fov, v.canvas.clientWidth, v.canvas.clientHeight, latest.current.framing);
+        const shift = framingShift(range, fov, width, height, latest.current.framing);
         if (shift.left) v.camera.moveLeft(shift.left);
         if (shift.down) v.camera.moveDown(shift.down);
       };
@@ -247,7 +259,18 @@ export function GlobeView(props: GlobeViewProps) {
         v.scene.requestRender();
         if (!arrived) frame = requestAnimationFrame(tick);
       };
+      // Relevo de marcadores según el recorrido: el de Bolivia antes de llegar, las zonas al llegar (#125).
+      let zonesShown: boolean | null = null;
+      const updateMarkers = () => {
+        const show = zonesVisible(latest.current.progress.get());
+        if (show === zonesShown) return;
+        zonesShown = show;
+        if (boliviaRef.current) boliviaRef.current.show = !show;
+        for (const entity of zoneEntities.current.keys()) entity.show = show;
+        v.scene.requestRender();
+      };
       const wake = () => {
+        updateMarkers();
         if (!frame) frame = requestAnimationFrame(tick);
       };
       wakeRef.current = wake;
@@ -257,10 +280,9 @@ export function GlobeView(props: GlobeViewProps) {
         wakeRef.current = () => undefined;
       });
 
-      // Marcador de Bolivia de lejos; al acercarse cede su lugar a los puntos de las zonas (se relevan a la misma
-      // distancia para no superponerse).
+      // Marcador de Bolivia antes de llegar a Bolivia; al llegar cede su lugar a los puntos de las zonas.
       boliviaRef.current = v.entities.add(
-        marker(C, element, "bolivia", BOLIVIA_CENTER, latest.current.boliviaLabel, [MARKER_SWAP_DISTANCE, Number.POSITIVE_INFINITY]),
+        marker(C, element, "bolivia", BOLIVIA_CENTER, latest.current.boliviaLabel, -26, !zonesVisible(latest.current.progress.get())),
       );
 
       // Contorno de Bolivia sobre el relieve (#123), con su crédito (RNF-11). Si no carga, el globo sigue sin él.

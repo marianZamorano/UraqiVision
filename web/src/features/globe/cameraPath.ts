@@ -117,3 +117,15 @@ export function framingShift(
     down: ((side(framing.bottom) - side(framing.top)) / 2) * metersPerPixel,
   };
 }
+
+/**
+ * En una pantalla vertical (celular) el ancho visible es mucho menor: la cámara se aleja en proporción para que
+ * Bolivia quepa a lo ancho (#125). En pantallas apaisadas no cambia nada.
+ */
+export function portraitZoom(width: number, height: number): number {
+  if (!(width > 0) || !(height > 0) || width >= height) return 1;
+  return Math.min(2, Math.max(1, (height / width) * 0.7));
+}
+
+/** Desde qué punto del recorrido se ven las zonas en lugar del marcador de Bolivia (a medio camino de Bolivia). */
+export const ZONES_FROM_PROGRESS = TOUR_SECTIONS.indexOf("bolivia") - 0.5;

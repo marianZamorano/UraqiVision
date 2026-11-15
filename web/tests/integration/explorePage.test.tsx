@@ -8,7 +8,14 @@ const globe = vi.hoisted(() => ({
   webgl: false,
   loadCesium: vi.fn<() => Promise<unknown>>(),
   viewerFails: false,
+  // Ubicaciones publicadas que devolvería el backend (#123, #125); vacías por defecto, como sin backend.
+  locations: [] as Array<{ stationId: string; label: { es: string; en: string }; longitude: number; latitude: number }>,
 }))
+
+vi.mock('../../src/data/publicationRepository', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../src/data/publicationRepository')>()
+  return { ...original, listStationLocations: async () => globe.locations }
+})
 
 // jsdom no tiene WebGL: el visor real se prueba en tests/unit/GlobeView.test.tsx y en el navegador (E2E).
 vi.mock('../../src/features/globe/GlobeView', () => ({
@@ -53,6 +60,7 @@ async function renderExplore(lang: 'es' | 'en' = 'es') {
 afterEach(async () => {
   globe.webgl = false
   globe.viewerFails = false
+  globe.locations = []
   globe.loadCesium.mockReset()
   await changeLanguage('es')
 })
@@ -124,6 +132,24 @@ describe('ExplorePage tour (#121, #123)', () => {
     expect(within(bolivia).getAllByRole('list', { name: /estaciones disponibles/i }).length).toBeGreaterThan(0)
     // Sin backend (pruebas) no hay ubicaciones publicadas: se explica y queda la lista.
     expect(within(bolivia).getByText(/las zonas aparecen como puntos en el globo/i)).toBeInTheDocument()
+  })
+
+  it('with points on the globe the Bolivia panel is hidden until the keyboard reaches it (#125)', async () => {
+    globe.locations = [{ stationId: 'santa-cruz', label: { es: 'Santa Cruz', en: 'Santa Cruz' }, longitude: -63, latitude: -17 }]
+    await renderReadyGlobe('es')
+    const heading = screen.getByRole('heading', { name: 'Elige una zona' })
+    const panel = heading.closest('.tour-panel') as HTMLElement
+
+    await waitFor(() => expect(panel).toHaveClass('tour-panel--on-demand'))
+    // Los enlaces siguen en la página (alternativa por teclado) y la pista de «sin puntos» ya no aparece.
+    expect(within(panel).getByRole('link', { name: 'Santa Cruz' })).toBeInTheDocument()
+    expect(within(panel).queryByText(/las zonas aparecen como puntos/i)).not.toBeInTheDocument()
+  })
+
+  it('without points the Bolivia panel stays visible (#125)', async () => {
+    await renderReadyGlobe('es')
+    const panel = screen.getByRole('heading', { name: 'Elige una zona' }).closest('.tour-panel') as HTMLElement
+    expect(panel).not.toHaveClass('tour-panel--on-demand')
   })
 
   it('the keyboard-operable section nav marks the active step and scrolls smoothly to a section', async () => {
