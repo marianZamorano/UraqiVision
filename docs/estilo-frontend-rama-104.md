@@ -91,8 +91,48 @@ Reglas verificadas por pruebas (`web/tests/unit/estilos.test.ts`, WCAG 2.2):
 - `npx vite build`: compilación correcta (requiere `maplibre-gl`, declarado en `package.json`; `npm ci` en `web/`).
 - Capturas Playwright en 1280 px y 390 px: menú centrado a la derecha del logo con separadores `|`, logo de
   órbita, fondo negro estrellado, tarjetas de vidrio.
+- `npm run ai:check`: 42 skills, 14 subagentes, 4 servidores MCP, 0 cambios pendientes; `ai/referencias/catalogo.json`
+  tiene 26 URLs y todas están en §31 del documento maestro.
 - Conocido y previo a esta rama: `npm run build` (que corre `tsc --noEmit`) falla por faltar `@types/node` en
   `package.json`; se resolverá con una dependencia de desarrollo aparte, con aprobación del equipo.
+
+## Direcciones intentadas y descartadas (no forman parte de esta rama)
+
+Dos propuestas de interfaz se implementaron, se verificaron en el navegador y **se descartaron**: el trabajo
+no está en ningún commit ni en el árbol de trabajo, y el `git stash` que lo guardaba se borró por decisión de
+la persona (14 nov 2026). Se registran aquí para no repetir el intento sin resolver antes el conflicto de
+alcance.
+
+| Dirección intentada | Qué hacía | Por qué se descartó (hecho, con fuente) |
+|---|---|---|
+| Página única con scroll | `/`, `/explore`, `/method` y `/about` pasaban a secciones de una misma página con navegación lateral por anclas y fundido al entrar en pantalla | §20.1 del documento maestro (líneas 1747-1755) fija «Método y Acerca de: **páginas aparte**, enlazadas desde cada cifra y desde el pie del sitio». Cambiar el recorrido principal es decisión de equipo, no de implementación. |
+| Planeta CesiumJS como fondo fijo, con cámara sincronizada al scroll | Visor a pantalla completa (después, en esquina con tinte azul), vuelos `camera.flyTo` por sección, panel de vidrio sin bordes y paleta estricta de azules (#050B14, #121F35, #0047AB, #00E0FF, #FFFFFF) | RNF-01 (líneas 1251-1256): «CesiumJS se carga solo al entrar al explorador», y `web/tests/e2e/home-performance.spec.ts` y `web/tests/e2e/portada.spec.ts` exigen **cero peticiones** de Cesium en `/`. Un fondo de Cesium en la portada rompe además la meta de 3 s (RNF-02). `web/tests/unit/App.test.tsx` exige que la atribución de Cesium no aparezca en `/`. |
+
+Lo que sí quedó de esos intentos, como documentación: las reglas duras de CesiumJS que se registraron en las
+skills `globo-y-mapa` y `vite-bundle-optimization` (altura del lienzo + `viewer.resize()` + `ResizeObserver` y
+carga de `Widgets/widgets.css`), porque fueron fallos reales observados en el navegador.
+
+## Para decidir por el equipo (pendientes, sin número en §29)
+
+- **Identidad visual**: aprobar o rectificar la paleta de 7 colores y las tres familias tipográficas de esta
+  rama. Hoy son propuesta (regla 4 de §28).
+- **Fuentes externas**: decidir autoalojar Orbitron, Roboto y Space Grotesk antes del despliegue; depende de
+  la elección de hospedaje (DP-06).
+- **Referencias que faltan en §31**: no hay entrada para MapLibre GL JS ni para las licencias de las fuentes, y
+  la guía de los widgets de CesiumJS tampoco está citada. Sin entrada en §31 no podemos respaldar esas
+  elecciones (regla 3 de §28: no inventar). Candidatas, con fecha de consulta 14 nov 2026:
+  - CesiumJS — guía de Cesium ion y de los assets de terreno e imagen, y la página de referencia de `Viewer`
+    y `ImageryProvider`: https://cesium.com/learn/cesiumjs/ (una entrada distinta a la guía de visualización
+    que ya está en §31).
+  - CesiumJS — `Widgets/widgets.css` y las carpetas estáticas que hay que servir (`Assets`, `Widgets`,
+    `Workers`, `ThirdParty`): https://cesium.com/learn/cesiumjs/ref-doc/
+  - MapLibre GL JS (documento §18 lo fijó como tecnología del mapa 2D, sin referencia en §31):
+    https://maplibre.org/maplibre-gl-js/docs/
+  - Orbitron (SIL Open Font License): https://fonts.google.com/specimen/Orbitron/about
+  - Space Grotesk (SIL Open Font License): https://fonts.google.com/specimen/Space+Grotesk/about
+  - Roboto (Apache 2.0): https://fonts.google.com/specimen/Roboto/about
+  Registrarlas en §31 es tarea del equipo; aquí no se añaden a `ai/referencias/catalogo.json` hasta que estén
+  en el documento maestro, porque la validación exige coherencia con §31.
 
 ## Límites y pendientes
 
