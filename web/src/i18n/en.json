@@ -20,9 +20,40 @@
   },
   "pages": {
     "home": {
-      "headline": "UraqiVision web base",
-      "description": "Main route, honest states and real paths for static publication validation.",
-      "cta": "Explore Bolivia"
+      "eyebrow": "NISAR radar · Bolivia",
+      "quote": "Why are we trying to colonize other planets when we are not able to take care of our own?",
+      "lead": "UraqiVision turns NISAR radar data into clear maps, figures and stories, in Spanish and English.",
+      "cta": "Explore Bolivia",
+      "problemTitle": "The problem",
+      "problems": {
+        "unseen": {
+          "title": "Unseen",
+          "body": "Land clearing fires come with thick smoke and the rains with clouds: optical satellites miss exactly the critical moments."
+        },
+        "notUnderstood": {
+          "title": "Not understood",
+          "body": "Radar does see through smoke and clouds, but its data arrives in technical formats out of reach for most people."
+        },
+        "scattered": {
+          "title": "Out of reach",
+          "body": "The information is scattered across bulletins, viewers and studies, with no place that brings it together with recent satellite data."
+        }
+      },
+      "stepsTitle": "How to use UraqiVision",
+      "steps": {
+        "travel": {
+          "title": "Travel",
+          "body": "Scroll through the globe from the whole Earth down to Bolivia."
+        },
+        "choose": {
+          "title": "Choose",
+          "body": "Click one of the areas we analyse with the radar."
+        },
+        "read": {
+          "title": "Read",
+          "body": "See what changed, where and when, with the source and range of every figure."
+        }
+      }
     },
     "explore": {
       "title": "Explorer",

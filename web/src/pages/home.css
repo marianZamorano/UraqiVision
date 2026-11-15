@@ -1,0 +1,244 @@
+/* Portada (#127, RF-01). Solo tokens (§20.2); planeta y radar en CSS puro, sin imágenes (RNF-01). Las animaciones
+   se anulan con movimiento reducido (regla global de global.css, RNF-12). */
+/* Capas: estrellas del fondo (z −1) < planeta (z 0) < contenido de la portada (z 1) < cabecera (z 10). */
+.home {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: calc(var(--espacio-4) * 2);
+  padding-bottom: calc(var(--espacio-4) * 2);
+}
+
+/* --- Planeta: horizonte que asoma por debajo de los botones ---
+   Marco fijo del tamaño de la ventana que recorta el planeta: no alarga la página ni crea desplazamiento
+   horizontal, y las tarjetas pasan por encima al desplazarse. Va montado al principio de <body> (HomePlanet) y
+   aparece con un fundido suave. */
+.home-planet {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  animation: home-planet-in 0.9s ease 0.5s both;
+}
+
+.home-planet__frame {
+  position: absolute;
+  top: clamp(30rem, 74vh, 48rem);
+  left: 50%;
+  width: min(170vw, 120rem);
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+}
+
+@keyframes home-planet-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.home-planet__sphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--paleta-hielo) 55%, transparent) 0%, transparent 18%),
+    radial-gradient(circle at 30% 12%, color-mix(in srgb, var(--paleta-azul-electrico) 70%, transparent) 0%, transparent 35%),
+    radial-gradient(circle at 70% 8%, color-mix(in srgb, var(--paleta-violeta) 45%, transparent) 0%, transparent 30%),
+    radial-gradient(circle at 50% 50%, var(--paleta-azul-noche) 0%, var(--paleta-azul-abismal) 55%, var(--paleta-negro-azulado) 100%);
+  box-shadow:
+    0 -2px 0 color-mix(in srgb, var(--paleta-hielo) 70%, transparent),
+    0 -30px 90px color-mix(in srgb, var(--paleta-hielo) 30%, transparent),
+    0 -80px 220px color-mix(in srgb, var(--paleta-azul-electrico) 30%, transparent);
+}
+
+/* Barrido de radar que gira sobre el planeta (la banda L ve a través del humo y las nubes). */
+.home-planet__sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 300deg,
+    color-mix(in srgb, var(--paleta-hielo) 6%, transparent) 330deg,
+    color-mix(in srgb, var(--paleta-hielo) 28%, transparent) 359deg,
+    transparent 360deg
+  );
+  mix-blend-mode: screen;
+  animation: home-radar 9s linear infinite;
+}
+
+/* Órbita inclinada con un satélite (NISAR) que la recorre. */
+.home-planet__orbit {
+  position: absolute;
+  inset: -6%;
+  border: 1px dashed color-mix(in srgb, var(--paleta-hielo) 35%, transparent);
+  border-radius: 50%;
+  transform: rotateX(76deg);
+  transform-style: preserve-3d;
+  animation: home-orbit 24s linear infinite;
+}
+
+.home-planet__satellite {
+  position: absolute;
+  top: -0.375rem;
+  left: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-left: -0.375rem;
+  border-radius: 50%;
+  background: var(--paleta-blanco);
+  box-shadow: 0 0 12px var(--paleta-hielo), 0 0 28px var(--paleta-azul-electrico);
+}
+
+@keyframes home-radar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes home-orbit {
+  from {
+    transform: rotateX(76deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(76deg) rotateZ(360deg);
+  }
+}
+
+/* --- Portada: título, frase y llamada a la acción --- */
+.home-hero {
+  display: grid;
+  justify-items: center;
+  gap: var(--espacio-3);
+  min-height: clamp(26rem, calc(100dvh - 8rem), 46rem);
+  align-content: center;
+  padding-block: calc(var(--espacio-4) * 2);
+  text-align: center;
+}
+
+.home-eyebrow {
+  margin: 0;
+  color: var(--color-acento);
+  font-family: var(--fuente-menu);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: var(--espaciado-letras-menu);
+  text-transform: uppercase;
+}
+
+.home-title {
+  margin: 0;
+  font-family: var(--fuente-titulo);
+  font-size: clamp(2rem, 8.5vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--holo);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--paleta-hielo) 35%, transparent));
+}
+
+.home-quote {
+  max-width: 46rem;
+  margin: var(--espacio-2) 0 0;
+}
+
+.home-quote p {
+  margin: 0;
+  color: var(--color-titulo);
+  font-family: var(--fuente-menu);
+  font-size: var(--texto-subtitulo);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.home-quote p::before {
+  content: "“";
+}
+
+.home-quote p::after {
+  content: "”";
+}
+
+.home-lead {
+  max-width: 38rem;
+  margin: 0;
+  color: var(--color-texto-secundario);
+}
+
+.home-cta {
+  justify-content: center;
+  margin-top: var(--espacio-2);
+}
+
+/* --- Problema y cómo usar: tarjetas de vidrio sobre el planeta --- */
+.home-block {
+  display: grid;
+  gap: var(--espacio-3);
+}
+
+.home-block__title {
+  margin: 0;
+  color: var(--color-titulo);
+  font-family: var(--fuente-titulo);
+  font-size: var(--texto-subtitulo);
+  letter-spacing: var(--espaciado-letras-titulo);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-card {
+  padding: var(--espacio-4);
+  border-radius: calc(var(--radio) * 1.5);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-fuerte), transparent);
+  backdrop-filter: blur(calc(var(--desenfoque-vidrio) * 2));
+  -webkit-backdrop-filter: blur(calc(var(--desenfoque-vidrio) * 2));
+  box-shadow:
+    0 30px 80px -30px color-mix(in srgb, var(--paleta-negro-azulado) 90%, transparent),
+    0 0 50px -12px color-mix(in srgb, var(--paleta-hielo) 18%, transparent);
+}
+
+.home-card h3 {
+  margin: 0 0 var(--espacio-2);
+  color: var(--color-acento);
+  font-family: var(--fuente-menu);
+  font-size: 1.1rem;
+  letter-spacing: var(--espaciado-letras-menu);
+  text-transform: uppercase;
+}
+
+.home-card p {
+  margin: 0;
+  color: var(--color-texto-secundario);
+}
+
+.home-step__number {
+  display: block;
+  margin-bottom: var(--espacio-2);
+  font-family: var(--fuente-titulo);
+  font-size: 2rem;
+  line-height: 1;
+  background: var(--holo);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
