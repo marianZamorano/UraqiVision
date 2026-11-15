@@ -6,7 +6,7 @@ description: Uso de design tokens (variables CSS) y consistencia visual en la we
 # Design tokens de UraqiVision
 
 Adaptada de la skill homónima de chapterCoreIEEE. El documento maestro no fija todavía un sistema de diseño:
-la ubicación y el prefijo de abajo son una **propuesta**; confírmalos con M-INTERFAZ (Angie y Marian) y
+la ubicación y los nombres de abajo son una **propuesta**; confírmalos con M-INTERFAZ (Angie y Marian) y
 registra la decisión.
 
 ## Cuándo aplicar
@@ -17,19 +17,19 @@ registra la decisión.
 
 ## Reglas
 
-1. **Un solo archivo de tokens** (propuesta: `web/src/styles/tokens.css`, prefijo `--uv-`). Fuera de ese
+1. **Un solo archivo de tokens** (propuesta: `web/src/styles/tokens.css`, nombres de `tokens.css`, sin prefijo). Fuera de ese
    archivo no hay `#hex`, `rgb()`, `oklch()` ni tamaños sueltos.
-2. **Escala de espaciado de 4 px** (`--uv-space-1/2/3/4/6/8`); sin valores intermedios inventados.
-3. **Tokens semánticos** sobre primitivos cuando importa el significado: `--uv-color-danger`,
-   `--uv-color-surface`, `--uv-color-text-muted`.
+2. **Escala de espaciado de 4 px** (`--espacio-N/2/3/4/6/8`); sin valores intermedios inventados.
+3. **Tokens semánticos** sobre primitivos cuando importa el significado: `--color-acento`,
+   `--color-superficie`, `--color-texto-secundario`.
 4. **Colores de datos con su propio grupo** y nunca reutilizados como colores de interfaz:
    - paleta de cambio de **un solo tono** (más oscuro = más cambio), §20.2;
-   - trama gris para **zonas sin dato** (`--uv-nodata-pattern`), nunca el color de «sin cambio» (RN-13);
+   - trama gris para **zonas sin dato** (`--trama-sin-dato`), nunca el color de «sin cambio» (RN-13);
    - colores de las cuatro clases de parche (RN-05) distinguibles también sin color (patrón o etiqueta).
 5. **Contraste**: texto ≥ 4,5:1 y componentes ≥ 3:1 (WCAG 2.2 AA, RNF-04); pensado para lectura en celular
    al aire libre.
-6. **Tipografía** solo con la escala tipada (`--uv-font-size-xs..xl`, `--uv-line-height-body`).
-7. **Movimiento**: duraciones como tokens (`--uv-duration-*`) que valen `0` con
+6. **Tipografía** solo con la escala tipada (`--texto-base`, `--interlineado`).
+7. **Movimiento**: duraciones como tokens (`--duracion-*`) que valen `0` con
    `prefers-reduced-motion: reduce` (RNF-12).
 8. **Tokens nuevos**: se proponen al equipo antes de agregarlos; no se crean para un solo componente.
 
@@ -41,11 +41,11 @@ registra la decisión.
 
 /* Bien */
 .leyenda {
-  padding: var(--uv-space-4);
-  background: var(--uv-color-surface);
-  border: 1px solid var(--uv-color-border);
+  padding: var(--espacio-N);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
 }
-.sin-dato { background: var(--uv-nodata-pattern); }
+.sin-dato { background: var(--trama-sin-dato); }
 ```
 
 ## Checklist
