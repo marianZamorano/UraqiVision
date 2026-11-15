@@ -41,3 +41,19 @@ h3 {
     scroll-behavior: auto !important;
   }
 }
+
+h1 {
+  font-size: var(--texto-titulo);
+}
+
+h2,
+h3 {
+  font-size: var(--texto-subtitulo);
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}

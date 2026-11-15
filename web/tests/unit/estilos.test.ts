@@ -40,6 +40,31 @@ describe("tokens de diseño", () => {
   });
 });
 
+describe("paleta y contraste por rol (RNF-04, WCAG 1.4.3 y 1.4.11)", () => {
+  it("define exactamente 7 colores de paleta", () => {
+    expect(tokens.match(/--paleta-[a-z]+:\s*#[0-9a-fA-F]{6}/g)).toHaveLength(7);
+  });
+
+  it("el texto principal y el secundario cumplen 4.5:1 sobre la superficie", () => {
+    expect(contraste(token("color-texto"), token("color-superficie"))).toBeGreaterThanOrEqual(4.5);
+    expect(contraste(token("color-texto-secundario"), token("color-superficie"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("los títulos en color de marca cumplen 4.5:1 sobre el fondo", () => {
+    expect(contraste(token("paleta-azul"), token("color-fondo"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("el texto del botón primario (fondo sobre marca) cumple 4.5:1", () => {
+    expect(contraste(token("color-fondo"), token("paleta-azul"))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("el rojo de acento nunca se usa como color de texto", () => {
+    const shell = import.meta.glob("../../src/app/shell.css", { query: "?raw", import: "default", eager: true });
+    const css = Object.values(shell)[0] as string;
+    expect(css).not.toMatch(/(^|[;{\s])color:\s*var\(--color-acento\)/m);
+  });
+});
+
 describe("estilos globales", () => {
   it("el foco es visible con :focus-visible (RNF-04)", () => {
     expect(global).toMatch(/:focus-visible\s*\{[^}]*outline/);
