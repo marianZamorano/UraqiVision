@@ -20,9 +20,40 @@
   },
   "pages": {
     "home": {
-      "headline": "Base web del proyecto UraqiVision",
-      "description": "Recorrido principal, estados honestos y rutas reales para la validación de publicaciones estáticas.",
-      "cta": "Explorar Bolivia"
+      "eyebrow": "Radar NISAR · Bolivia",
+      "quote": "¿Por qué intentamos colonizar otros planetas cuando no somos capaces de cuidar el nuestro?",
+      "lead": "UraqiVision traduce los datos del radar NISAR en mapas, cifras e historias comprensibles, en español e inglés.",
+      "cta": "Explorar Bolivia",
+      "problemTitle": "El problema",
+      "problems": {
+        "unseen": {
+          "title": "No se ve",
+          "body": "Los chaqueos llegan con humo denso y las lluvias con nubes: los satélites ópticos pierden justo los momentos críticos."
+        },
+        "notUnderstood": {
+          "title": "No se entiende",
+          "body": "El radar sí atraviesa humo y nubes, pero sus datos llegan en formatos técnicos fuera del alcance de la mayoría."
+        },
+        "scattered": {
+          "title": "No está a mano",
+          "body": "La información está dispersa en boletines, visores y estudios, sin un lugar que la reúna con datos satelitales recientes."
+        }
+      },
+      "stepsTitle": "Cómo usar UraqiVision",
+      "steps": {
+        "travel": {
+          "title": "Viaja",
+          "body": "Desplázate por el globo desde la Tierra entera hasta Bolivia."
+        },
+        "choose": {
+          "title": "Elige",
+          "body": "Haz clic en una de las zonas que analizamos con el radar."
+        },
+        "read": {
+          "title": "Lee",
+          "body": "Mira qué cambió, dónde y cuándo, con la fuente y el rango de cada cifra."
+        }
+      }
     },
     "explore": {
       "title": "Explorador",

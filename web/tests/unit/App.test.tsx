@@ -26,7 +26,7 @@ describe("App", () => {
 
   it("renders the home page at the root route without the Cesium attribution (RNF-01)", () => {
     renderAt("/");
-    expect(screen.getByRole("heading", { name: /base web del proyecto uraqivision/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "UraqiVision" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /atribución de cesium/i })).not.toBeInTheDocument();
   });
 

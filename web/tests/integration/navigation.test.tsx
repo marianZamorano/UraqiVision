@@ -35,7 +35,7 @@ describe("navegación de la base web", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Acerca de" })).toBeInTheDocument();
 
     fireEvent.click(nav().getByRole("link", { name: "Inicio" }));
-    expect(screen.getByRole("heading", { level: 1, name: /base web del proyecto/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "UraqiVision" })).toBeInTheDocument();
   });
 
   it("recargar una ruta de estación conserva la estación (FR-002)", async () => {
@@ -50,7 +50,7 @@ describe("navegación de la base web", () => {
 
   it("una ruta desconocida vuelve a la portada", async () => {
     renderAt("/ruta-inexistente");
-    expect(await screen.findByRole("heading", { level: 1, name: /base web del proyecto/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "UraqiVision" })).toBeInTheDocument();
     expect(window.location.pathname).toBe("/");
   });
 
@@ -64,7 +64,7 @@ describe("navegación de la base web", () => {
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
 
-    expect(screen.getByRole("heading", { level: 1, name: /base web del proyecto/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "UraqiVision" })).toBeInTheDocument();
   });
 
   it("anuncia el cambio de página y actualiza el título del documento", async () => {
