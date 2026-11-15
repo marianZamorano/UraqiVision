@@ -1,6 +1,6 @@
 // Shell de la aplicación (001 T016, T039): enlace para saltar al contenido, marca, navegación principal (solo Inicio y
-// Explorador, #129), selector de idioma, pie con Método y Acerca de (RF-15, RF-24: enlazadas desde todo el sitio) y
-// región de anuncios del cambio de página. Todo traducido (RNF-03) y operable con teclado (RNF-04).
+// Explorador, alineada a la derecha junto al idioma; #129, #131), selector de idioma y región de anuncios del cambio de
+// página. Método y Acerca de quedan solo por su ruta (/method, /about), por decisión del equipo (#131). Todo traducido (RNF-03) y operable con teclado (RNF-04).
 import type { MouseEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -44,10 +44,7 @@ export function AppShell({ children, announcement = "" }: AppShellProps) {
               <circle cx="20.2" cy="7.4" r="1.4" fill="var(--paleta-hielo)" />
             </svg>
           </span>
-          <div>
-            <strong>{t("app.title")}</strong>
-            <small>{t("app.subtitle")}</small>
-          </div>
+          <strong>{t("app.title")}</strong>
         </div>
 
         <nav aria-label={t("app.mainNavigation")} className="main-nav">
@@ -61,13 +58,6 @@ export function AppShell({ children, announcement = "" }: AppShellProps) {
       <main id={MAIN_CONTENT_ID} className="page-shell" tabIndex={-1}>
         {children}
       </main>
-
-      <footer className="site-footer">
-        <nav aria-label={t("app.footerNavigation")}>
-          <NavLink to="/method">{t("app.method")}</NavLink>
-          <NavLink to="/about">{t("app.about")}</NavLink>
-        </nav>
-      </footer>
 
       <p className="visually-hidden" aria-live="polite" aria-atomic="true">
         {announcement}

@@ -1,7 +1,7 @@
 // Portada (001 T019, #127; RF-01): «UraqiVision» en grande, la frase del equipo, qué hace la web, el problema (§4.1) y
 // cómo usarla en tres pasos, en menos de un minuto de lectura. El planeta es solo CSS: la portada no carga CesiumJS
 // ni imágenes (RNF-01) y su animación se detiene con movimiento reducido (RNF-12). Textos traducidos (RNF-03).
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Link } from "../app/router";
@@ -37,8 +37,35 @@ function HomePlanet() {
   );
 }
 
+/** Tiempo (ms) que la barra de desplazamiento sigue visible después de desplazarse. */
+const SCROLLBAR_HIDE_MS = 900;
+
+/**
+ * En la portada la barra de desplazamiento está oculta y aparece solo mientras se desplaza la página (#131). Se puede
+ * desplazar igual con la rueda, el teclado o el tacto; la clase vive en <html> porque la barra es la de la ventana.
+ */
+function useScrollbarOnScroll() {
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("scrollbar-auto");
+    let timer: number | undefined;
+    const onScroll = () => {
+      root.classList.add("is-scrolling");
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => root.classList.remove("is-scrolling"), SCROLLBAR_HIDE_MS);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(timer);
+      root.classList.remove("scrollbar-auto", "is-scrolling");
+    };
+  }, []);
+}
+
 export function HomePage() {
   const { t } = useTranslation();
+  useScrollbarOnScroll();
 
   return (
     <div className="home">
