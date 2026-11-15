@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { changeLanguage } from '../../src/i18n'
 import { ExplorePage } from '../../src/pages/ExplorePage'
@@ -50,13 +50,16 @@ describe('ExplorePage globe fallback', () => {
     expect(globe.loadCesium).toHaveBeenCalledTimes(1)
   })
 
-  it('shows no fallback notice while Cesium loads correctly', async () => {
+  // T020: estado explícito del explorador mientras se descarga CesiumJS (FR-003: ningún destino mudo).
+  it('announces that the 3D globe is being prepared while Cesium downloads, then clears it', async () => {
     globe.webgl = true
-    globe.loadCesium.mockResolvedValue({})
+    let finish: (value: unknown) => void = () => {}
+    globe.loadCesium.mockReturnValue(new Promise((resolve) => { finish = resolve }))
 
     await renderExplore('es')
 
-    await vi.waitFor(() => expect(globe.loadCesium).toHaveBeenCalled())
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(/preparando el globo 3d/i)
+    await act(async () => finish({}))
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
   })
 })
