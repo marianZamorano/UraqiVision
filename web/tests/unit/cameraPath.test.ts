@@ -1,6 +1,6 @@
 // #121 (RF-25, RNF-12): trayectoria de la cámara del recorrido.
 import { describe, expect, it } from "vitest";
-import { dampPose, easeInOutCubic, framingShift, KEYFRAMES, poseAt, poseDistance, TOUR_SECTIONS } from "../../src/features/globe/cameraPath";
+import { dampPose, easeInOutCubic, framingShift, KEYFRAMES, portraitZoom, poseAt, poseDistance, TOUR_SECTIONS, ZONES_FROM_PROGRESS } from "../../src/features/globe/cameraPath";
 import { BOLIVIA_RECTANGLE } from "../../src/features/globe/globeConfig";
 
 describe("cameraPath", () => {
@@ -17,7 +17,6 @@ describe("cameraPath", () => {
     expect(KEYFRAMES.bolivia.longitude).toBeLessThan(east);
     expect(KEYFRAMES.bolivia.latitude).toBeGreaterThan(south);
     expect(KEYFRAMES.bolivia.latitude).toBeLessThan(north);
-    expect(KEYFRAMES.bolivia.range).toBeLessThan(3_200_000); // por debajo del relevo de marcadores de GlobeView
   });
 
   it("la aceleración es suave: empieza y termina quieta", () => {
@@ -67,5 +66,17 @@ describe("cameraPath", () => {
     expect(framingShift(1_000_000, fov, 400, 800, { left: 0, right: 0, top: 0, bottom: 300 }).down).toBeGreaterThan(0);
     expect(framingShift(1_000_000, fov, 0, 0, { left: 400, right: 0, top: 0, bottom: 300 })).toEqual({ left: 0, down: 0 });
     expect(framingShift(1_000_000, fov, 1000, 600, { left: -50, right: -5, top: -2, bottom: -1 })).toEqual({ left: 0, down: 0 });
+  });
+
+  it("en pantallas verticales la cámara se aleja para que Bolivia quepa a lo ancho; en apaisadas no (#125)", () => {
+    expect(portraitZoom(1440, 900)).toBe(1);
+    expect(portraitZoom(390, 844)).toBeGreaterThan(1.4);
+    expect(portraitZoom(390, 844)).toBeLessThanOrEqual(2);
+    expect(portraitZoom(100, 2000)).toBe(2);
+    expect(portraitZoom(0, 0)).toBe(1);
+  });
+
+  it("las zonas relevan al marcador de Bolivia a medio camino de la sección de Bolivia", () => {
+    expect(ZONES_FROM_PROGRESS).toBe(1.5);
   });
 });

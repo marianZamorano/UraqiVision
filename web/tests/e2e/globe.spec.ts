@@ -59,7 +59,8 @@ test("hacer clic en el marcador de Bolivia en el globo lleva a la sección de Bo
       const panel = document.querySelector(".tour-panel")?.getBoundingClientRect();
       const nav = document.querySelector(".tour-nav ol")?.getBoundingClientRect();
       const cabecera = document.querySelector(".topbar")?.getBoundingClientRect();
-      return { left: panel?.right ?? 0, right: nav ? window.innerWidth - nav.left : 0, top: cabecera?.bottom ?? 0 };
+      // 48 px: margen extra con la navegación (NAV_MARGIN de ExplorePage, #125).
+      return { left: panel?.right ?? 0, right: nav ? window.innerWidth - nav.left + 48 : 0, top: cabecera?.bottom ?? 0 };
     });
     await page.mouse.click(
       caja.x + caja.width / 2 + (libre.left - libre.right) / 2,

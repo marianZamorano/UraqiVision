@@ -278,18 +278,33 @@ describe("GlobeView", () => {
     ];
     render(<GlobeView {...props(f, { zones })} />);
 
-    type Punto = {
-      id: string;
-      label: { text: string; pixelOffset: { y: number }; distanceDisplayCondition: { near: number; far: number } };
-    };
+    type Punto = { id: string; show: boolean; label: { text: string; pixelOffset: { y: number } } };
     const puntos = f.entities.filter((e) => String(e.id).startsWith("zona-")) as unknown as Punto[];
     expect(puntos.map((p) => p.id)).toEqual(["zona-chiquitania-oeste", "zona-sanignacio"]); // ordenadas por longitud
     expect(puntos.map((p) => p.label.text)).toEqual(["Chiquitanía oeste", "San Ignacio de Velasco"]);
     expect(puntos[0]?.label.pixelOffset.y).toBeLessThan(0);
     expect(puntos[1]?.label.pixelOffset.y).toBeGreaterThan(0);
-    expect(puntos[0]?.label.distanceDisplayCondition).toMatchObject({ near: 0 });
+    // Antes de llegar a Bolivia se ve su marcador y no las zonas.
     const bolivia = f.entities[0] as unknown as Punto;
-    expect(bolivia.label.distanceDisplayCondition.near).toBe(puntos[0]?.label.distanceDisplayCondition.far); // se relevan
+    expect(bolivia.show).toBe(true);
+    expect(puntos.every((p) => !p.show)).toBe(true);
+  });
+
+  it("al llegar a Bolivia las zonas relevan al marcador de Bolivia, y al volver se invierte (#125)", () => {
+    const f = fakeCesium();
+    const progress = createProgressStore();
+    const zones = [{ id: "beni-norte", label: "Beni norte", longitude: -65.57, latitude: -11.99 }];
+    render(<GlobeView {...props(f, { progress, zones })} />);
+    const bolivia = f.entities[0] as { show: boolean };
+    const punto = f.entities.find((e) => e.id === "zona-beni-norte") as { show: boolean };
+
+    progress.set(2);
+    expect(bolivia.show).toBe(false);
+    expect(punto.show).toBe(true);
+
+    progress.set(0.4);
+    expect(bolivia.show).toBe(true);
+    expect(punto.show).toBe(false);
   });
 
   it("las zonas que llegan después (o cambian de idioma) reemplazan los puntos anteriores", () => {
