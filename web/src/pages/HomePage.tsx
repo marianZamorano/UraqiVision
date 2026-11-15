@@ -57,9 +57,6 @@ export function HomePage() {
           <Link to="/explore" className="button-primary">
             {t("pages.home.cta")}
           </Link>
-          <Link to="/method" className="button-secondary">
-            {t("app.method")}
-          </Link>
         </div>
       </section>
 
