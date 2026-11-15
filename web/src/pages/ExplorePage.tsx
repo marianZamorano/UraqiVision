@@ -7,6 +7,7 @@ import {
   demoStations,
   listStationLocations,
   listStations,
+  stationFilesBase,
   usesPublishedApi,
   type StationLocation,
   type StationSummary,
@@ -14,22 +15,40 @@ import {
 import { useTranslation } from 'react-i18next'
 import { GlobeAttribution } from '../features/globe/GlobeAttribution'
 import { hasWebGLSupport, resolveGlobeProvider } from '../features/globe/GlobeProvider'
-import { GlobeView, type CesiumModule, type ZonePoint } from '../features/globe/GlobeView'
-import { NO_FRAMING, TOUR_SECTIONS, type GlobeFraming, type TourSection } from '../features/globe/cameraPath'
+import { GlobeView, type CesiumModule, type GlobeOverlay, type ZonePoint } from '../features/globe/GlobeView'
+import {
+  DEFAULT_ZONE_RANGE,
+  NO_FRAMING,
+  TOUR_SECTIONS,
+  zoneRange,
+  type GlobeFocus,
+  type GlobeFraming,
+  type TourSection,
+} from '../features/globe/cameraPath'
 import { resolveFallbackProvider } from '../features/globe/fallbackProvider'
 import { globeConfigFor } from '../features/globe/globeConfig'
 import { readPublicIonToken } from '../features/globe/ionProvider'
 import { loadCesiumModule, loadGlobeModule } from '../features/globe/lazyGlobe'
 import { useTourProgress } from '../features/globe/scrollProgress'
+import { rectanguloDe } from '../features/map/stationFiles'
+import { ZoneLayer, type ZoneCovered } from '../features/zone/ZoneLayer'
+import { viewFor, type GlobeLayerChoice } from '../features/zone/globeLayers'
+import { useZoneSummary } from '../features/zone/useZoneSummary'
 
 /** Separación (px) entre la escena del globo y la navegación del recorrido. */
 const NAV_MARGIN = 48
 
+/** Sección del recorrido donde viven las zonas. */
+const BOLIVIA_INDEX = TOUR_SECTIONS.indexOf('bolivia')
+const DEFAULT_LAYER: GlobeLayerChoice = { layer: 'cambio' }
+
 type ExplorePageProps = {
   lang: Language
+  /** Zona abierta, de la URL (`/explore?station=…`, RF-29). */
+  stationId?: string
 }
 
-export function ExplorePage({ lang }: ExplorePageProps) {
+export function ExplorePage({ lang, stationId }: ExplorePageProps) {
   const { t } = useTranslation()
   // RNF-01, RF-30: CesiumJS solo se pide aquí y nunca sin WebGL. La decisión y la configuración se fijan una vez.
   const [{ decision, config }] = useState(() => {
@@ -53,9 +72,13 @@ export function ExplorePage({ lang }: ExplorePageProps) {
     const element = sectionRefs.current[TOUR_SECTIONS.indexOf(section)]
     element?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' })
   }, [reducedMotion])
-  // #123 (RF-29): el clic en el punto de una zona abre directamente su estación.
-  const openStation = useCallback((stationId: string) => {
-    navigate(serializeRoute({ route: 'station', stationId }))
+  // RF-25, RF-29: el clic en el punto de una zona la abre aquí mismo, sin cambiar de página: la cámara vuela hasta
+  // ella y sus paneles van sobre el globo. La zona abierta vive en la URL, así «atrás» la cierra.
+  const openZone = useCallback((id: string) => {
+    navigate(serializeRoute({ route: 'explore', stationId: id }))
+  }, [])
+  const closeZone = useCallback(() => {
+    navigate(serializeRoute({ route: 'explore' }))
   }, [])
 
   // Versión beta (#110): estaciones publicadas por el backend; los ejemplos DEMO solo si no hay backend (RN-04).
@@ -115,6 +138,67 @@ export function ExplorePage({ lang }: ExplorePageProps) {
     ? t('pages.explore.fallbackWebglUnavailable')
     : t('pages.explore.fallbackLoadFailed')
   const showGlobe = cesium !== null && !fallback.active
+
+  // Zona abierta: solo con el globo a la vista y si la zona tiene ubicación publicada.
+  const zone = showGlobe && stationId ? zones.find((z) => z.id === stationId) ?? null : null
+  const zoneId = zone?.id ?? null
+  const zoneIndex = zone ? zones.indexOf(zone) : -1
+  const zoneBase = zone ? stationFilesBase(zone.id) : null
+  const summary = useZoneSummary(zoneBase)
+  const [choice, setChoice] = useState<GlobeLayerChoice>(DEFAULT_LAYER)
+  const [opacity, setOpacity] = useState(0.85)
+  const [detail, setDetail] = useState(false)
+  const [covered, setCovered] = useState<ZoneCovered | null>(null)
+  // Al cambiar de zona, la capa vuelve al cambio medido; al cerrarla, se cierra también su detalle (ajuste de estado
+  // durante el render, sin efecto).
+  const [shownZone, setShownZone] = useState<string | null>(null)
+  if (zoneId !== shownZone) {
+    setShownZone(zoneId)
+    setChoice(DEFAULT_LAYER)
+    if (!zoneId) {
+      setDetail(false)
+      setCovered(null)
+    }
+  }
+  const onCovered = useCallback((next: ZoneCovered) => {
+    setCovered((c) => (c && c.left === next.left && c.right === next.right && c.bottom === next.bottom ? c : next))
+  }, [])
+
+  // RF-25: a dónde vuela la cámara. La distancia sale de la caja publicada de la zona en cuanto se conoce.
+  const zoneBbox = summary.kind === 'ready' ? summary.data.estacion.area.bbox_lonlat : null
+  const focus = useMemo<GlobeFocus | null>(
+    () => (zone
+      ? { id: zone.id, longitude: zone.longitude, latitude: zone.latitude, range: zoneBbox ? zoneRange(zoneBbox) : DEFAULT_ZONE_RANGE }
+      : null),
+    [zone, zoneBbox],
+  )
+  // RF-08: la imagen de radar elegida, extendida sobre el relieve, con el contorno exacto de su caja.
+  const overlay = useMemo<GlobeOverlay | null>(() => {
+    if (!zoneBase || summary.kind !== 'ready') return null
+    const vistas = summary.data.vistas
+    const view = viewFor(vistas, choice)
+    if (!view) return null
+    const corners = view.esquinas_lonlat ?? vistas.esquinas_lonlat
+    return { url: `${zoneBase}/${view.archivo}`, rectangle: rectanguloDe(corners), opacity, outline: corners }
+  }, [zoneBase, summary, choice, opacity])
+
+  // La zona se ve desde la sección de Bolivia: un enlace directo salta ahí; salir de ella con el scroll la cierra.
+  const zoneAtBolivia = useRef(false)
+  useEffect(() => {
+    if (!zoneId) {
+      zoneAtBolivia.current = false
+      return
+    }
+    if (active === BOLIVIA_INDEX) {
+      zoneAtBolivia.current = true
+    } else if (zoneAtBolivia.current) {
+      closeZone()
+    } else {
+      const section = sectionRefs.current[BOLIVIA_INDEX]
+      if (typeof section?.scrollIntoView === 'function') section.scrollIntoView({ behavior: 'auto', block: 'center' })
+    }
+  }, [zoneId, active, closeZone])
+
   // #125: con los puntos en el globo, el panel de Bolivia sobra; queda solo para el teclado (aparece con el foco).
   const boliviaOnDemand = showGlobe && zones.length > 0
 
@@ -124,11 +208,20 @@ export function ExplorePage({ lang }: ExplorePageProps) {
   const [framing, setFraming] = useState<GlobeFraming>(NO_FRAMING)
   useEffect(() => {
     const measure = () => {
+      const header = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0
+      if (zoneId) {
+        // Con una zona abierta mandan sus paneles (ZoneLayer mide cuánto tapan); mientras no lo informan, nada.
+        if (!covered) return
+        const next: GlobeFraming = { left: covered.left, right: covered.right, top: Math.max(0, Math.round(header)), bottom: covered.bottom }
+        setFraming((f) =>
+          f.left === next.left && f.right === next.right && f.top === next.top && f.bottom === next.bottom ? f : next,
+        )
+        return
+      }
       const panel = panelRefs.current[active]
       if (!panel) return
       const rect = panel.getBoundingClientRect()
       const desktop = typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 769px)').matches
-      const header = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 0
       const nav = navRef.current?.querySelector('ol')?.getBoundingClientRect()
       const next: GlobeFraming = {
         left: desktop ? Math.round(rect.right) : 0,
@@ -150,7 +243,7 @@ export function ExplorePage({ lang }: ExplorePageProps) {
       document.removeEventListener('focusin', measure)
       document.removeEventListener('focusout', measure)
     }
-  }, [active, boliviaOnDemand])
+  }, [active, boliviaOnDemand, zoneId, covered])
 
   return (
     <>
@@ -165,14 +258,37 @@ export function ExplorePage({ lang }: ExplorePageProps) {
           framing={framing}
           progress={progress}
           reducedMotion={reducedMotion}
+          focus={focus}
+          overlay={overlay}
           onSelectSection={goTo}
-          onSelectZone={openStation}
+          onSelectZone={openZone}
           onReady={onGlobeReady}
           onError={onGlobeError}
         />
       ) : null}
 
-      <div className={showGlobe ? 'explore-tour explore-tour--globe' : 'explore-tour'}>
+      {zone ? (
+        <ZoneLayer
+          lang={lang}
+          stationId={zone.id}
+          name={zone.label}
+          departamento={stations.find((st) => st.stationId === zone.id)?.departamento ?? null}
+          base={zoneBase}
+          summary={summary}
+          choice={choice}
+          onChoice={setChoice}
+          opacity={opacity}
+          onOpacity={setOpacity}
+          detail={detail}
+          onDetail={setDetail}
+          onClose={closeZone}
+          onPrevious={zones.length > 1 ? () => openZone((zones[(zoneIndex - 1 + zones.length) % zones.length] as ZonePoint).id) : undefined}
+          onNext={zones.length > 1 ? () => openZone((zones[(zoneIndex + 1) % zones.length] as ZonePoint).id) : undefined}
+          onCovered={onCovered}
+        />
+      ) : null}
+
+      <div className={['explore-tour', showGlobe ? 'explore-tour--globe' : '', zone ? 'explore-tour--zone' : ''].filter(Boolean).join(' ')}>
         <nav className="tour-nav" aria-label={t('pages.explore.tour.nav')} data-globe-overlay="" ref={navRef}>
           <ol>
             {TOUR_SECTIONS.map((section, i) => (
@@ -249,7 +365,13 @@ export function ExplorePage({ lang }: ExplorePageProps) {
                       <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
                         {grupo.items.map((station) => (
                           <li key={station.stationId}>
-                            <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
+                            {/* Con su punto en el globo, la zona se abre aquí mismo; sin él, en su página (RF-29, RF-30). */}
+                            <Link
+                              to={serializeRoute({
+                                route: showGlobe && zones.some((z) => z.id === station.stationId) ? 'explore' : 'station',
+                                stationId: station.stationId,
+                              })}
+                            >
                               {station.label[lang]}
                             </Link>
                           </li>

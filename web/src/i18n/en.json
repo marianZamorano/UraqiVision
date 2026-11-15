@@ -198,6 +198,16 @@
       "drop": "HV drop",
       "during": "Hotspots during the drop",
       "after": "Hotspots after"
+    },
+    "footprints": "NISAR scene footprints",
+    "water": "Reference water (dry season)",
+    "waterNote": "Permanent (dark blue) and occasional (light blue) water in {{n}} areas. Exploratory, outside the MVP: the baseline for measuring floods once rainy-season scenes arrive.",
+    "fp": {
+      "title": "NISAR scene",
+      "orbit": "Orbit",
+      "frame": "Frame",
+      "date": "Dates",
+      "pol": "Polarizations"
     }
   },
   "view": {
@@ -206,7 +216,8 @@
     "base": "The normal (baseline)",
     "cambio": "HV change on the date",
     "dnbr": "Optical witness (Sentinel-2)",
-    "noChange": "Change is not measured on baseline dates: pick a later date."
+    "noChange": "Change is not measured on baseline dates: pick a later date.",
+    "validated": "VALIDATED image (separate segment)"
   },
   "story": {
     "eyebrow": "One answer, step by step",
@@ -215,21 +226,25 @@
     "see": "Show on the map",
     "s1": {
       "title": "First, this place's normal",
-      "body": "Median HV of {{dates}}, before the change. Light is forest with structure; dark is clearing, pasture or soil."
+      "body": "Median HV of {{dates}}, before the change. Light is forest with structure; dark is clearing, pasture or soil.",
+      "short": "What it looks like with no change. Bright: forest. Dark: pasture or soil."
     },
     "s2": {
       "title": "Then, how it changed by {{date}}",
-      "body": "That date minus the normal. Brown: the signal dropped; blue: it rose; white: it barely moved. Across most of the landscape the change stays between {{lo}} and {{hi}} dB."
+      "body": "That date minus the normal. Brown: the signal dropped; blue: it rose; white: it barely moved. Across most of the landscape the change stays between {{lo}} and {{hi}} dB.",
+      "short": "Brown: the signal dropped. Blue: it rose."
     },
     "s3": {
       "title": "The areas that crossed the rule",
-      "body": "{{n}} patches of at least 1 ha where HV fell more than {{thr}} dB and stayed low on the next date: {{ha}} ha (range {{min}}–{{max}}). These are radar signals, not fire perimeters."
+      "body": "{{n}} patches of at least 1 ha where HV fell more than {{thr}} dB and stayed low on the next date: {{ha}} ha (range {{min}}–{{max}}). These are radar signals, not fire perimeters.",
+      "short": "{{n}} patches · {{ha}} ha ({{min}}–{{max}}). Radar signals, not fire perimeters."
     },
     "s4": {
       "title": "A second witness",
       "body": "Sentinel-2 between {{from}} and {{to}}. Brown: vegetation lost; green: greener.",
       "brackets": "Its dates bracket the radar period.",
-      "notBrackets": "Its dates do not fully match the radar's."
+      "notBrackets": "Its dates do not fully match the radar's.",
+      "short": "Sentinel-2, {{from}} to {{to}}. Brown: lost vegetation. Green: regrew."
     },
     "s5": {
       "title": "Agreement, and where it breaks",
@@ -315,5 +330,67 @@
     "optico_con_fenologia": "The optical witness includes seasonal vegetation changes (leaf fall, regrowth), which are not fire.",
     "revision_visual_pendiente": "A visual review of a sample of patches is still missing (VC-05).",
     "procedencia_incompleta": "An original file checksum is missing (CQ-06)."
+  },
+  "validated": {
+    "title": "VALIDATED segment (separate)",
+    "note": "Product with the mission's full validation, published since 21 Oct 2026. Shown separately: it does not enter the baseline, the change or the hectares (RN-02)."
+  },
+  "zone": {
+    "eyebrow": "Analysis area",
+    "close": "Close the area",
+    "previous": "Previous area",
+    "next": "Next area",
+    "status": {
+      "publicada_con_limites": "Published with limits",
+      "borrador_exploratorio": "Exploratory draft"
+    },
+    "questions": "Question",
+    "q": {
+      "where": "Where and when?",
+      "what": "Burning or clearing?"
+    },
+    "range": "Range: {{min}} – {{max}} ha",
+    "headline": "Sustained drop of the vegetation signal (HV) as of {{date}}.",
+    "unconfirmed": "Last date: not yet confirmed by a later image.",
+    "trend": "Hectares by date",
+    "trendLabel": "Hectares by date: from {{a}} ha on {{from}} to {{b}} ha on {{to}}.",
+    "classesNote": "Hypotheses, not confirmed causes. They add up to the top of the range.",
+    "facts": {
+      "dates": "usable dates",
+      "baseline": "baseline dates",
+      "orbit": "orbit"
+    },
+    "limits": "Declared limits ({{n}})",
+    "more": "More information",
+    "loading": "Loading the area…",
+    "error": "The files of this area could not be read.",
+    "radar": {
+      "title": "Radar on the globe",
+      "layer": "Layer",
+      "opacity": "Opacity: {{pct}} %",
+      "noData": "No colour: no data.",
+      "layers": {
+        "cambio": "Change",
+        "base": "Normal",
+        "radar": "Radar",
+        "dnbr": "Optical"
+      }
+    },
+    "detail": {
+      "close": "Close the detail",
+      "fullMap": "Open the full analysis map",
+      "fullMapNote": "Patches, hotspots and control areas, on the exact radar grid."
+    },
+    "noChangeYet": "Baseline: no change is measured here yet.",
+    "timeline": {
+      "title": "Timeline",
+      "slider": "Image date",
+      "play": "Play from the first date",
+      "pause": "Pause",
+      "baseline": "baseline",
+      "change": "change measured",
+      "radar": "radar",
+      "gap": "No data from {{from}} to {{to}}"
+    }
   }
 }

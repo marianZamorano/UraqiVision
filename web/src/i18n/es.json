@@ -198,6 +198,16 @@
       "drop": "Caída de HV",
       "during": "Focos durante la caída",
       "after": "Focos después"
+    },
+    "footprints": "Huellas de las escenas NISAR",
+    "water": "Agua de referencia (época seca)",
+    "waterNote": "Agua permanente (azul oscuro) y ocasional (celeste) en {{n}} zonas. Exploratorio, fuera del MVP: es la base para medir inundaciones cuando lleguen las escenas de lluvias.",
+    "fp": {
+      "title": "Escena NISAR",
+      "orbit": "Órbita",
+      "frame": "Frame",
+      "date": "Fechas",
+      "pol": "Polarizaciones"
     }
   },
   "view": {
@@ -206,7 +216,8 @@
     "base": "Lo normal (línea base)",
     "cambio": "Cambio de HV en la fecha",
     "dnbr": "Testigo óptico (Sentinel-2)",
-    "noChange": "En la línea base no se mide cambio: elige una fecha posterior."
+    "noChange": "En la línea base no se mide cambio: elige una fecha posterior.",
+    "validated": "Imagen VALIDATED (tramo aparte)"
   },
   "story": {
     "eyebrow": "Una respuesta, paso a paso",
@@ -215,21 +226,25 @@
     "see": "Ver en el mapa",
     "s1": {
       "title": "Primero, lo normal de este lugar",
-      "body": "Mediana de HV de {{dates}}, antes del cambio. Claro es bosque con estructura; oscuro, desmonte, pasto o suelo."
+      "body": "Mediana de HV de {{dates}}, antes del cambio. Claro es bosque con estructura; oscuro, desmonte, pasto o suelo.",
+      "short": "Así es sin cambio. Claro: bosque. Oscuro: pasto o suelo."
     },
     "s2": {
       "title": "Después, cómo cambió al {{date}}",
-      "body": "Esa fecha menos lo normal. Marrón: la señal bajó; azul: subió; blanco: casi no se movió. En la mayor parte del paisaje el cambio queda entre {{lo}} y {{hi}} dB."
+      "body": "Esa fecha menos lo normal. Marrón: la señal bajó; azul: subió; blanco: casi no se movió. En la mayor parte del paisaje el cambio queda entre {{lo}} y {{hi}} dB.",
+      "short": "Marrón: la señal bajó. Azul: subió."
     },
     "s3": {
       "title": "Las zonas que cruzaron la regla",
-      "body": "{{n}} parches de al menos 1 ha donde HV cayó más de {{thr}} dB y siguió baja en la fecha siguiente: {{ha}} ha (rango {{min}}–{{max}}). Son señales de radar, no perímetros de incendio."
+      "body": "{{n}} parches de al menos 1 ha donde HV cayó más de {{thr}} dB y siguió baja en la fecha siguiente: {{ha}} ha (rango {{min}}–{{max}}). Son señales de radar, no perímetros de incendio.",
+      "short": "{{n}} parches · {{ha}} ha ({{min}}–{{max}}). Señales de radar, no perímetros de incendio."
     },
     "s4": {
       "title": "Un segundo testigo",
       "body": "Sentinel-2 entre el {{from}} y el {{to}}. Marrón: perdió vegetación; verde: reverdeció.",
       "brackets": "Sus fechas encierran el periodo del radar.",
-      "notBrackets": "Sus fechas no coinciden del todo con las del radar."
+      "notBrackets": "Sus fechas no coinciden del todo con las del radar.",
+      "short": "Sentinel-2, del {{from}} al {{to}}. Marrón: perdió vegetación. Verde: reverdeció."
     },
     "s5": {
       "title": "Acuerdo, y dónde se rompe",
@@ -315,5 +330,67 @@
     "optico_con_fenologia": "El testigo óptico incluye los cambios estacionales de la vegetación (caída de hojas, rebrote), que no son fuego.",
     "revision_visual_pendiente": "Falta la revisión visual de una muestra de parches (VC-05).",
     "procedencia_incompleta": "Falta la suma de verificación de algún archivo original (CQ-06)."
+  },
+  "validated": {
+    "title": "Tramo VALIDATED (aparte)",
+    "note": "Producto con la validación completa de la misión, publicado desde el 21 oct 2026. Se muestra aparte: no entra a la línea base, al cambio ni a las hectáreas (RN-02)."
+  },
+  "zone": {
+    "eyebrow": "Zona de análisis",
+    "close": "Cerrar la zona",
+    "previous": "Zona anterior",
+    "next": "Zona siguiente",
+    "status": {
+      "publicada_con_limites": "Publicada con límites",
+      "borrador_exploratorio": "Borrador exploratorio"
+    },
+    "questions": "Pregunta",
+    "q": {
+      "where": "¿Dónde y cuándo?",
+      "what": "¿Quema o desmonte?"
+    },
+    "range": "Rango: {{min}} – {{max}} ha",
+    "headline": "Caída sostenida de la señal de vegetación (HV) al {{date}}.",
+    "unconfirmed": "Última fecha: aún sin confirmar con una imagen posterior.",
+    "trend": "Hectáreas por fecha",
+    "trendLabel": "Hectáreas por fecha: de {{a}} ha el {{from}} a {{b}} ha el {{to}}.",
+    "classesNote": "Hipótesis, no causas confirmadas. Suman el tope del rango.",
+    "facts": {
+      "dates": "fechas útiles",
+      "baseline": "fechas de línea base",
+      "orbit": "órbita"
+    },
+    "limits": "Límites declarados ({{n}})",
+    "more": "Más información",
+    "loading": "Cargando la zona…",
+    "error": "No se pudieron leer los archivos de la zona.",
+    "radar": {
+      "title": "Radar sobre el globo",
+      "layer": "Capa",
+      "opacity": "Opacidad: {{pct}} %",
+      "noData": "Sin color: sin dato.",
+      "layers": {
+        "cambio": "Cambio",
+        "base": "Lo normal",
+        "radar": "Radar",
+        "dnbr": "Óptico"
+      }
+    },
+    "detail": {
+      "close": "Cerrar el detalle",
+      "fullMap": "Abrir el mapa de análisis completo",
+      "fullMapNote": "Parches, focos y zonas de control, sobre la grilla exacta del radar."
+    },
+    "noChangeYet": "Línea base: aquí todavía no se mide cambio.",
+    "timeline": {
+      "title": "Línea de tiempo",
+      "slider": "Fecha de la imagen",
+      "play": "Reproducir desde la primera fecha",
+      "pause": "Pausar",
+      "baseline": "línea base",
+      "change": "cambio medido",
+      "radar": "radar",
+      "gap": "Sin datos del {{from}} al {{to}}"
+    }
   }
 }

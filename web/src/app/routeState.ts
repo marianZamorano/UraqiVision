@@ -40,6 +40,10 @@ export function parseRoute(pathname: string, search = ""): RouteLocation | null 
   const params = new URLSearchParams(search);
   const departmentId = params.get("department");
   const period = params.get("period");
+  // RF-29: la zona abierta en el explorador va en la URL (?station=), para que «atrás» la cierre y el enlace se
+  // pueda compartir; al volver del mapa de análisis, el globo conserva la selección.
+  const zone = params.get("station");
+  if (location.route === "explore" && zone && ID.test(zone)) location.stationId = zone;
   if (departmentId && ID.test(departmentId)) location.departmentId = departmentId;
   if (period && PERIOD.test(period)) location.period = period;
 
@@ -59,6 +63,7 @@ export function serializeRoute(location: RouteLocation): string {
   }
 
   const params = new URLSearchParams();
+  if (location.route === "explore" && location.stationId && ID.test(location.stationId)) params.set("station", location.stationId);
   if (location.departmentId && ID.test(location.departmentId)) params.set("department", location.departmentId);
   if (location.period && PERIOD.test(location.period)) params.set("period", location.period);
   const query = params.toString();

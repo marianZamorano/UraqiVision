@@ -14,7 +14,8 @@ export function useRouteFocus(location: RouteLocation | null): string {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const route = location?.route ?? "home";
-  const path = `${route}:${location?.stationId ?? ""}`;
+  // La zona abierta dentro del explorador (?station=) no cambia de página: solo la ruta de estación cuenta su id.
+  const path = `${route}:${route === "station" ? (location?.stationId ?? "") : ""}`;
   const page = t(ROUTE_TITLE_KEYS[route]);
 
   // Ajuste de estado al cambiar la ruta, durante el render (patrón recomendado por React, sin efecto).

@@ -100,6 +100,20 @@ export async function listStations(signal?: AbortSignal): Promise<StationSummary
   }
 }
 
+/** Origen del endpoint (sin /api): las rutas de archivos que devuelve son relativas a él. */
+export const publishedOrigin = PUBLISHED_API.replace(/\/api$/, '')
+
+/** Capas de agua de referencia de época seca (exploratorias, fuera del MVP). Sin endpoint o si falla: ninguna. */
+export async function listWaterLayers<T>(signal?: AbortSignal): Promise<T[]> {
+  if (!PUBLISHED_API) return []
+  try {
+    const response = await fetch(`${PUBLISHED_API}/agua`, { signal })
+    return response.ok ? ((await response.json()) as T[]) : []
+  } catch {
+    return []
+  }
+}
+
 /** Carpeta de archivos publicados (§17.3) de una estación del endpoint, o null si es DEMO o no hay endpoint. */
 export function stationFilesBase(stationId: string): string | null {
   if (!PUBLISHED_API || demoStations[stationId]) return null

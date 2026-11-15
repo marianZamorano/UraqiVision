@@ -1,0 +1,772 @@
+/* Zona abierta en el explorador (RF-25, RF-29): ficha, control del radar y detalle sobre el globo. Solo tokens
+   (§20.2), salvo los colores categóricos de las clases y las paletas publicadas, que llegan como estilo en línea.
+   - La capa cubre la ventana sin recibir eventos: solo sus paneles los reciben, así el resto sigue siendo globo.
+   - Por encima del recorrido (z-index 1) y por debajo de la cabecera (z-index 10).
+   - Las entradas y salidas son transiciones; con movimiento reducido las anula global.css (RNF-12). */
+.zone-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.zone-glass {
+  pointer-events: auto;
+  border: 0;
+  border-radius: calc(var(--radio) * 1.5);
+  background: color-mix(in srgb, var(--color-superficie) 78%, transparent);
+  backdrop-filter: blur(calc(var(--desenfoque-vidrio) * 2)) saturate(140%);
+  -webkit-backdrop-filter: blur(calc(var(--desenfoque-vidrio) * 2)) saturate(140%);
+  box-shadow:
+    0 30px 80px -30px color-mix(in srgb, var(--paleta-negro-azulado) 90%, transparent),
+    0 0 60px -10px color-mix(in srgb, var(--paleta-hielo) 18%, transparent);
+  color: var(--color-texto);
+  transition:
+    opacity var(--duracion-aparicion) ease,
+    transform var(--duracion-aparicion) cubic-bezier(0.22, 0.8, 0.26, 1),
+    visibility 0s linear 0s;
+}
+
+/* Escritorio: la hoja no ocupa lugar; la ficha va a la izquierda y el control del radar arriba a la derecha. */
+.zone-sheet {
+  display: contents;
+}
+
+/* Abajo queda libre la franja de los créditos del globo (RNF-11). */
+.zone-card,
+.zone-radar {
+  position: fixed;
+  top: calc(var(--zone-top) + var(--espacio-3));
+  max-height: calc(100dvh - var(--zone-top) - var(--espacio-3) - 3rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--espacio-4);
+}
+
+.zone-card {
+  left: var(--espacio-4);
+  width: min(25rem, calc(100vw - 2 * var(--espacio-4)));
+}
+
+.zone-radar {
+  right: var(--espacio-4);
+  width: min(17rem, calc(100vw - 2 * var(--espacio-4)));
+  padding: var(--espacio-3);
+}
+
+.zone-radar h3 {
+  margin-bottom: var(--espacio-2);
+}
+
+/* Con el detalle abierto, la ficha y el control se retiran hacia su lado. */
+.zone-card[data-hidden],
+.zone-radar[data-hidden] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duracion-aparicion) ease,
+    transform var(--duracion-aparicion) cubic-bezier(0.22, 0.8, 0.26, 1),
+    visibility 0s linear var(--duracion-aparicion);
+}
+
+.zone-card[data-hidden] {
+  transform: translateX(-2rem);
+}
+
+.zone-radar[data-hidden] {
+  transform: translateX(2rem);
+}
+
+/* Detalle: columna a la derecha, de arriba abajo, que deja libre más de la mitad de la pantalla para el globo. */
+.zone-detail {
+  position: fixed;
+  top: var(--zone-top);
+  right: 0;
+  bottom: 0;
+  width: min(42vw, 36rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--espacio-4);
+  border-radius: calc(var(--radio) * 1.5) 0 0 calc(var(--radio) * 1.5);
+  transform: translateX(104%);
+  visibility: hidden;
+  transition:
+    transform calc(var(--duracion-aparicion) * 1.2) cubic-bezier(0.22, 0.8, 0.26, 1),
+    visibility 0s linear calc(var(--duracion-aparicion) * 1.2);
+}
+
+.zone-detail[data-open] {
+  transform: none;
+  visibility: visible;
+  transition:
+    transform calc(var(--duracion-aparicion) * 1.2) cubic-bezier(0.22, 0.8, 0.26, 1),
+    visibility 0s linear 0s;
+}
+
+/* Cabecera de los paneles: antetítulo, acciones y título. */
+.zone-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+}
+
+.zone-head__actions {
+  display: flex;
+  gap: var(--espacio-1);
+}
+
+.zone-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--color-borde);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+  color: var(--color-texto);
+  font: inherit;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zone-icon:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+
+.zone-glass h2 {
+  margin: 0 0 var(--espacio-2);
+  color: var(--color-titulo);
+  font-family: var(--fuente-titulo);
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  letter-spacing: var(--espaciado-letras-titulo);
+  line-height: 1.15;
+}
+
+/* El título recibe el foco por programa al abrir el panel (para el lector de pantalla); no es un control. */
+.zone-glass h2:focus {
+  outline: none;
+}
+
+.zone-glass h3.tour-eyebrow {
+  font-size: 0.8rem;
+}
+
+.zone-glass :is(button, a, input, summary):focus-visible {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-separacion);
+}
+
+/* Las dos preguntas del proyecto y los grupos de botones (capa, fecha). */
+.zone-tabs,
+.zone-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  margin: 0 0 var(--espacio-3);
+}
+
+.zone-tabs button,
+.zone-buttons button {
+  min-height: 2rem;
+  padding: var(--espacio-1) var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
+  color: var(--color-texto);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.zone-buttons button {
+  padding-inline: var(--espacio-2);
+  border-radius: var(--radio);
+}
+
+.zone-tabs button[aria-pressed="true"],
+.zone-buttons button[aria-pressed="true"] {
+  border-color: var(--paleta-blanco);
+  background: var(--paleta-blanco);
+  color: var(--paleta-negro-azulado);
+  font-weight: 700;
+}
+
+/* La cifra: hectáreas con su rango (RN-06). */
+.zone-figure {
+  margin: 0;
+  font-family: var(--fuente-titulo);
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.zone-figure span {
+  font-size: 0.5em;
+  color: var(--color-texto-secundario);
+}
+
+/* Línea base: todavía no hay cifra (RN-13: nunca un cero). */
+.zone-figure--none {
+  color: var(--color-texto-secundario);
+}
+
+.zone-range {
+  margin: var(--espacio-1) 0 0;
+  color: var(--color-acento);
+  font-variant-numeric: tabular-nums;
+}
+
+.zone-what {
+  margin: var(--espacio-2) 0 0;
+}
+
+.zone-note {
+  margin: var(--espacio-2) 0 0;
+  color: var(--color-texto-secundario);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.zone-answer {
+  margin: 0 0 var(--espacio-3);
+}
+
+/* Hectáreas por fecha: barras con su rango. */
+.zone-trend {
+  margin: var(--espacio-3) 0 0;
+}
+
+.zone-trend svg {
+  display: block;
+  width: 100%;
+  height: 3rem;
+}
+
+.zone-trend__bar {
+  fill: var(--color-acento);
+  opacity: 0.85;
+}
+
+.zone-trend__range {
+  stroke: var(--paleta-blanco);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* La fecha que se ve en el globo va en blanco; lo que todavía no había ocurrido, atenuado. */
+.zone-trend g[data-current] .zone-trend__bar {
+  fill: var(--paleta-blanco);
+  opacity: 1;
+}
+
+.zone-trend g[data-later] {
+  opacity: 0.28;
+}
+
+.zone-trend figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-1);
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Parches por clase (RN-05). */
+.zone-classes__bar {
+  display: flex;
+  gap: 2px;
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.zone-classes__bar span {
+  display: block;
+  min-width: 2px;
+}
+
+.zone-classes {
+  display: grid;
+  gap: var(--espacio-1);
+  margin: var(--espacio-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zone-classes li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espacio-2);
+  font-size: 0.9375rem;
+}
+
+.zone-classes strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.zone-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+}
+
+/* Tres datos cortos. */
+.zone-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espacio-2);
+  margin: 0 0 var(--espacio-3);
+  padding: var(--espacio-3) 0;
+  border-block: 1px solid var(--color-borde);
+}
+
+.zone-facts div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.zone-facts dt {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+}
+
+.zone-facts dd {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.zone-limits summary {
+  color: var(--color-enlace);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.zone-limits ul {
+  margin: var(--espacio-2) 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.zone-limits li + li {
+  margin-top: var(--espacio-1);
+}
+
+/* El botón principal queda siempre a la vista aunque la ficha tenga desplazamiento propio. */
+.zone-more {
+  position: sticky;
+  bottom: 0;
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--espacio-3);
+}
+
+/* La ficha repite estados y distintivos del shell: aquí van sin caja propia. */
+.zone-card .view-state {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: none;
+}
+
+/* Modo de evidencia (RN-04): una palabra, siempre a la vista; DEMO con borde discontinuo y su aviso. */
+.zone-chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  margin: 0 0 var(--espacio-3);
+  padding: 0.125rem var(--espacio-2);
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: var(--espaciado-letras-menu);
+}
+
+.zone-chip--demo {
+  border-style: dashed;
+  border-width: 2px;
+}
+
+/* Control del radar sobre el globo. */
+.zone-radar__body .zone-buttons {
+  margin-bottom: var(--espacio-2);
+}
+
+.zone-legend {
+  min-width: 0;
+}
+
+.zone-legend__bar {
+  display: block;
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.zone-legend__ends {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-1);
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+}
+
+.zone-opacity {
+  display: grid;
+  gap: var(--espacio-1);
+  margin: var(--espacio-2) 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-texto-secundario);
+}
+
+.zone-opacity input {
+  width: 100%;
+  accent-color: var(--color-acento);
+}
+
+/* Detalle: la respuesta paso a paso en una columna angosta. */
+/* Línea de tiempo: abajo, en el espacio libre entre la ficha (o el borde) y el detalle (o el borde); ZoneLayer mide
+   esos bordes (--zone-left, --zone-right). Deja libre la franja de créditos del globo (RNF-11). */
+.zone-timeline {
+  --thumb: 1.125rem;
+  --dot: 0.5rem;
+  position: fixed;
+  left: calc(var(--zone-left, 0px) + var(--espacio-4));
+  right: calc(var(--zone-right, 0px) + var(--espacio-4));
+  bottom: 3rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(11rem, 14rem);
+  align-items: center;
+  gap: var(--espacio-3) var(--espacio-4);
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: var(--espacio-3) var(--espacio-4);
+  transition:
+    left calc(var(--duracion-aparicion) * 1.2) cubic-bezier(0.22, 0.8, 0.26, 1),
+    right calc(var(--duracion-aparicion) * 1.2) cubic-bezier(0.22, 0.8, 0.26, 1),
+    opacity var(--duracion-aparicion) ease;
+}
+
+.zone-timeline__play {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 0.875rem;
+}
+
+.zone-timeline__now {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espacio-2);
+  margin: 0;
+}
+
+.zone-timeline__now strong {
+  font-size: 1.0625rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.zone-timeline__tag {
+  padding: 0 var(--espacio-2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-acento) 22%, transparent);
+  color: var(--color-acento);
+  font-size: 0.75rem;
+}
+
+.zone-timeline__tag[data-baseline] {
+  background: color-mix(in srgb, var(--paleta-blanco) 16%, transparent);
+  color: var(--color-texto);
+}
+
+.zone-timeline__count {
+  margin-left: auto;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La pista: un deslizador real (teclado y tacto) con un punto por fecha debajo del pulgar. */
+.zone-timeline__track {
+  position: relative;
+  height: 1.75rem;
+}
+
+.zone-timeline__track[data-idle] {
+  opacity: 0.55;
+}
+
+.zone-timeline__track input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* El foco del teclado se marca en el pulgar, no con un recuadro alrededor de toda la pista. */
+.zone-glass .zone-timeline__track input:focus-visible {
+  outline: none;
+}
+
+.zone-timeline__track input:focus-visible::-webkit-slider-thumb {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-separacion);
+}
+
+.zone-timeline__track input:focus-visible::-moz-range-thumb {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-separacion);
+}
+
+.zone-timeline__track input::-webkit-slider-runnable-track {
+  height: 2px;
+  background: color-mix(in srgb, var(--paleta-blanco) 35%, transparent);
+}
+
+.zone-timeline__track input::-moz-range-track {
+  height: 2px;
+  background: color-mix(in srgb, var(--paleta-blanco) 35%, transparent);
+}
+
+.zone-timeline__track input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((2px - var(--thumb)) / 2);
+  border: 3px solid var(--color-acento);
+  border-radius: 50%;
+  background: var(--paleta-blanco);
+  box-shadow: var(--resplandor);
+}
+
+.zone-timeline__track input::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 3px solid var(--color-acento);
+  border-radius: 50%;
+  background: var(--paleta-blanco);
+  box-shadow: var(--resplandor);
+}
+
+.zone-timeline__dots {
+  position: absolute;
+  top: 50%;
+  right: calc((var(--thumb) - var(--dot)) / 2);
+  left: calc((var(--thumb) - var(--dot)) / 2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 0;
+  pointer-events: none;
+}
+
+.zone-timeline__dots span {
+  width: var(--dot);
+  height: var(--dot);
+  border: 1.5px solid color-mix(in srgb, var(--paleta-blanco) 70%, transparent);
+  border-radius: 50%;
+  background: var(--color-superficie);
+}
+
+.zone-timeline__dots span[data-past] {
+  border-color: var(--color-acento);
+  background: var(--color-acento);
+}
+
+/* Línea base: puntos cuadrados (lo que había antes de medir cambio). */
+.zone-timeline__dots span[data-baseline] {
+  border-radius: 2px;
+}
+
+.zone-timeline__dots span[data-baseline][data-past] {
+  border-color: var(--paleta-blanco);
+  background: var(--paleta-blanco);
+}
+
+/* Hueco sin datos entre dos fechas (RN-13): trama gris de «sin dato». */
+.zone-timeline__gap {
+  position: absolute;
+  top: 50%;
+  width: 0.875rem;
+  height: 0.625rem;
+  border-radius: 2px;
+  background: var(--trama-sin-dato);
+  transform: translate(-50%, -50%);
+}
+
+.zone-timeline__ends {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.zone-timeline__gapnote {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zone-timeline__legend .zone-legend__ends {
+  font-size: 0.6875rem;
+  white-space: nowrap;
+}
+
+.zone-timeline__legend .zone-note {
+  display: block;
+  margin: var(--espacio-1) 0 0;
+  font-size: 0.75rem;
+}
+
+/* Enlaces del detalle (descargas) con el color de enlace del tema oscuro. */
+.zone-detail a:not(.button-secondary) {
+  color: var(--color-enlace);
+}
+
+/* Detalle compacto: lo metodológico va plegado. */
+.zone-detail .respuesta--compacta details > summary {
+  color: var(--color-enlace);
+  cursor: pointer;
+}
+
+.zone-detail .respuesta--compacta details.bloque > summary {
+  font-weight: 700;
+}
+
+.zone-detail .respuesta--compacta details[open] > summary {
+  margin-bottom: var(--espacio-2);
+}
+
+.zone-detail .respuesta {
+  margin-top: 0;
+}
+
+.zone-detail .respuesta h2 {
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.zone-detail .paso h3,
+.zone-detail .bloque h3 {
+  font-size: 1rem;
+}
+
+.zone-detail .pasos {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.zone-detail .paso {
+  grid-template-columns: 7rem minmax(0, 1fr);
+  background: color-mix(in srgb, var(--color-superficie) var(--vidrio-fuerte), transparent);
+}
+
+.zone-detail .paso--ancho {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.zone-detail .paso-img {
+  width: 7rem;
+}
+
+.zone-detail__full {
+  display: grid;
+  gap: var(--espacio-1);
+  justify-items: start;
+  margin: var(--espacio-4) 0 0;
+}
+
+.zone-detail__full .zone-note {
+  margin: 0;
+}
+
+/* Celular y tableta: el globo arriba; la ficha con el control debajo, y el detalle, como hojas inferiores. */
+@media (max-width: 768px) {
+  .zone-sheet {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    gap: var(--espacio-2);
+    max-height: 42dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--espacio-2);
+    pointer-events: auto;
+  }
+
+  .zone-sheet[data-hidden] {
+    pointer-events: none;
+  }
+
+  .zone-card,
+  .zone-radar {
+    position: static;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    padding: var(--espacio-3);
+  }
+
+  .zone-card[data-hidden],
+  .zone-radar[data-hidden] {
+    transform: translateY(2rem);
+  }
+
+  .zone-detail {
+    top: auto;
+    left: 0;
+    width: auto;
+    max-height: 52dvh;
+    padding: var(--espacio-3);
+    border-radius: calc(var(--radio) * 1.5) calc(var(--radio) * 1.5) 0 0;
+    transform: translateY(104%);
+  }
+
+  .zone-detail .paso {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .zone-detail .paso-img {
+    width: 100%;
+  }
+
+  /* La línea de tiempo va primera en la hoja (justo bajo el globo) y sin el detalle no se muestra. */
+  .zone-timeline {
+    position: static;
+    order: -1;
+    grid-template-columns: auto minmax(0, 1fr);
+    max-width: none;
+    margin: 0;
+    padding: var(--espacio-3);
+  }
+
+  .zone-timeline__legend {
+    grid-column: 1 / -1;
+  }
+
+  .zone-sheet[data-hidden] .zone-timeline {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
