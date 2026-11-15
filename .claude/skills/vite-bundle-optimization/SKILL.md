@@ -20,7 +20,11 @@ Según la guía oficial de CesiumJS (consultada el 12 nov 2026):
 - Dos formas de lograrlo: copiar las carpetas en el build (por ejemplo con un plugin de copia estática) y
   fijar `CESIUM_BASE_URL`, o usar un plugin que lo haga solo (la guía de Cesium menciona `vite-plugin-cesium`).
   Elegir un plugin es añadir una dependencia: propónlo en el plan (§28) y verifica su versión con `context7`.
-- Importa también `cesium/Build/Cesium/Widgets/widgets.css` en el componente del globo.
+- El CSS de los widgets (`Widgets/widgets.css`) debe llegar al navegador junto con el globo. Dos formas
+  válidas: importar `cesium/Build/Cesium/Widgets/widgets.css` desde el componente (empaqueta sus imágenes,
+  vigila el peso en RNF-02) o enlazarlo desde `${CESIUM_BASE_URL}/Widgets/widgets.css` al montar el
+  explorador (aprovecha las carpetas ya copiadas y no duplica recursos). En cualquier caso el enlace se pide
+  **solo** al entrar al explorador: la portada no debe solicitar nada de `/cesium` (RNF-01).
 - Si el sitio se publica en una subruta (posible con GitHub Pages, DP-06), `base` de Vite y
   `CESIUM_BASE_URL` deben incluirla.
 

@@ -20,10 +20,23 @@ documentación vigente (MCP `context7` o la documentación oficial). No escribas
 
 ## Reglas del globo
 
-- **Sin token de Cesium ion**, con un mapa base abierto y su atribución visible. Qué mapa base usar está
-  **pendiente (DP-07)**: deja el proveedor configurable y no elijas uno por tu cuenta.
-- Desactiva los widgets que dependen de ion (por ejemplo el geocodificador y el selector de capas base).
-  Verifica en la documentación cuáles son en la versión instalada.
+- **Proveedor visual (DP-07, decisión cerrada el 14 nov 2026)**: Cesium ion con Cesium World Terrain (asset 1)
+  y Bing Maps Aerial (asset 2), con el token público `assets:read` que vive solo en el entorno
+  (`VITE_CESIUM_ION_TOKEN`, RNF-06). Sin token, o si ion falla, se usa el **respaldo sin ion** con mapa base
+  abierto y su atribución visible (`TileMapServiceImageryProvider` desde `Assets/Textures/NaturalEarthII`).
+  Deja el proveedor configurable y no elijas otro por tu cuenta.
+- Desactiva los widgets de la interfaz que estorban y los que dependen de ion (geocodificador, selector de
+  capas base, línea de tiempo, animación, botón de inicio). Verifica en la documentación cuáles son en la
+  versión instalada; la atribución de CesiumJS se conserva visible (RNF-11).
+- **El lienzo necesita tamaño explícito y un `resize()` tras el layout**: sin eso CesiumJS deja el canvas a
+  300 × 150 dentro de un contenedor grande. Da al contenedor una altura real (`svh` o `rem`) y llama a
+  `viewer.resize()` al montar y en un `ResizeObserver` sobre el contenedor.
+- **CSS de los widgets**: hay que cargar `Widgets/widgets.css` (servido desde `CESIUM_BASE_URL`, o empaquetado
+  desde `node_modules/cesium`). Sin él el lienzo no llena el contenedor y la atribución sale suelta; con la
+  ruta absoluta el sitio debe servirse desde la raíz o ajustar `base` (pendiente DP-06).
+- **Encuadre de Bolivia**: el globo arranca con Bolivia entera encuadrada (límites aproximados 70.4°O, 23.4°S,
+  56.8°O, 9.2°N con margen), con `camera.setView` al montar y `camera.flyTo` al cambiar de destino. Fijar otros
+  encuadres por departamento es trabajo de M-GLOBO y se acuerda con el equipo.
 - **Carga diferida** (RNF-01): CesiumJS solo se carga al entrar al explorador (import dinámico), nunca en
   la portada.
 - **Respaldo 2D** (RF-30): si WebGL o CesiumJS fallan al iniciar, el atlas se abre en el mapa 2D con
