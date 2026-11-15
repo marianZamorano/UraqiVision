@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from '../app/router'
 import { serializeRoute } from '../app/routeState'
 import type { Language } from '../contracts/view-state'
-import { demoStations, listStations, type StationSummary } from '../data/publicationRepository'
+import { demoStations, listStations, usesPublishedApi, type StationSummary } from '../data/publicationRepository'
 import { useTranslation } from 'react-i18next'
 import { GlobeAttribution } from '../features/globe/GlobeAttribution'
 import { hasWebGLSupport, resolveGlobeProvider } from '../features/globe/GlobeProvider'
@@ -26,15 +26,25 @@ export function ExplorePage({ lang }: ExplorePageProps) {
   // T020: estado explícito del globo; «loading» solo existe si hay WebGL y CesiumJS aún se descarga.
   const [globeLoad, setGlobeLoad] = useState<'loading' | 'ready' | 'failed'>('loading')
   const loadFailed = globeLoad === 'failed'
-  // Versión beta (#110): estaciones del endpoint del backend, si está configurado, más los ejemplos DEMO.
-  const [stations, setStations] = useState<StationSummary[]>(() => Object.values(demoStations))
+  // Versión beta (#110): estaciones publicadas por el backend; los ejemplos DEMO solo si no hay backend (RN-04).
+  // Con backend, la lista empieza vacía para no mostrar un instante ejemplos que después desaparecen.
+  const [stations, setStations] = useState<StationSummary[]>(() => (usesPublishedApi ? [] : Object.values(demoStations)))
 
   useEffect(() => {
     const controller = new AbortController()
-    void listStations(controller.signal).then((list) => {
+    listStations(controller.signal).then((list) => {
       if (!controller.signal.aborted) setStations(list)
-    })
+    }, () => undefined)
     return () => controller.abort()
+  }, [])
+
+  // Agrupadas por departamento cuando el backend lo informa; los ejemplos DEMO van sin grupo.
+  const grupos = stations.reduce<Array<{ departamento: string | null; items: StationSummary[] }>>((acc, st) => {
+    const dep = st.departamento ?? null
+    const grupo = acc.find((g) => g.departamento === dep)
+    if (grupo) grupo.items.push(st)
+    else acc.push({ departamento: dep, items: [st] })
+    return acc
   }, [])
 
   useEffect(() => {
@@ -71,15 +81,20 @@ export function ExplorePage({ lang }: ExplorePageProps) {
           <p role="status">{t('pages.explore.globeLoading')}</p>
         ) : null}
 
-        <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
-          {stations.map((station) => (
-            <li key={station.stationId}>
-              <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
-                {station.label[lang]}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {grupos.map((grupo) => (
+          <section key={grupo.departamento ?? 'sin-departamento'} aria-label={grupo.departamento ?? t('pages.explore.stationListLabel')}>
+            {grupo.departamento ? <h2 className="station-group">{grupo.departamento}</h2> : null}
+            <ul className="station-list" aria-label={t('pages.explore.stationListLabel')}>
+              {grupo.items.map((station) => (
+                <li key={station.stationId}>
+                  <Link to={serializeRoute({ route: 'station', stationId: station.stationId })}>
+                    {station.label[lang]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
 
         <GlobeAttribution
           description={t('pages.explore.globeAttribution')}
