@@ -48,12 +48,23 @@ test("hacer clic en el marcador de Bolivia en el globo lleva a la sección de Bo
   const errores: string[] = [];
   const globo = await openTour(page, errores);
 
-  // Clic real sobre el marcador (centro de la vista de entrada); se reintenta mientras el globo termina de dibujarse.
+  // Clic real sobre el marcador: en la vista de entrada mira a Bolivia, centrado en la parte libre de la pantalla
+  // (#123: descontando el panel a la izquierda, la navegación a la derecha y la cabecera arriba). Se reintenta
+  // mientras el globo termina de dibujarse.
   const lienzo = globo.locator("canvas").first();
   await expect(async () => {
     const caja = await lienzo.boundingBox();
     if (!caja) throw new Error("sin lienzo");
-    await page.mouse.click(caja.x + caja.width / 2, caja.y + caja.height / 2);
+    const libre = await page.evaluate(() => {
+      const panel = document.querySelector(".tour-panel")?.getBoundingClientRect();
+      const nav = document.querySelector(".tour-nav ol")?.getBoundingClientRect();
+      const cabecera = document.querySelector(".topbar")?.getBoundingClientRect();
+      return { left: panel?.right ?? 0, right: nav ? window.innerWidth - nav.left : 0, top: cabecera?.bottom ?? 0 };
+    });
+    await page.mouse.click(
+      caja.x + caja.width / 2 + (libre.left - libre.right) / 2,
+      caja.y + caja.height / 2 + libre.top / 2,
+    );
     await expect(navButton(page, "Bolivia")).toHaveAttribute("aria-current", "step", { timeout: 2_000 });
   }).toPass({ timeout: 20_000 });
 

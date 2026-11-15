@@ -1,6 +1,6 @@
-// #115, #121 (RF-02, RF-25, RF-30, DP-07, RNF-06, RNF-11, RNF-12): el visor del globo con un doble de CesiumJS
+// #115, #121, #123 (RF-02, RF-25, RF-29, RF-30, DP-07, RNF-06, RNF-11, RNF-12): el visor del globo con un doble de CesiumJS
 // (jsdom no tiene WebGL) y fotogramas controlados a mano.
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GlobeView, type CesiumModule } from "../../src/features/globe/GlobeView";
@@ -43,6 +43,11 @@ beforeEach(() => {
     return id;
   });
   vi.stubGlobal("cancelAnimationFrame", (id: number) => frames.delete(id));
+  // Contorno de Bolivia (public/data/bolivia-contorno.geojson): un cuadrado basta para el doble.
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+    type: "FeatureCollection",
+    features: [{ type: "Feature", geometry: { type: "Polygon", coordinates: [[[-60, -16], [-59, -16], [-59, -15], [-60, -16]]] } }],
+  }))));
 });
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -51,6 +56,8 @@ afterEach(() => {
 function fakeCesium(options: { failViewer?: boolean } = {}) {
   const destroy = vi.fn();
   const poses: Pose[] = [];
+  const moveLeft = vi.fn();
+  const moveDown = vi.fn();
   const lookAt = vi.fn((point: { point: number[] }, hpr: Pose["hpr"]) => {
     poses.push({ point: point.point, hpr: { heading: hpr.heading, pitch: hpr.pitch, range: hpr.range } });
   });
@@ -58,6 +65,8 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
   const resize = vi.fn();
   const pick = vi.fn<(position: unknown) => unknown>(() => undefined);
   const entities: Array<Record<string, unknown>> = [];
+  const removed: Array<Record<string, unknown>> = [];
+  const credits: unknown[] = [];
   const viewerOptions: unknown[] = [];
   const viewers: FakeViewer[] = [];
   const cesium = {
@@ -65,7 +74,7 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
     Viewer: vi.fn(function (this: Record<string, unknown>, _el: Element, opts: unknown) {
       if (options.failViewer) throw new Error("WebGL no disponible");
       viewerOptions.push(opts);
-      this.camera = { lookAt, lookAtTransform: vi.fn() };
+      this.camera = { lookAt, lookAtTransform: vi.fn(), moveLeft, moveDown, frustum: { fov: Math.PI / 3 } };
       this.clock = { currentTime: null, shouldAnimate: true };
       this.scene = {
         pick,
@@ -81,9 +90,11 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
           entities.push(e);
           return e;
         }),
+        remove: vi.fn((e: Record<string, unknown>) => removed.push(e)),
       };
+      this.creditDisplay = { addStaticCredit: vi.fn((c: unknown) => credits.push(c)) };
       this.resize = resize;
-      this.canvas = { getBoundingClientRect: () => ({ left: 10, top: 20 }) };
+      this.canvas = { getBoundingClientRect: () => ({ left: 10, top: 20 }), clientWidth: 1440, clientHeight: 900 };
       this.destroy = destroy;
       this.isDestroyed = () => false;
       viewers.push(this as unknown as FakeViewer);
@@ -96,7 +107,13 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
     Terrain: vi.fn(function (this: Record<string, unknown>, promise: unknown) {
       this.promise = promise;
     }),
-    Cartesian3: { fromDegrees: vi.fn((...degrees: number[]) => ({ point: degrees })) },
+    Cartesian3: {
+      fromDegrees: vi.fn((...degrees: number[]) => ({ point: degrees })),
+      fromDegreesArray: vi.fn((flat: number[]) => ({ line: flat })),
+    },
+    Credit: vi.fn(function (this: Record<string, unknown>, html: string) {
+      this.html = html;
+    }),
     Cartesian2: vi.fn(function (this: Record<string, unknown>, x: number, y: number) {
       this.x = x;
       this.y = y;
@@ -117,7 +134,7 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
     LabelStyle: { FILL_AND_OUTLINE: "relleno-y-borde" },
     HeightReference: { CLAMP_TO_GROUND: "pegado-al-suelo" },
   };
-  return { cesium: cesium as unknown as CesiumModule, raw: cesium, destroy, poses, pick, entities, viewerOptions, viewers, resize };
+  return { cesium: cesium as unknown as CesiumModule, raw: cesium, destroy, poses, pick, entities, removed, credits, viewerOptions, viewers, resize, moveLeft, moveDown };
 }
 
 type Fake = ReturnType<typeof fakeCesium>;
@@ -127,10 +144,13 @@ function props(f: Fake, overrides: Partial<ComponentProps<typeof GlobeView>> = {
     cesium: f.cesium,
     config: { mode: "no-ion" },
     label: "Globo",
-    markerLabels: { bolivia: "Bolivia", station: "San Ignacio de Velasco" },
+    boliviaLabel: "Bolivia",
+    zones: [],
+    framing: { left: 0, right: 0, top: 0, bottom: 0 },
     progress: createProgressStore(),
     reducedMotion: false,
     onSelectSection: vi.fn(),
+    onSelectZone: vi.fn(),
     onReady: vi.fn(),
     onError: vi.fn(),
     ...overrides,
@@ -213,6 +233,22 @@ describe("GlobeView", () => {
     expect(frames.size).toBe(0); // llegó: el bucle se detuvo
   });
 
+  it("centra la escena en la parte libre: a la derecha del panel en escritorio y encima en celular (#123)", () => {
+    const f = fakeCesium();
+    const { rerender } = render(<GlobeView {...props(f)} />);
+    expect(f.moveLeft).not.toHaveBeenCalled();
+    expect(f.moveDown).not.toHaveBeenCalled();
+
+    rerender(<GlobeView {...props(f, { framing: { left: 600, right: 0, top: 0, bottom: 0 } })} />);
+    flush();
+    expect(f.moveLeft).toHaveBeenCalled();
+    expect(f.moveLeft.mock.calls.at(-1)?.[0]).toBeGreaterThan(0);
+
+    rerender(<GlobeView {...props(f, { framing: { left: 0, right: 0, top: 0, bottom: 400 } })} />);
+    flush();
+    expect(f.moveDown).toHaveBeenCalled();
+  });
+
   it("con movimiento reducido salta a la vista de la sección activa, sin interpolar (RNF-12)", () => {
     const f = fakeCesium();
     const progress = createProgressStore();
@@ -224,25 +260,60 @@ describe("GlobeView", () => {
     expect(frames.size).toBe(0);
   });
 
-  it("pone los marcadores de Bolivia y de la estación y los traduce con la interfaz (RNF-03)", () => {
+  it("pone el marcador de Bolivia y lo traduce con la interfaz (RNF-03)", () => {
     const f = fakeCesium();
     const { rerender } = render(<GlobeView {...props(f)} />);
-    const [bolivia, station] = f.entities as Array<{ id: string; label: { text: unknown } }>;
-    expect(bolivia?.id).toBe("bolivia");
-    expect(station?.id).toBe("station");
+    const bolivia = f.entities[0] as { id: string; label: { text: unknown } };
+    expect(bolivia.id).toBe("bolivia");
 
-    rerender(<GlobeView {...props(f, { markerLabels: { bolivia: "Bolivia (en)", station: "Station (en)" } })} />);
-    expect(bolivia?.label.text).toMatchObject({ value: "Bolivia (en)" });
-    expect(station?.label.text).toMatchObject({ value: "Station (en)" });
+    rerender(<GlobeView {...props(f, { boliviaLabel: "Bolivia (en)" })} />);
+    expect(bolivia.label.text).toMatchObject({ value: "Bolivia (en)" });
   });
 
-  it("un clic en un marcador lleva a su sección; en otro lugar o sobre un panel, no", () => {
+  it("pone un punto por zona, visible solo al acercarse, con etiquetas alternadas para no taparse (#123)", () => {
+    const f = fakeCesium();
+    const zones = [
+      { id: "sanignacio", label: "San Ignacio de Velasco", longitude: -60.81, latitude: -15.92 },
+      { id: "chiquitania-oeste", label: "Chiquitanía oeste", longitude: -61.8, latitude: -15.75 },
+    ];
+    render(<GlobeView {...props(f, { zones })} />);
+
+    type Punto = {
+      id: string;
+      label: { text: string; pixelOffset: { y: number }; distanceDisplayCondition: { near: number; far: number } };
+    };
+    const puntos = f.entities.filter((e) => String(e.id).startsWith("zona-")) as unknown as Punto[];
+    expect(puntos.map((p) => p.id)).toEqual(["zona-chiquitania-oeste", "zona-sanignacio"]); // ordenadas por longitud
+    expect(puntos.map((p) => p.label.text)).toEqual(["Chiquitanía oeste", "San Ignacio de Velasco"]);
+    expect(puntos[0]?.label.pixelOffset.y).toBeLessThan(0);
+    expect(puntos[1]?.label.pixelOffset.y).toBeGreaterThan(0);
+    expect(puntos[0]?.label.distanceDisplayCondition).toMatchObject({ near: 0 });
+    const bolivia = f.entities[0] as unknown as Punto;
+    expect(bolivia.label.distanceDisplayCondition.near).toBe(puntos[0]?.label.distanceDisplayCondition.far); // se relevan
+  });
+
+  it("las zonas que llegan después (o cambian de idioma) reemplazan los puntos anteriores", () => {
+    const f = fakeCesium();
+    const { rerender } = render(<GlobeView {...props(f)} />);
+    const zona = { id: "beni-norte", label: "Beni norte", longitude: -65.57, latitude: -11.99 };
+
+    rerender(<GlobeView {...props(f, { zones: [zona] })} />);
+    const primero = f.entities.find((e) => e.id === "zona-beni-norte");
+    rerender(<GlobeView {...props(f, { zones: [{ ...zona, label: "North Beni" }] })} />);
+
+    expect(f.removed).toContain(primero);
+    expect((f.entities[f.entities.length - 1] as { label: { text: string } }).label.text).toBe("North Beni");
+  });
+
+  it("el clic en Bolivia lleva a su sección y en el punto de una zona abre la estación; sobre un panel, nada", () => {
     const f = fakeCesium();
     const onSelectSection = vi.fn();
+    const onSelectZone = vi.fn();
+    const zones = [{ id: "beni-norte", label: "Beni norte", longitude: -65.57, latitude: -11.99 }];
     const { getByRole } = render(
       <>
         <div data-globe-overlay=""><button type="button">Bolivia</button></div>
-        <GlobeView {...props(f, { onSelectSection })} />
+        <GlobeView {...props(f, { onSelectSection, onSelectZone, zones })} />
       </>,
     );
 
@@ -257,9 +328,20 @@ describe("GlobeView", () => {
     expect(onSelectSection).toHaveBeenLastCalledWith("bolivia");
     expect(f.pick).toHaveBeenLastCalledWith({ x: 40, y: 40 });
 
-    f.pick.mockReturnValue({ id: f.entities[1] });
+    f.pick.mockReturnValue({ id: f.entities.find((e) => e.id === "zona-beni-norte") });
     fireEvent.click(document.body, { clientX: 50, clientY: 60 });
-    expect(onSelectSection).toHaveBeenLastCalledWith("station");
+    expect(onSelectZone).toHaveBeenCalledWith("beni-norte");
+  });
+
+  it("dibuja el contorno de Bolivia pegado al relieve y muestra su crédito (RNF-11)", async () => {
+    const f = fakeCesium();
+    render(<GlobeView {...props(f)} />);
+
+    await waitFor(() => expect(f.credits).toHaveLength(1));
+    const linea = f.entities.find((e) => "polyline" in e) as { polyline: { clampToGround: boolean; positions: unknown } };
+    expect(linea.polyline.clampToGround).toBe(true);
+    expect(linea.polyline.positions).toEqual({ line: [-60, -16, -59, -16, -59, -15, -60, -16] });
+    expect(f.credits[0]).toMatchObject({ html: "geoBoundaries · GeoBolivia" });
   });
 
   it("al salir del explorador destruye el visor y deja de escuchar el scroll y los clics", () => {

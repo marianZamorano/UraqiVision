@@ -12,10 +12,11 @@ const globe = vi.hoisted(() => ({
 
 // jsdom no tiene WebGL: el visor real se prueba en tests/unit/GlobeView.test.tsx y en el navegador (E2E).
 vi.mock('../../src/features/globe/GlobeView', () => ({
-  GlobeView: ({ label, reducedMotion, onSelectSection, onReady, onError }: {
+  GlobeView: ({ label, reducedMotion, onSelectSection, onSelectZone, onReady, onError }: {
     label: string
     reducedMotion: boolean
     onSelectSection: (section: string) => void
+    onSelectZone: (stationId: string) => void
     onReady: () => void
     onError: () => void
   }) => {
@@ -23,11 +24,11 @@ vi.mock('../../src/features/globe/GlobeView', () => ({
       if (globe.viewerFails) onError()
       else onReady()
     }, [onReady, onError])
-    // El doble expone un «clic en el marcador» de Bolivia y de la estación.
+    // El doble expone un «clic» en el marcador de Bolivia y en el punto de una zona.
     return (
       <div role="region" aria-label={label} data-reduced={String(reducedMotion)}>
         <button type="button" onClick={() => onSelectSection('bolivia')}>marcador Bolivia</button>
-        <button type="button" onClick={() => onSelectSection('station')}>marcador estación</button>
+        <button type="button" onClick={() => onSelectZone('beni-norte')}>punto de zona</button>
       </div>
     )
   },
@@ -81,8 +82,9 @@ describe('ExplorePage globe (#115)', () => {
   })
 })
 
-// #121 (RF-25, RNF-03, RNF-04, RNF-12): recorrido por secciones; el scroll, la navegación y los marcadores lo guían.
-describe('ExplorePage tour (#121)', () => {
+// #121, #123 (RF-25, RF-29, RNF-03, RNF-04, RNF-12): recorrido por secciones; el scroll, la navegación y los
+// marcadores lo guían, y el punto de una zona abre directamente su estación.
+describe('ExplorePage tour (#121, #123)', () => {
   const scrollIntoView = vi.fn()
   beforeEach(() => {
     scrollIntoView.mockReset()
@@ -97,14 +99,14 @@ describe('ExplorePage tour (#121)', () => {
     await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
   }
 
-  it('shows four sections in order, from the whole Earth to the station', async () => {
+  it('shows three sections in order, from the whole Earth to Bolivia with its areas', async () => {
     await renderReadyGlobe('es')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Explorador' })).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
-      'Los incendios de 2026', 'San Ignacio de Velasco', 'Dos preguntas',
+      'Los incendios de 2026', 'Elige una zona',
     ])
-    expect(screen.getByText(/desplázate para viajar/i)).toBeInTheDocument()
+    expect(screen.getByText(/desplázate para viajar hasta bolivia/i)).toBeInTheDocument()
   })
 
   it('every figure comes with its source (§4.2)', async () => {
@@ -115,25 +117,39 @@ describe('ExplorePage tour (#121)', () => {
     expect(screen.getByText('Fuente: SIMB, vía eju.tv (21 jul 2026).')).toBeInTheDocument()
   })
 
+  it('the Bolivia section lists the areas (keyboard alternative to the points) and explains when there are no points', async () => {
+    await renderReadyGlobe('es')
+    const bolivia = screen.getByRole('heading', { name: 'Elige una zona' }).closest('section') as HTMLElement
+
+    expect(within(bolivia).getAllByRole('list', { name: /estaciones disponibles/i }).length).toBeGreaterThan(0)
+    // Sin backend (pruebas) no hay ubicaciones publicadas: se explica y queda la lista.
+    expect(within(bolivia).getByText(/las zonas aparecen como puntos en el globo/i)).toBeInTheDocument()
+  })
+
   it('the keyboard-operable section nav marks the active step and scrolls smoothly to a section', async () => {
     await renderReadyGlobe('es')
     const nav = screen.getByRole('navigation', { name: 'Secciones del recorrido' })
     const buttons = within(nav).getAllByRole('button')
 
-    expect(buttons.map((b) => b.textContent)).toEqual(['La Tierra', 'Sudamérica', 'Bolivia', 'Chiquitanía'])
+    expect(buttons.map((b) => b.textContent)).toEqual(['La Tierra', 'Sudamérica', 'Bolivia'])
     // jsdom no maqueta (todas las secciones miden 0): solo se comprueba que haya exactamente un paso activo.
     expect(buttons.filter((b) => b.getAttribute('aria-current') === 'step')).toHaveLength(1)
 
     fireEvent.click(within(nav).getByRole('button', { name: 'Bolivia' }))
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
-    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole('heading', { name: 'San Ignacio de Velasco' }).closest('section'))
+    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole('heading', { name: 'Elige una zona' }).closest('section'))
   })
 
-  it('clicking a marker on the globe goes to its section', async () => {
+  it('clicking Bolivia on the globe goes to its section; clicking an area point opens that station directly', async () => {
+    window.history.replaceState(null, '', '/explore')
     await renderReadyGlobe('es')
 
-    fireEvent.click(screen.getByRole('button', { name: 'marcador estación' }))
-    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole('heading', { name: 'Dos preguntas' }).closest('section'))
+    fireEvent.click(screen.getByRole('button', { name: 'marcador Bolivia' }))
+    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole('heading', { name: 'Elige una zona' }).closest('section'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'punto de zona' }))
+    expect(window.location.pathname).toBe('/station/beni-norte')
+    window.history.replaceState(null, '', '/')
   })
 
   it('with reduced motion the jump to a section is instant (RNF-12)', async () => {
@@ -154,7 +170,7 @@ describe('ExplorePage tour (#121)', () => {
   it('is bilingual, sources included', async () => {
     await renderReadyGlobe('en')
     expect(screen.getByRole('navigation', { name: 'Tour sections' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Two questions' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Choose an area' })).toBeInTheDocument()
     expect(screen.getByText('Source: SIMB, via eju.tv (21 Jul 2026).')).toBeInTheDocument()
   })
 })

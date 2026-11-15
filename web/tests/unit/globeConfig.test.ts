@@ -1,7 +1,7 @@
 // #115 (RF-02, DP-07, RNF-06): configuración del globo según el proveedor elegido. El token público solo viaja en
 // modo ion y con los assets aprobados 1 (World Terrain) y 2 (Bing Maps Aerial).
 import { describe, expect, it } from "vitest";
-import { BOLIVIA_CENTER, BOLIVIA_RECTANGLE, SAN_IGNACIO_CENTER, SUNRISE_TIME_ISO, globeConfigFor } from "../../src/features/globe/globeConfig";
+import { BOLIVIA_CENTER, BOLIVIA_RECTANGLE, SUNRISE_TIME_ISO, globeConfigFor } from "../../src/features/globe/globeConfig";
 
 describe("globeConfigFor", () => {
   it("con ion usa solo los assets aprobados y el token público", () => {
@@ -31,9 +31,9 @@ describe("globeConfigFor", () => {
     expect(north).toBeLessThan(-8);
   });
 
-  it("los marcadores de Bolivia y de San Ignacio quedan dentro del encuadre de Bolivia", () => {
+  it("el marcador de Bolivia queda dentro del encuadre de Bolivia", () => {
     const [west, south, east, north] = BOLIVIA_RECTANGLE;
-    for (const [longitude, latitude] of [BOLIVIA_CENTER, SAN_IGNACIO_CENTER]) {
+    for (const [longitude, latitude] of [BOLIVIA_CENTER]) {
       expect(longitude).toBeGreaterThan(west);
       expect(longitude).toBeLessThan(east);
       expect(latitude).toBeGreaterThan(south);
