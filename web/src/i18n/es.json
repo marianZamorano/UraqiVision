@@ -7,7 +7,9 @@
     "method": "Método",
     "about": "Acerca de",
     "mainNavigation": "Navegación principal",
-    "loadingPage": "Cargando la página…"
+    "loadingPage": "Cargando la página…",
+    "skipToContent": "Saltar al contenido",
+    "navigatedTo": "Página: {{page}}"
   },
   "language": {
     "switchTo": "Cambiar el idioma a",
@@ -29,7 +31,8 @@
       "globeAttributionLink": "Atribución de Cesium",
       "stationListLabel": "Estaciones disponibles",
       "fallbackWebglUnavailable": "Este navegador no puede mostrar el globo 3D (WebGL no disponible). Usa la lista de estaciones para explorar.",
-      "fallbackLoadFailed": "No se pudo cargar el globo 3D. Usa la lista de estaciones para explorar."
+      "fallbackLoadFailed": "No se pudo cargar el globo 3D. Usa la lista de estaciones para explorar.",
+      "globeLoading": "Preparando el globo 3D… Mientras tanto, puedes usar la lista de estaciones."
     },
     "method": {
       "title": "Método",

@@ -7,7 +7,9 @@
     "method": "Method",
     "about": "About",
     "mainNavigation": "Main navigation",
-    "loadingPage": "Loading the page…"
+    "loadingPage": "Loading the page…",
+    "skipToContent": "Skip to content",
+    "navigatedTo": "Page: {{page}}"
   },
   "language": {
     "switchTo": "Switch language to",
@@ -29,7 +31,8 @@
       "globeAttributionLink": "Cesium attribution",
       "stationListLabel": "Available stations",
       "fallbackWebglUnavailable": "This browser cannot display the 3D globe (WebGL unavailable). Use the station list to explore.",
-      "fallbackLoadFailed": "The 3D globe could not be loaded. Use the station list to explore."
+      "fallbackLoadFailed": "The 3D globe could not be loaded. Use the station list to explore.",
+      "globeLoading": "Preparing the 3D globe… Meanwhile, you can use the station list."
     },
     "method": {
       "title": "Method",

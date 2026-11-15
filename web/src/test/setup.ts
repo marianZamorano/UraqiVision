@@ -13,3 +13,6 @@ Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
   configurable: true,
   value: () => null,
 });
+
+// jsdom no implementa el desplazamiento de la ventana; el cambio de página lo usa (useRouteFocus).
+window.scrollTo = () => {};
