@@ -13,7 +13,7 @@
   justify-content: space-between;
   gap: var(--espacio-3);
   padding: var(--espacio-3) var(--espacio-4);
-  border-bottom: 1px solid var(--color-borde);
+  /* Sin línea inferior (#131): el vidrio basta para separarla del contenido. */
   background: color-mix(in srgb, var(--color-superficie) var(--vidrio-suave), transparent);
   backdrop-filter: blur(var(--desenfoque-vidrio));
   position: sticky;
