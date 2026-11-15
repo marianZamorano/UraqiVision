@@ -85,6 +85,12 @@ html.globe-pointer body {
   box-shadow: none;
 }
 
+/* Con una zona abierta (RF-29), sus paneles (features/zone) reemplazan a los del recorrido. */
+.explore-tour--zone .tour-panel,
+.explore-tour--zone .tour-nav {
+  visibility: hidden;
+}
+
 /* Jerarquía: antetítulo → título → texto principal → fuente. */
 .tour-eyebrow {
   margin: 0 0 var(--espacio-2);

@@ -127,5 +127,84 @@ export function portraitZoom(width: number, height: number): number {
   return Math.min(2, Math.max(1, (height / width) * 0.7));
 }
 
+/** Sin corrimiento pendiente: por debajo de medio píxel el encuadre ya llegó. */
+const FRAMING_ARRIVED = 0.5;
+
+/**
+ * Acerca el encuadre actual al de destino con la misma amortiguación de la cámara: al abrir o cerrar el detalle de
+ * una zona, la escena se desliza hacia la parte libre de la pantalla en lugar de saltar.
+ */
+export function dampFraming(current: GlobeFraming, target: GlobeFraming, dtSeconds: number, tau = 0.28): GlobeFraming {
+  const t = 1 - Math.exp(-Math.max(0, dtSeconds) / tau);
+  const side = (a: number, b: number) => (Math.abs(b - a) <= FRAMING_ARRIVED ? b : a + (b - a) * t);
+  return {
+    left: side(current.left, target.left),
+    right: side(current.right, target.right),
+    top: side(current.top, target.top),
+    bottom: side(current.bottom, target.bottom),
+  };
+}
+
+export function sameFraming(a: GlobeFraming, b: GlobeFraming): boolean {
+  return a.left === b.left && a.right === b.right && a.top === b.top && a.bottom === b.bottom;
+}
+
+/** Zona abierta en el explorador (RF-25): a dónde vuela la cámara y desde qué distancia la mira. */
+export type GlobeFocus = { id: string; longitude: number; latitude: number; range: number };
+
+/** Distancia de cámara mientras todavía no se conoce la caja de la zona (las cajas publicadas miden ~50 km). */
+export const DEFAULT_ZONE_RANGE = 160_000;
+
+/** Cuántas veces el lado de la caja de una zona se aleja la cámara: la caja ocupa cerca de la mitad del espacio libre. */
+export const ZONE_RANGE_FACTOR = 3.2;
+const ZONE_RANGE_MIN = 40_000;
+const ZONE_RANGE_MAX = 900_000;
+const METERS_PER_DEGREE = 111_320;
+
+/** Distancia de cámara para ver entera una caja `[oeste, sur, este, norte]` en grados. */
+export function zoneRange(bbox: readonly [number, number, number, number]): number {
+  const [west, south, east, north] = bbox;
+  const midLatitude = ((south + north) / 2) * (Math.PI / 180);
+  const width = Math.abs(east - west) * METERS_PER_DEGREE * Math.cos(midLatitude);
+  const height = Math.abs(north - south) * METERS_PER_DEGREE;
+  const side = Math.max(width, height);
+  if (!Number.isFinite(side) || side <= 0) return ZONE_RANGE_MIN * ZONE_RANGE_FACTOR;
+  return Math.min(ZONE_RANGE_MAX, Math.max(ZONE_RANGE_MIN, side * ZONE_RANGE_FACTOR));
+}
+
+/** Vista de una zona: casi cenital (la imagen de radar se lee de frente) con una inclinación leve para dar relieve. */
+export function zonePose(focus: GlobeFocus): CameraPose {
+  return { longitude: focus.longitude, latitude: focus.latitude, range: focus.range, heading: 0, pitch: -82 };
+}
+
+/** Distancia sobre el suelo entre los puntos que miran dos poses, en metros (haversine). */
+export function groundDistance(a: CameraPose, b: CameraPose): number {
+  const rad = Math.PI / 180;
+  const dLat = (b.latitude - a.latitude) * rad;
+  const dLon = (b.longitude - a.longitude) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.latitude * rad) * Math.cos(b.latitude * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * 6_371_000 * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/**
+ * Vuelo entre dos vistas (RF-25) para `t` de 0 a 1: aceleración y frenado suaves y, si el destino queda lejos para
+ * la altura a la que se vuela (de una zona a otra), la cámara se eleva a mitad de camino para que se vea el
+ * trayecto. En los extremos devuelve exactamente la vista de origen y la de destino.
+ */
+export function flightPose(from: CameraPose, to: CameraPose, t: number): CameraPose {
+  const e = easeInOutCubic(t);
+  const pose = mix(from, to, e);
+  if (e <= 0 || e >= 1) return pose;
+  const lift = groundDistance(from, to) * 1.2 * Math.sin(Math.PI * e);
+  return { ...pose, range: Math.hypot(pose.range, lift) };
+}
+
+/** Duración del vuelo en segundos: más largo cuanto más cambia la altura o más lejos queda el destino. */
+export function flightDuration(from: CameraPose, to: CameraPose): number {
+  const zoom = Math.abs(Math.log(from.range / to.range));
+  const travel = groundDistance(from, to) / Math.max(from.range, to.range);
+  return Math.min(2.6, 1.1 + 0.3 * zoom + 0.25 * Math.min(4, travel));
+}
+
 /** Desde qué punto del recorrido se ven las zonas en lugar del marcador de Bolivia (a medio camino de Bolivia). */
 export const ZONES_FROM_PROGRESS = TOUR_SECTIONS.indexOf("bolivia") - 0.5;

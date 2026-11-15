@@ -4,7 +4,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GlobeView, type CesiumModule } from "../../src/features/globe/GlobeView";
-import { KEYFRAMES } from "../../src/features/globe/cameraPath";
+import { KEYFRAMES, zonePose } from "../../src/features/globe/cameraPath";
 import { SUNRISE_TIME_ISO } from "../../src/features/globe/globeConfig";
 import { createProgressStore } from "../../src/features/globe/scrollProgress";
 
@@ -67,6 +67,8 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
   const entities: Array<Record<string, unknown>> = [];
   const removed: Array<Record<string, unknown>> = [];
   const credits: unknown[] = [];
+  const layers: Array<Record<string, unknown>> = [];
+  const removedLayers: unknown[] = [];
   const viewerOptions: unknown[] = [];
   const viewers: FakeViewer[] = [];
   const cesium = {
@@ -93,13 +95,26 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
         remove: vi.fn((e: Record<string, unknown>) => removed.push(e)),
       };
       this.creditDisplay = { addStaticCredit: vi.fn((c: unknown) => credits.push(c)) };
+      this.imageryLayers = {
+        add: vi.fn((layer: Record<string, unknown>) => layers.push(layer)),
+        remove: vi.fn((layer: unknown) => removedLayers.push(layer)),
+      };
       this.resize = resize;
       this.canvas = { getBoundingClientRect: () => ({ left: 10, top: 20 }), clientWidth: 1440, clientHeight: 900 };
       this.destroy = destroy;
       this.isDestroyed = () => false;
       viewers.push(this as unknown as FakeViewer);
     }),
-    ImageryLayer: { fromProviderAsync: vi.fn((provider: unknown) => ({ provider })) },
+    ImageryLayer: {
+      fromProviderAsync: vi.fn((provider: unknown, options?: { alpha?: number }) => ({
+        provider,
+        alpha: options?.alpha,
+        readyEvent: { addEventListener: vi.fn() },
+        errorEvent: { addEventListener: vi.fn() },
+      })),
+    },
+    SingleTileImageryProvider: { fromUrl: vi.fn(async (url: string, options: unknown) => ({ single: url, options })) },
+    Rectangle: { fromDegrees: vi.fn((...degrees: number[]) => ({ rectangle: degrees })) },
     IonImageryProvider: { fromAssetId: vi.fn(async (id: number) => ({ ionImagery: id })) },
     TileMapServiceImageryProvider: { fromUrl: vi.fn(async (url: string) => ({ tms: url })) },
     buildModuleUrl: vi.fn((path: string) => `/cesium/${path}`),
@@ -134,7 +149,7 @@ function fakeCesium(options: { failViewer?: boolean } = {}) {
     LabelStyle: { FILL_AND_OUTLINE: "relleno-y-borde" },
     HeightReference: { CLAMP_TO_GROUND: "pegado-al-suelo" },
   };
-  return { cesium: cesium as unknown as CesiumModule, raw: cesium, destroy, poses, pick, entities, removed, credits, viewerOptions, viewers, resize, moveLeft, moveDown };
+  return { cesium: cesium as unknown as CesiumModule, raw: cesium, destroy, poses, pick, entities, removed, credits, layers, removedLayers, viewerOptions, viewers, resize, moveLeft, moveDown };
 }
 
 type Fake = ReturnType<typeof fakeCesium>;
@@ -395,5 +410,128 @@ describe("GlobeView", () => {
     const onError = vi.fn();
     render(<GlobeView {...props(f, { onError })} />);
     expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  // RF-25, RF-08: zona abierta en el explorador.
+  const beniNorte = { id: "beni-norte", longitude: -65.565, latitude: -11.985, range: 160_000 };
+  const zonas = [
+    { id: "beni-norte", label: "Beni norte", longitude: -65.565, latitude: -11.985 },
+    { id: "sanignacio", label: "San Ignacio de Velasco", longitude: -60.81, latitude: -15.92 },
+  ];
+  const capa = {
+    url: "http://backend/estaciones/beni-norte/views/20261018_cambio.webp",
+    rectangle: [-65.805, -12.224, -65.326, -11.746] as const,
+    opacity: 0.85,
+    outline: [[-65.8, -11.746], [-65.326, -11.75], [-65.33, -12.224], [-65.805, -12.22]] as const,
+  };
+
+  it("al abrir una zona la cámara vuela hasta ella y se queda ahí aunque cambie el scroll (RF-25)", () => {
+    const f = fakeCesium();
+    const progress = createProgressStore(2);
+    const { rerender } = render(<GlobeView {...props(f, { progress, zones: zonas })} />);
+    flush(400);
+    expect(lastPose(f).hpr.range).toBe(KEYFRAMES.bolivia.range);
+
+    rerender(<GlobeView {...props(f, { progress, zones: zonas, focus: beniNorte })} />);
+    flush(3);
+    const enVuelo = lastPose(f).hpr.range;
+    expect(enVuelo).toBeLessThan(KEYFRAMES.bolivia.range); // ya salió…
+    expect(enVuelo).toBeGreaterThan(beniNorte.range); // …y todavía no llegó
+
+    flush(400);
+    const destino = zonePose(beniNorte);
+    expect(lastPose(f)).toEqual({
+      point: [destino.longitude, destino.latitude],
+      hpr: { heading: destino.heading, pitch: destino.pitch, range: destino.range },
+    });
+    expect(frames.size).toBe(0);
+
+    progress.set(1.2); // el scroll ya no manda mientras la zona esté abierta
+    flush(400);
+    expect(lastPose(f).hpr.range).toBe(beniNorte.range);
+  });
+
+  it("al cerrar la zona vuelve a la vista del recorrido; con movimiento reducido, sin vuelo (RNF-12)", () => {
+    const f = fakeCesium();
+    const progress = createProgressStore(2);
+    const { rerender } = render(<GlobeView {...props(f, { progress, focus: beniNorte })} />);
+    expect(lastPose(f).hpr.range).toBe(beniNorte.range); // enlace directo: empieza en la zona
+
+    rerender(<GlobeView {...props(f, { progress, focus: null })} />);
+    flush(400);
+    expect(lastPose(f).hpr.range).toBe(KEYFRAMES.bolivia.range);
+
+    rerender(<GlobeView {...props(f, { progress, focus: beniNorte, reducedMotion: true })} />);
+    flush();
+    expect(lastPose(f).hpr.range).toBe(beniNorte.range);
+    expect(frames.size).toBe(0);
+  });
+
+  it("con una zona abierta se ven los puntos de las demás (para saltar entre ellas) pero no el suyo", () => {
+    const f = fakeCesium();
+    const { rerender } = render(<GlobeView {...props(f, { zones: zonas })} />);
+    const bolivia = f.entities[0] as { show: boolean };
+    const punto = (id: string) => f.entities.find((e) => e.id === `zona-${id}`) as { show: boolean };
+    expect(punto("sanignacio").show).toBe(false); // lejos de Bolivia todavía no hay puntos
+
+    rerender(<GlobeView {...props(f, { zones: zonas, focus: beniNorte })} />);
+    flush();
+    expect(bolivia.show).toBe(false);
+    expect(punto("sanignacio").show).toBe(true);
+    expect(punto("beni-norte").show).toBe(false);
+  });
+
+  it("con una zona abierta el encuadre se desliza hasta la parte libre en lugar de saltar", () => {
+    const f = fakeCesium();
+    const zona = { progress: createProgressStore(2), focus: beniNorte };
+    const { rerender } = render(<GlobeView {...props(f, { ...zona, framing: { left: 420, right: 300, top: 76, bottom: 0 } })} />);
+    flush(400);
+
+    // Se abre el detalle a la derecha: la escena tiene que irse a la izquierda (la cámara, a la derecha).
+    rerender(<GlobeView {...props(f, { ...zona, framing: { left: 0, right: 600, top: 76, bottom: 0 } })} />);
+    flush();
+    const primero = f.moveLeft.mock.calls.at(-1)?.[0] as number;
+    flush(400);
+    const final = f.moveLeft.mock.calls.at(-1)?.[0] as number;
+    expect(final).toBeLessThan(0);
+    expect(primero).toBeGreaterThan(final); // el primer fotograma todavía no llegó
+    expect(frames.size).toBe(0);
+  });
+
+  it("extiende la imagen de radar de la zona sobre el relieve, con el contorno de su caja (RF-08)", async () => {
+    const f = fakeCesium();
+    const { rerender } = render(<GlobeView {...props(f, { focus: beniNorte, overlay: capa })} />);
+
+    expect(f.layers).toHaveLength(1);
+    expect(f.layers[0]?.alpha).toBe(0.85);
+    await expect(f.layers[0]?.provider).resolves.toEqual({
+      single: capa.url,
+      options: { rectangle: { rectangle: [-65.805, -12.224, -65.326, -11.746] } },
+    });
+    const contorno = f.entities.find((e) => (e.polyline as { clampToGround?: boolean } | undefined)?.clampToGround
+      && ((e.polyline as { positions: { line: number[] } }).positions.line.length === 10)) as Record<string, unknown>;
+    expect((contorno.polyline as { positions: { line: number[] } }).positions.line).toEqual(
+      [-65.8, -11.746, -65.326, -11.75, -65.33, -12.224, -65.805, -12.22, -65.8, -11.746],
+    );
+
+    // Solo la opacidad: la misma capa, sin volver a pedir la imagen.
+    rerender(<GlobeView {...props(f, { focus: beniNorte, overlay: { ...capa, opacity: 0.4 } })} />);
+    expect(f.layers).toHaveLength(1);
+    expect(f.layers[0]?.alpha).toBe(0.4);
+
+    // Otra fecha u otra capa de la misma zona: llega la imagen nueva y el contorno se conserva. La anterior se queda
+    // hasta que la nueva está lista, para que la línea de tiempo no parpadee.
+    rerender(<GlobeView {...props(f, { focus: beniNorte, overlay: { ...capa, url: `${capa.url}?base` } })} />);
+    expect(f.layers).toHaveLength(2);
+    expect(f.removedLayers).toEqual([]);
+    expect(f.removed).not.toContain(contorno);
+    const lista = (f.layers[1]?.readyEvent as { addEventListener: ReturnType<typeof vi.fn> }).addEventListener.mock.calls[0]?.[0] as () => void;
+    lista();
+    await waitFor(() => expect(f.removedLayers).toEqual([f.layers[0]]));
+
+    // Al cerrar la zona no queda ni la imagen ni el contorno.
+    rerender(<GlobeView {...props(f, { focus: null, overlay: null })} />);
+    expect(f.removedLayers).toEqual([f.layers[0], f.layers[1]]);
+    expect(f.removed).toContain(contorno);
   });
 });

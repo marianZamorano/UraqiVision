@@ -21,7 +21,7 @@ type AppRoutesProps = {
 export function AppRoutes({ location, lang }: AppRoutesProps) {
   switch (location?.route) {
     case "explore":
-      return <ExplorePage lang={lang} />;
+      return <ExplorePage lang={lang} stationId={location.stationId} />;
     case "station":
       return <StationPage lang={lang} stationId={location.stationId} />;
     case "method":

@@ -1,6 +1,24 @@
 // #121 (RF-25, RNF-12): trayectoria de la cámara del recorrido.
 import { describe, expect, it } from "vitest";
-import { dampPose, easeInOutCubic, framingShift, KEYFRAMES, portraitZoom, poseAt, poseDistance, TOUR_SECTIONS, ZONES_FROM_PROGRESS } from "../../src/features/globe/cameraPath";
+import {
+  dampFraming,
+  dampPose,
+  easeInOutCubic,
+  flightDuration,
+  flightPose,
+  framingShift,
+  groundDistance,
+  KEYFRAMES,
+  NO_FRAMING,
+  portraitZoom,
+  poseAt,
+  poseDistance,
+  sameFraming,
+  TOUR_SECTIONS,
+  zonePose,
+  zoneRange,
+  ZONES_FROM_PROGRESS,
+} from "../../src/features/globe/cameraPath";
 import { BOLIVIA_RECTANGLE } from "../../src/features/globe/globeConfig";
 
 describe("cameraPath", () => {
@@ -78,5 +96,62 @@ describe("cameraPath", () => {
 
   it("las zonas relevan al marcador de Bolivia a medio camino de la sección de Bolivia", () => {
     expect(ZONES_FROM_PROGRESS).toBe(1.5);
+  });
+
+  // RF-25: zona abierta en el explorador.
+  const beniNorte = { id: "beni-norte", longitude: -65.565, latitude: -11.985, range: zoneRange([-65.8, -12.22, -65.33, -11.75]) };
+  const sanIgnacio = { id: "sanignacio", longitude: -60.81, latitude: -15.92, range: zoneRange([-61.045, -16.153, -60.575, -15.693]) };
+
+  it("la distancia a una zona sale de su caja: una de ~50 km se ve entera y de cerca", () => {
+    expect(beniNorte.range).toBeGreaterThan(120_000);
+    expect(beniNorte.range).toBeLessThan(220_000);
+    // Una caja el doble de grande se mira desde el doble de lejos; una inválida no rompe la cámara.
+    expect(zoneRange([-66, -12.5, -65, -11.5])).toBeGreaterThan(beniNorte.range * 1.8);
+    expect(zoneRange([0, 0, 0, 0])).toBeGreaterThan(0);
+    expect(Number.isFinite(zoneRange([Number.NaN, 0, 1, 1]))).toBe(true);
+  });
+
+  it("la vista de una zona mira a su centro, casi desde arriba", () => {
+    const pose = zonePose(beniNorte);
+    expect(pose).toMatchObject({ longitude: -65.565, latitude: -11.985, range: beniNorte.range, heading: 0 });
+    expect(pose.pitch).toBeLessThan(-75);
+  });
+
+  it("el vuelo empieza y termina exactamente en sus vistas y baja sin rebotes desde Bolivia", () => {
+    const to = zonePose(beniNorte);
+    expect(flightPose(KEYFRAMES.bolivia, to, 0)).toEqual(KEYFRAMES.bolivia);
+    expect(flightPose(KEYFRAMES.bolivia, to, 1)).toEqual(to);
+    expect(flightPose(KEYFRAMES.bolivia, to, 7)).toEqual(to);
+    const ranges = [0, 0.2, 0.4, 0.6, 0.8, 1].map((t) => flightPose(KEYFRAMES.bolivia, to, t).range);
+    for (let i = 1; i < ranges.length; i += 1) expect(ranges[i]).toBeLessThanOrEqual(ranges[i - 1] as number);
+  });
+
+  it("de una zona a otra lejana la cámara se eleva a mitad de camino para que se vea el trayecto", () => {
+    const from = zonePose(beniNorte);
+    const to = zonePose(sanIgnacio);
+    expect(groundDistance(from, to)).toBeGreaterThan(500_000); // ~670 km entre las dos zonas
+    const mid = flightPose(from, to, 0.5);
+    expect(mid.range).toBeGreaterThan(groundDistance(from, to));
+    expect(mid.longitude).toBeCloseTo((from.longitude + to.longitude) / 2, 3);
+    // Entre dos vistas del mismo punto no hay nada que mostrar: no se eleva.
+    expect(flightPose(from, { ...from, range: from.range * 2 }, 0.5).range).toBeLessThan(from.range * 2);
+  });
+
+  it("el vuelo dura lo justo: nunca instantáneo ni eterno", () => {
+    for (const [a, b] of [[KEYFRAMES.bolivia, zonePose(beniNorte)], [zonePose(beniNorte), zonePose(sanIgnacio)], [KEYFRAMES.earth, zonePose(sanIgnacio)]] as const) {
+      expect(flightDuration(a, b)).toBeGreaterThanOrEqual(1);
+      expect(flightDuration(a, b)).toBeLessThanOrEqual(2.6);
+    }
+  });
+
+  it("el encuadre se desliza hasta el destino y encaja exacto al llegar", () => {
+    const target = { left: 0, right: 600, top: 76, bottom: 0 };
+    let framing = { ...NO_FRAMING, left: 420 };
+    const first = dampFraming(framing, target, 1 / 60);
+    expect(first.right).toBeGreaterThan(0);
+    expect(first.right).toBeLessThan(600);
+    expect(first.left).toBeLessThan(420);
+    for (let i = 0; i < 400 && !sameFraming(framing, target); i += 1) framing = dampFraming(framing, target, 1 / 60);
+    expect(framing).toEqual(target);
   });
 });

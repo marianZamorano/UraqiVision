@@ -2,18 +2,22 @@
 // (§17.3): lo normal (MC-02), el cambio (MC-03), los parches (MC-04, RN-05), el testigo óptico y el acuerdo, con
 // dónde se rompe (VC-01, VC-02, RN-04, RN-06). Después, la serie con el rango normal del paisaje (RF-07, huecos =
 // fechas sin imagen usable, RN-13) y cómo leer los colores. Textos en es.json/en.json (RNF-03).
+// `compacta` (panel de detalle del explorador): cada paso con su imagen y una sola línea; lo metodológico (zonas de
+// control, límites) queda plegado y la leyenda de colores no se repite (va con la línea de tiempo del globo).
 import { useTranslation } from "react-i18next";
 import { Area, ComposedChart, Line, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatearHectareas, type Idioma } from "../interface/formato/formato";
 import { CLASES, type ArchivosEstacion } from "./stationFiles";
 
-export type VistaMapa = "radar" | "base" | "cambio" | "dnbr";
+export type VistaMapa = "radar" | "base" | "cambio" | "dnbr" | "validated";
 
 interface Props {
   base: string;
   datos: ArchivosEstacion;
   lang: Idioma;
   onVer: (vista: VistaMapa, fecha?: string) => void;
+  /** Versión corta para una columna angosta: menos texto, lo metodológico plegado. */
+  compacta?: boolean;
 }
 
 const TRAZO: Record<string, string> = { compatible_quema: "", perdida_previa: "6 3", ambigua: "2 3", insuficiente: "8 3 2 3" };
@@ -40,7 +44,7 @@ function MiniParches({ datos }: { datos: ArchivosEstacion }) {
 }
 
 /** Propuesta de zonas de control (MC-05, DP-05 pendiente): criterios, zonas y qué cambia si se usan. */
-function PropuestaControl({ datos, lang, onVer }: { datos: ArchivosEstacion; lang: Idioma; onVer: Props["onVer"] }) {
+function PropuestaControl({ datos, lang, onVer, plegada = false }: { datos: ArchivosEstacion; lang: Idioma; onVer: Props["onVer"]; plegada?: boolean }) {
   const { t } = useTranslation();
   const c = datos.control;
   if (!c) return null;
@@ -51,9 +55,10 @@ function PropuestaControl({ datos, lang, onVer }: { datos: ArchivosEstacion; lan
   const zonas = datos.zonasControl?.features ?? [];
   const fechas = Object.keys(c.deriva_actual_db);
   const ultima = fechas[fechas.length - 1] ?? "";
+  const Caja = plegada ? "details" : "section";
   return (
-    <section className="bloque bloque--propuesta">
-      <h2>{t(aplicada ? "control.titleApplied" : "control.title")}</h2>
+    <Caja className="bloque bloque--propuesta">
+      {plegada ? <summary>{t(aplicada ? "control.titleApplied" : "control.title")}</summary> : <h2>{t(aplicada ? "control.titleApplied" : "control.title")}</h2>}
       <p><strong>{t(aplicada ? "control.whoApplied" : "control.who")}</strong> {t(aplicada ? "control.bodyApplied" : "control.body")}</p>
       {c.calibracion ? (<>
         <p>{t("control.calibration", { s: num(c.calibracion.umbrales_db.sensible), c: num(c.calibracion.umbrales_db.central), e: num(c.calibracion.umbrales_db.estricto) })}</p>
@@ -82,7 +87,7 @@ function PropuestaControl({ datos, lang, onVer }: { datos: ArchivosEstacion; lan
           <p><strong>{t("control.hectares", { date: ultima, now: ha(c.hectareas_ultima_fecha.actual), ctrl: ha(c.hectareas_ultima_fecha.con_control) })}</strong></p>
         </>) : null}
       </>) : <p>{t("control.noZones")}</p>}
-    </section>
+    </Caja>
   );
 }
 
@@ -90,7 +95,7 @@ function Barra({ colores }: { colores: string[] }) {
   return <span className="barra-color" aria-hidden="true" style={{ background: `linear-gradient(90deg, ${colores.join(", ")})` }} />;
 }
 
-export function Respuesta({ base, datos, lang, onVer }: Props) {
+export function Respuesta({ base, datos, lang, onVer, compacta = false }: Props) {
   const { t } = useTranslation();
   const { vistas, serie, validacion: v, hect } = datos;
   const lb = serie.linea_base;
@@ -105,15 +110,17 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
   const ha = (x: string | undefined) => formatearHectareas(Number(x ?? 0), lang);
 
   const pasos = [
-    { n: "01", titulo: t("story.s1.title"), texto: t("story.s1.body", { dates: lb.join(lang === "es" ? " y " : " and ") }),
+    { n: "01", titulo: t("story.s1.title"), texto: t("story.s1.body", { dates: lb.join(lang === "es" ? " y " : " and ") }), corto: t("story.s1.short"),
       img: imgBase && <img className="paso-img" src={`${base}/${imgBase.archivo}`} alt="" />, ver: () => onVer("base") },
     { n: "02", titulo: t("story.s2.title", { date: fechaUlt }),
-      texto: t("story.s2.body", { lo: num(puntoUlt?.rango_normal?.[0] ?? 0), hi: num(puntoUlt?.rango_normal?.[1] ?? 0) }),
+      texto: t("story.s2.body", { lo: num(puntoUlt?.rango_normal?.[0] ?? 0), hi: num(puntoUlt?.rango_normal?.[1] ?? 0) }), corto: t("story.s2.short"),
       img: imgCambio && <img className="paso-img" src={`${base}/${imgCambio.archivo}`} alt="" />, ver: () => onVer("cambio", fechaUlt) },
     { n: "03", titulo: t("story.s3.title"),
       texto: t("story.s3.body", { thr: num(Math.abs(serie.umbrales_db[1]), 2), n: datos.scars.features.length, ha: ha(ultimaFila?.hectareas), min: ha(ultimaFila?.rango_inferior), max: ha(ultimaFila?.rango_superior) }),
+      corto: t("story.s3.short", { n: datos.scars.features.length, ha: ha(ultimaFila?.hectareas), min: ha(ultimaFila?.rango_inferior), max: ha(ultimaFila?.rango_superior) }),
       img: <MiniParches datos={datos} />, ver: () => onVer("radar", fechaUlt) },
     { n: "04", titulo: t("story.s4.title"), texto: `${t("story.s4.body", { from: v.vc01_sentinel2.fechas[0], to: v.vc01_sentinel2.fechas[1] })} ${t(v.vc01_sentinel2.encierra_radar ? "story.s4.brackets" : "story.s4.notBrackets")}`,
+      corto: t("story.s4.short", { from: v.vc01_sentinel2.fechas[0], to: v.vc01_sentinel2.fechas[1] }),
       img: imgOptico && <img className="paso-img" src={`${base}/${imgOptico.archivo}`} alt="" />, ver: () => onVer("dnbr") },
   ];
 
@@ -132,12 +139,14 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
     ["serie", "serie.json"], ["validation", "validation.json"], ["manifest", "manifest.json"]] as const;
 
   return (
-    <div className="respuesta">
-      <header className="respuesta-cabecera">
-        <p className="eyebrow">{t("story.eyebrow")}</p>
-        <h2>{t("story.title")}</h2>
-        <p>{t("story.lead")}</p>
-      </header>
+    <div className={compacta ? "respuesta respuesta--compacta" : "respuesta"}>
+      {compacta ? null : (
+        <header className="respuesta-cabecera">
+          <p className="eyebrow">{t("story.eyebrow")}</p>
+          <h2>{t("story.title")}</h2>
+          <p>{t("story.lead")}</p>
+        </header>
+      )}
 
       <ol className="pasos">
         {pasos.map((p) => (
@@ -146,7 +155,7 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
             <div>
               <p className="paso-n">{p.n} / 05</p>
               <h3>{p.titulo}</h3>
-              <p>{p.texto}</p>
+              <p>{compacta ? p.corto : p.texto}</p>
               <button type="button" className="paso-ver" onClick={p.ver}>{t("story.see")}</button>
             </div>
           </li>
@@ -155,7 +164,7 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
           <div>
             <p className="paso-n">05 / 05</p>
             <h3>{t("story.s5.title")}</h3>
-            <p>{t("story.s5.body")}</p>
+            {compacta ? null : <p>{t("story.s5.body")}</p>}
             <ul className="acuerdo">
               {v.acuerdo_por_clase_optica.map((a) => (
                 <li key={a.clase_optica}>
@@ -167,25 +176,33 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
               ))}
             </ul>
             <p>{t("story.s5.fires", { a: v.vc02_focos.focos_en_o_junto_a_parche, b: v.vc02_focos.focos_periodo })}</p>
-            <h4>{t("story.breaks")}</h4>
-            <ul className="lista">{rompe.map((r) => <li key={r}>{r}</li>)}</ul>
+            {compacta ? (
+              <details>
+                <summary>{t("story.breaks")} ({rompe.length})</summary>
+                <ul className="lista">{rompe.map((r) => <li key={r}>{r}</li>)}</ul>
+              </details>
+            ) : (<>
+              <h4>{t("story.breaks")}</h4>
+              <ul className="lista">{rompe.map((r) => <li key={r}>{r}</li>)}</ul>
+            </>)}
           </div>
         </li>
       </ol>
 
-      <PropuestaControl datos={datos} lang={lang} onVer={onVer} />
+      <PropuestaControl datos={datos} lang={lang} onVer={onVer} plegada={compacta} />
 
       <section className="bloque">
         <h2>{t("serie.title")}</h2>
-        <p>{t("serie.body")}</p>
+        {compacta ? null : <p>{t("serie.body")}</p>}
         <div className="grafico-serie">
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={compacta ? 220 : 300}>
             <ComposedChart data={datosSerie} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
               <XAxis dataKey="fecha" />
               <YAxis domain={[Math.min(-5, Math.floor(serie.umbrales_db[1]) - 1), 2]} label={{ value: t("serie.axis"), angle: -90, position: "insideLeft" }} />
               <Tooltip formatter={(val) => (typeof val === "number" ? `${num(val, 2)} dB` : String(val))} />
-              <ReferenceArea x1={lb[0]?.slice(5)} x2={lb[lb.length - 1]?.slice(5)} fill="#e8eef6" label={{ value: t("serie.baseline"), position: "insideTop" }} />
-              <Area dataKey="banda" name={t("serie.band")} stroke="none" fill="#c9c9c4" fillOpacity={0.55} isAnimationActive="auto" connectNulls={false} />
+              {/* Sobre el panel oscuro del explorador, la línea base y la banda van más tenues para no tapar las líneas. */}
+              <ReferenceArea x1={lb[0]?.slice(5)} x2={lb[lb.length - 1]?.slice(5)} fill="#e8eef6" fillOpacity={compacta ? 0.12 : 1} label={{ value: t("serie.baseline"), position: "insideTop", fill: compacta ? "#c3ccdd" : undefined }} />
+              <Area dataKey="banda" name={t("serie.band")} stroke="none" fill="#c9c9c4" fillOpacity={compacta ? 0.22 : 0.55} isAnimationActive="auto" connectNulls={false} />
               <ReferenceLine y={serie.umbrales_db[1]} stroke="#8a3210" strokeDasharray="4 3" label={{ value: t("serie.threshold", { v: num(serie.umbrales_db[1], 2) }), position: "insideBottomRight" }} />
               {CLASES.map((k) => (
                 <Line key={k.id} dataKey={k.id} name={t(`stationMap.class.${k.id}`)} stroke={k.color} strokeWidth={2}
@@ -206,7 +223,7 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
         ) : null}
       </section>
 
-      <section className="bloque">
+      {compacta ? null : <section className="bloque">
         <h2>{t("colors.title")}</h2>
         <dl className="colores">
           <div><dt>{t("colors.radar")}</dt><dd><Barra colores={pal.radar} /><span className="extremos"><span>{t("colors.radarLo")}</span><span>{t("colors.radarHi")}</span></span></dd></div>
@@ -218,7 +235,7 @@ export function Respuesta({ base, datos, lang, onVer }: Props) {
             {datos.zonasControl?.features.length ? <li><span className="muestra muestra--control" aria-hidden="true" />{t("control.layer")}</li> : null}
           </ul></dd></div>
         </dl>
-      </section>
+      </section>}
 
       <p className="descargas">
         <strong>{t("downloads.title")}:</strong>{" "}

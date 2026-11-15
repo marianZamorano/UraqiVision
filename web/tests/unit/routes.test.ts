@@ -31,6 +31,15 @@ describe("parseRoute", () => {
     },
   );
 
+  it("conserva la zona abierta en el explorador (?station=) y descarta la inválida (RF-29)", () => {
+    expect(parseRoute("/explore", "?station=beni-norte")).toEqual({ route: "explore", stationId: "beni-norte" });
+    expect(parseRoute("/explore", "?station=../etc")).toEqual({ route: "explore" });
+    // Solo el explorador abre zonas así: en otra ruta el parámetro no significa nada.
+    expect(parseRoute("/method", "?station=beni-norte")).toEqual({ route: "method" });
+    expect(serializeRoute({ route: "explore", stationId: "beni-norte" })).toBe("/explore?station=beni-norte");
+    expect(serializeRoute({ route: "explore" })).toBe("/explore");
+  });
+
   it("conserva departamento y periodo válidos de la query", () => {
     expect(parseRoute("/explore", "?department=santa-cruz&period=2026-11")).toEqual({
       route: "explore",

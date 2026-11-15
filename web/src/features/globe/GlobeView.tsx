@@ -6,8 +6,11 @@
 //   salta a la vista de la sección activa, sin interpolación (RNF-12).
 // - Fondo: el contenedor no recibe eventos (no bloquea el desplazamiento); el clic en un marcador se detecta desde
 //   el documento, salvo sobre contenido interactivo o paneles ([data-globe-overlay]).
-// - Zonas con datos (#123): un punto por zona publicada al acercarse a Bolivia; el clic abre su estación (RF-29).
+// - Zonas con datos (#123): un punto por zona publicada al acercarse a Bolivia; el clic abre la zona (RF-29).
 //   Contorno de Bolivia sobre el relieve (boliviaOutline.ts).
+// - Zona abierta (RF-25, RF-08): la cámara vuela hasta ella (cameraPath.ts: flightPose), su imagen de radar se
+//   extiende sobre el relieve con el contorno de su caja, y el encuadre se desliza hacia la parte libre de la
+//   pantalla cuando se abre o se cierra su detalle. Con movimiento reducido, todo salta sin animación (RNF-12).
 // - Amanecer sutil: luz solar real a una hora fija (globeConfig.ts), con el brillo cálido solo en el horizonte de la
 //   atmósfera; sin cielo, Sol ni Luna dibujados. Las imágenes de satélite no se recolorean: son datos.
 // - Modelos glTF locales opcionales (localModels.ts). Los créditos los muestra el visor y son clicables (RNF-11).
@@ -16,13 +19,19 @@ import { createPortal } from "react-dom";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { BOLIVIA_OUTLINE_CREDIT, loadBoliviaOutline } from "./boliviaOutline";
 import {
+  dampFraming,
   dampPose,
+  flightDuration,
+  flightPose,
   framingShift,
   portraitZoom,
   poseAt,
   poseDistance,
+  sameFraming,
+  zonePose,
   ZONES_FROM_PROGRESS,
   type CameraPose,
+  type GlobeFocus,
   type GlobeFraming,
   type TourSection,
 } from "./cameraPath";
@@ -34,9 +43,23 @@ import "./globe.css";
 export type CesiumModule = typeof import("cesium");
 type Viewer = InstanceType<CesiumModule["Viewer"]>;
 type Entity = InstanceType<CesiumModule["Entity"]>;
+type ImageryLayer = InstanceType<CesiumModule["ImageryLayer"]>;
 
 /** Zona con datos en el globo (#123), ya con su nombre en el idioma activo. */
 export type ZonePoint = { id: string; label: string; longitude: number; latitude: number };
+
+/**
+ * Imagen de radar de la zona abierta, extendida sobre el relieve (RF-08). `rectangle` es `[oeste, sur, este, norte]`
+ * en grados: el rectángulo que contiene a la imagen (la grilla del radar es UTM, así que en las esquinas puede
+ * desviarse unos cientos de metros; el mapa de análisis 2D usa las 4 esquinas exactas). `outline` son esas 4
+ * esquinas publicadas, para dibujar el contorno exacto de la caja.
+ */
+export type GlobeOverlay = {
+  url: string;
+  rectangle: readonly [number, number, number, number];
+  opacity: number;
+  outline: ReadonlyArray<readonly [number, number]>;
+};
 
 type GlobeViewProps = {
   cesium: CesiumModule;
@@ -52,7 +75,11 @@ type GlobeViewProps = {
   progress: ProgressStore;
   reducedMotion: boolean;
   onSelectSection: (section: TourSection) => void;
-  /** Clic en el punto de una zona: abre su estación. */
+  /** Zona abierta: la cámara vuela hasta ella y se queda ahí hasta que se cierra (RF-25). */
+  focus?: GlobeFocus | null;
+  /** Imagen de radar de la zona abierta sobre el relieve (RF-08). */
+  overlay?: GlobeOverlay | null;
+  /** Clic en el punto de una zona: la abre. */
   onSelectZone: (stationId: string) => void;
   onReady: () => void;
   onError: () => void;
@@ -60,6 +87,15 @@ type GlobeViewProps = {
 
 /** Contenido que tapa al globo: un clic ahí nunca se interpreta como clic en el globo. */
 const OVERLAY_SELECTOR = "a, button, input, select, textarea, label, summary, [role='button'], [data-globe-overlay], .topbar";
+
+/** Redibujos de cortesía tras cambiar la imagen o el contorno de la zona abierta. */
+const SETTLE_RENDERS_MS = [120, 400, 1000, 2000];
+/** Cuánto se conserva la imagen anterior después de que la nueva está lista (lo que tarda en dibujarse). */
+const STALE_IMAGE_MS = 220;
+
+/** Lo que hay de la zona abierta en el globo: su imagen, las anteriores que aún no se quitaron y el contorno. */
+type OverlayShown = { image: string; layer: ImageryLayer | null; stale: ImageryLayer[]; box: string; outline: Entity | null };
+const noOverlay = (): OverlayShown => ({ image: "", layer: null, stale: [], box: "", outline: null });
 
 /** Cuándo la cámara ya llegó: por debajo de esto se deja de dibujar (requestRenderMode). */
 const ARRIVED = 1e-4;
@@ -129,7 +165,7 @@ function marker(
 const zonesVisible = (progress: number) => progress >= ZONES_FROM_PROGRESS;
 
 export function GlobeView(props: GlobeViewProps) {
-  const { cesium, config, label, boliviaLabel, zones, reducedMotion, framing } = props;
+  const { cesium, config, label, boliviaLabel, zones, reducedMotion, framing, focus, overlay } = props;
   const container = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | undefined>(undefined);
   const boliviaRef = useRef<Entity | undefined>(undefined);
@@ -137,10 +173,18 @@ export function GlobeView(props: GlobeViewProps) {
   const zoneEntities = useRef(new Map<Entity, string>());
   const zonesDrawn = useRef<readonly ZonePoint[] | null>(null);
   const wakeRef = useRef<() => void>(() => undefined);
+  /** Imagen de radar y contorno de la zona abierta que hay ahora en el globo. */
+  const overlayShown = useRef<OverlayShown>(noOverlay());
   // Lo que el visor necesita leer sin recrearse: callbacks, progreso, movimiento reducido, textos y zonas.
   const latest = useRef(props);
   useEffect(() => {
     latest.current = props;
+  });
+
+  /** ¿Se ve el punto de esta zona? Al llegar a Bolivia o con una zona abierta; la zona abierta no lleva punto. */
+  const zoneShown = useRef((id: string) => {
+    const open = latest.current.focus?.id ?? null;
+    return (open !== null || zonesVisible(latest.current.progress.get())) && id !== open;
   });
 
   // El fondo vive en un nodo al PRINCIPIO de <body>: así ningún ancestro con transform (la animación de entrada de
@@ -164,12 +208,85 @@ export function GlobeView(props: GlobeViewProps) {
       .sort((a, b) => a.longitude - b.longitude)
       .forEach((zone, i) => {
         const entity = viewer.entities.add(
-          marker(cesium, element, `zona-${zone.id}`, [zone.longitude, zone.latitude], zone.label, i % 2 === 0 ? -26 : 30, zonesVisible(latest.current.progress.get())),
+          marker(cesium, element, `zona-${zone.id}`, [zone.longitude, zone.latitude], zone.label, i % 2 === 0 ? -26 : 30, zoneShown.current(zone.id)),
         );
         next.set(entity, zone.id);
       });
     zoneEntities.current = next;
     viewer.scene.requestRender();
+  });
+
+  /** Pone, cambia o quita la imagen de radar de la zona abierta y el contorno de su caja (RF-08). */
+  const syncOverlay = useRef((next: GlobeOverlay | null | undefined) => {
+    const viewer = viewerRef.current;
+    const element = container.current;
+    if (!viewer || viewer.isDestroyed() || !element) return;
+    const C = cesium;
+    const shown = overlayShown.current;
+    const image = next ? `${next.url}|${next.rectangle.join(",")}` : "";
+    const box = next ? next.outline.map((corner) => corner.join(",")).join(";") : "";
+    // El contorno solo cambia con la zona: al cambiar de capa o de fecha dentro de la misma, se conserva.
+    if (shown.box !== box) {
+      if (shown.outline) viewer.entities.remove(shown.outline);
+      shown.outline = null;
+      shown.box = box;
+      if (next && next.outline.length >= 3) {
+        const ring = [...next.outline, next.outline[0] as readonly [number, number]].flatMap(([lon, lat]) => [lon, lat]);
+        shown.outline = viewer.entities.add({
+          polyline: {
+            positions: C.Cartesian3.fromDegreesArray(ring),
+            width: 2,
+            material: tokenColor(C, element, "--paleta-hielo", C.Color.WHITE),
+            clampToGround: true,
+          },
+        });
+      }
+    }
+    if (shown.image !== image) {
+      // La imagen anterior se queda hasta que la nueva esté lista: al recorrer la línea de tiempo no parpadea.
+      if (shown.layer) shown.stale.push(shown.layer);
+      shown.layer = null;
+      shown.image = image;
+      const dropStale = () => {
+        if (viewer.isDestroyed()) return;
+        for (const old of shown.stale.splice(0)) viewer.imageryLayers.remove(old, true);
+        viewer.scene.requestRender();
+      };
+      if (next) {
+        const [west, south, east, north] = next.rectangle;
+        const layer = C.ImageryLayer.fromProviderAsync(
+          C.SingleTileImageryProvider.fromUrl(next.url, { rectangle: C.Rectangle.fromDegrees(west, south, east, north) }),
+          { alpha: next.opacity },
+        );
+        // Con requestRenderMode hay que pedir el dibujo cuando la imagen llega. Si entretanto se eligió otra, esta
+        // ya es de las anteriores y la quitará la que la reemplazó.
+        layer.readyEvent.addEventListener(() => {
+          if (viewer.isDestroyed()) return;
+          viewer.scene.requestRender();
+          window.setTimeout(() => {
+            if (shown.layer === layer) dropStale();
+          }, STALE_IMAGE_MS);
+        });
+        // Si la imagen nueva no carga, no se deja la anterior haciéndose pasar por ella.
+        layer.errorEvent.addEventListener(() => {
+          if (shown.layer === layer) dropStale();
+        });
+        viewer.imageryLayers.add(layer);
+        shown.layer = layer;
+      } else {
+        dropStale();
+      }
+    } else if (next && shown.layer) {
+      shown.layer.alpha = next.opacity;
+    }
+    viewer.scene.requestRender();
+    // El contorno pegado al relieve y la imagen se preparan en varios fotogramas: con requestRenderMode hay que
+    // pedirlos, o lo anterior se queda dibujado hasta el próximo movimiento.
+    for (const delay of SETTLE_RENDERS_MS) {
+      window.setTimeout(() => {
+        if (!viewer.isDestroyed()) viewer.scene.requestRender();
+      }, delay);
+    }
   });
 
   const mode = config.mode;
@@ -220,6 +337,8 @@ export function GlobeView(props: GlobeViewProps) {
       const v = viewer;
       applySunrise(C, v, element);
 
+      // Encuadre que se está aplicando: salta con el recorrido y se desliza con una zona abierta.
+      let shownFraming = latest.current.framing;
       // Cámara: mira a un punto del suelo con rumbo, inclinación y distancia, se suelta del punto y se corre para que
       // la escena quede en la parte de la pantalla que no tapa el panel.
       const applyPose = (pose: CameraPose) => {
@@ -232,41 +351,68 @@ export function GlobeView(props: GlobeViewProps) {
         );
         v.camera.lookAtTransform(C.Matrix4.IDENTITY);
         const fov = (v.camera.frustum as { fov?: number }).fov ?? Math.PI / 3;
-        const shift = framingShift(range, fov, width, height, latest.current.framing);
+        const shift = framingShift(range, fov, width, height, shownFraming);
         if (shift.left) v.camera.moveLeft(shift.left);
         if (shift.down) v.camera.moveDown(shift.down);
       };
+      // Vista de destino: la zona abierta (RF-25) o, sin ella, la del recorrido según el scroll.
       const targetPose = () => {
+        const open = latest.current.focus;
+        if (open) return zonePose(open);
         const p = latest.current.progress.get();
         return poseAt(latest.current.reducedMotion ? Math.round(p) : p);
       };
       let current = targetPose();
       applyPose(current);
 
-      // Bucle de fotogramas solo mientras la cámara se mueve; se despierta con cada cambio de progreso.
+      // Bucle de fotogramas solo mientras la cámara se mueve; se despierta con cada cambio de progreso o de zona.
       let frame = 0;
       let last = 0;
+      let openId = latest.current.focus?.id ?? null;
+      let flight: { from: CameraPose; start: number; duration: number } | null = null;
       const tick = (now: number) => {
         frame = 0;
         if (v.isDestroyed()) return;
         const target = targetPose();
-        if (latest.current.reducedMotion) current = target;
-        else current = dampPose(current, target, last ? Math.min((now - last) / 1000, 0.1) : 1 / 60);
-        const arrived = poseDistance(current, target) <= ARRIVED;
+        const reduced = latest.current.reducedMotion;
+        const nextId = latest.current.focus?.id ?? null;
+        if (nextId !== openId) {
+          // Se abrió, se cambió o se cerró una zona: vuelo con aceleración suave en lugar de la amortiguación del scroll.
+          openId = nextId;
+          flight = reduced ? null : { from: current, start: now, duration: flightDuration(current, target) * 1000 };
+        }
+        const dt = last ? Math.min((now - last) / 1000, 0.1) : 1 / 60;
+        const zoneMode = openId !== null || flight !== null;
+        if (reduced) {
+          current = target;
+          flight = null;
+        } else if (flight) {
+          const t = (now - flight.start) / flight.duration;
+          current = flightPose(flight.from, target, t);
+          if (t >= 1) flight = null;
+        } else {
+          current = dampPose(current, target, dt);
+        }
+        const framingTarget = latest.current.framing;
+        shownFraming = reduced || !zoneMode ? framingTarget : dampFraming(shownFraming, framingTarget, dt);
+        const arrived = flight === null && poseDistance(current, target) <= ARRIVED && sameFraming(shownFraming, framingTarget);
         if (arrived) current = target; // encaja exacto al llegar
         last = arrived ? 0 : now;
         applyPose(current);
         v.scene.requestRender();
         if (!arrived) frame = requestAnimationFrame(tick);
       };
-      // Relevo de marcadores según el recorrido: el de Bolivia antes de llegar, las zonas al llegar (#125).
-      let zonesShown: boolean | null = null;
+      // Relevo de marcadores: el de Bolivia antes de llegar; las zonas al llegar (#125) o con una zona abierta, que
+      // no lleva punto (lo tapa su imagen).
+      let markersKey: string | null = null;
       const updateMarkers = () => {
-        const show = zonesVisible(latest.current.progress.get());
-        if (show === zonesShown) return;
-        zonesShown = show;
+        const open = latest.current.focus?.id ?? null;
+        const show = open !== null || zonesVisible(latest.current.progress.get());
+        const key = `${show}|${open ?? ""}`;
+        if (key === markersKey) return;
+        markersKey = key;
         if (boliviaRef.current) boliviaRef.current.show = !show;
-        for (const entity of zoneEntities.current.keys()) entity.show = show;
+        for (const [entity, id] of zoneEntities.current) entity.show = zoneShown.current(id);
         v.scene.requestRender();
       };
       const wake = () => {
@@ -352,6 +498,7 @@ export function GlobeView(props: GlobeViewProps) {
 
       viewerRef.current = v;
       syncZones.current(latest.current.zones);
+      syncOverlay.current(latest.current.overlay);
       latest.current.onReady();
     } catch {
       latest.current.onError();
@@ -363,16 +510,23 @@ export function GlobeView(props: GlobeViewProps) {
       boliviaRef.current = undefined;
       zoneEntities.current = new Map();
       zonesDrawn.current = null;
+      overlayShown.current = noOverlay();
       if (viewer && !viewer.isDestroyed()) viewer.destroy();
     };
     // El visor solo se recrea si cambia el módulo, el modo o el token (no en cada render). Los assets de ion son fijos
     // (1 y 2, DP-07), así que `config` no hace falta como dependencia.
   }, [cesium, mode, token]);
 
-  // Si cambia el movimiento reducido o el espacio libre de la pantalla, la cámara se recoloca (RNF-12).
+  // Si cambia el movimiento reducido, el espacio libre de la pantalla o la zona abierta, la cámara se recoloca
+  // (RNF-12, RF-25).
   useEffect(() => {
     wakeRef.current();
-  }, [reducedMotion, framing.left, framing.right, framing.top, framing.bottom]);
+  }, [reducedMotion, framing.left, framing.right, framing.top, framing.bottom, focus?.id, focus?.longitude, focus?.latitude, focus?.range]);
+
+  // La imagen de radar llega después que el visor y cambia con la capa, la fecha y la opacidad.
+  useEffect(() => {
+    syncOverlay.current(overlay);
+  }, [overlay]);
 
   // El marcador de Bolivia cambia de idioma con la interfaz (RNF-03).
   useEffect(() => {

@@ -341,3 +341,15 @@
 .tabla-compacta th:first-child {
   text-align: left;
 }
+
+/* Huellas de escenas (RF-26) y agua de referencia: mismas muestras que en el mapa. */
+.muestra--huella {
+  background: transparent;
+  border: 2px dashed #6a4c93;
+}
+.muestra--agua {
+  background: linear-gradient(90deg, #104896 50%, #78beeb 50%);
+}
+.mapa-validated {
+  border-style: dashed;
+}
