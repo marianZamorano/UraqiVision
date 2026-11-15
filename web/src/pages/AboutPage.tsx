@@ -1,23 +1,16 @@
-import type { Language } from '../contracts/view-state'
-import { getDictionary } from '../i18n'
+// Acerca de (001 T022). Textos provisionales: el contenido definitivo es de M-INTERFAZ (RF-24). Traducidos (RNF-03).
+import { useTranslation } from "react-i18next";
 
-type AboutPageProps = {
-  lang: Language
-}
-
-export function AboutPage({ lang }: AboutPageProps) {
-  const dict = getDictionary(lang)
+export function AboutPage() {
+  const { t } = useTranslation();
 
   return (
     <section className="page">
       <div className="panel">
-        <h1>{dict.pages.about.title}</h1>
-        <p>{dict.pages.about.description}</p>
-        <p>
-          La base web cumple con trazabilidad, accesibilidad, rendimiento y honestidad de datos para el
-          recorrido principal de UraqiVision.
-        </p>
+        <h1>{t("pages.about.title")}</h1>
+        <p>{t("pages.about.description")}</p>
+        <p>{t("pages.about.scope")}</p>
       </div>
     </section>
-  )
+  );
 }
