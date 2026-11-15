@@ -73,18 +73,30 @@ const PUBLISHED_API = String(import.meta.env.VITE_PUBLISHED_API ?? '').replace(/
 export interface StationSummary {
   stationId: string
   label: { es: string; en: string }
+  /** Departamento (nombre en español, como en los límites publicados); agrupa la lista del explorador. */
+  departamento?: string | null
 }
 
-/** Estaciones del endpoint (si está configurado) seguidas de los ejemplos DEMO. */
+/** true si la web lee estaciones publicadas por el backend (VITE_PUBLISHED_API). */
+export const usesPublishedApi = PUBLISHED_API !== ''
+
+const demoSummaries = (): StationSummary[] =>
+  Object.values(demoStations).map(({ stationId, label }) => ({ stationId, label }))
+
+/**
+ * Estaciones para el explorador. Si el backend publica al menos una, se muestran SOLO las publicadas: los ejemplos
+ * DEMO (sin cifras) no se mezclan con resultados reales (RN-04). Sin endpoint, o si no responde, quedan los DEMO.
+ */
 export async function listStations(signal?: AbortSignal): Promise<StationSummary[]> {
-  const demos = Object.values(demoStations).map(({ stationId, label }) => ({ stationId, label }))
-  if (!PUBLISHED_API) return demos
+  if (!PUBLISHED_API) return demoSummaries()
   try {
     const response = await fetch(`${PUBLISHED_API}/estaciones`, { signal })
-    if (!response.ok) return demos
-    return [...((await response.json()) as StationSummary[]), ...demos]
-  } catch {
-    return demos
+    if (!response.ok) return demoSummaries()
+    const publicadas = (await response.json()) as StationSummary[]
+    return publicadas.length ? publicadas : demoSummaries()
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw error
+    return demoSummaries()
   }
 }
 
